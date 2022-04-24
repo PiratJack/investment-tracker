@@ -13,8 +13,8 @@ DATABASE_FILE = "data.sqlite"
 LOCALE_FOLDER = "./locale"
 
 # Setup translation (before import, otherwise it fails)
-gettext.bindtextdomain("investmenttracker", LOCALE_FOLDER)
-gettext.translation("investmenttracker", localedir=LOCALE_FOLDER).install()
+gettext.bindtextdomain("messages", LOCALE_FOLDER)
+gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 
 # Process commandline arguments
 log_level = controllers.console.get_log_level()
