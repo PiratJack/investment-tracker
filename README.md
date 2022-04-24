@@ -4,8 +4,8 @@ An application to track your investment and get information about it.
 
 ## Why?
 I searched far and wide for an application that:
-- Would be free
-- Allows for import/export of data through API or easily
+- Would be free (open source if possible)
+- Allows for import/export of data through API or UI
 - Displays graphs & statistics about my investments and transactions
 - Remains simple
 
