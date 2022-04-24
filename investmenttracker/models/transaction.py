@@ -4,7 +4,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date, Enum
 
-from .base import Base
+from .base import Base, ValidationException
 
 _ = gettext.gettext
 
@@ -137,10 +137,52 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
     label = Column(String(250))
-    type = Column(Enum(TransactionTypes), nullable=False)
+    type = Column(Enum(TransactionTypes, validate_strings=True), nullable=False)
     share_id = Column(Integer, ForeignKey("shares.id"))
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     quantity = Column(Float, nullable=False)
     unit_price = Column(Float, nullable=False)
     share = sqlalchemy.orm.relationship("Share", back_populates="transactions")
     account = sqlalchemy.orm.relationship("Account", back_populates="transactions")
+
+    @sqlalchemy.orm.validates("label")
+    def validate_label(self, key, value):
+        if len(value) > 250:
+            raise ValidationException(
+                _("Max length for account {field_name} is 250 characters").format(
+                    field_name=key
+                )
+            )
+        return value
+
+    @sqlalchemy.orm.validates("type")
+    def validate_type(self, key, value):
+        self.validate_missing_field(key, value)
+
+        if value not in self.__table__.columns["type"].type.enums:
+            raise ValidationException(
+                _("Transaction type {field_name} is invalid").format(field_name=key)
+            )
+        return value
+
+    @sqlalchemy.orm.validates("account")
+    def validate_account(self, key, value):
+        self.validate_missing_field(key, value)
+        return value
+
+    @sqlalchemy.orm.validates("quantity")
+    def validate_quantity(self, key, value):
+        self.validate_missing_field(key, value)
+        return value
+
+    @sqlalchemy.orm.validates("unit_price")
+    def validate_unit_price(self, key, value):
+        self.validate_missing_field(key, value)
+        return value
+
+    def validate_missing_field(self, key, value):
+        if value == "" or value is None:
+            raise ValidationException(
+                _("Missing transaction {field_name}").format(field_name=key)
+            )
+        return value
