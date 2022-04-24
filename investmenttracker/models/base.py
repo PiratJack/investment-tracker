@@ -9,3 +9,7 @@ class FillException(Exception):
 
 class NoPriceException(Exception):
     pass
+
+
+class ValidationException(Exception):
+    pass

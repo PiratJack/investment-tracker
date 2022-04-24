@@ -7,6 +7,7 @@ import investmenttracker.models.database as databasemodel
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
+from investmenttracker.models.base import ValidationException
 
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)
@@ -97,4 +98,40 @@ class TestAccount(unittest.TestCase):
         total_invested = self.database.accounts_get_all()[0].total_invested
         self.assertEqual(
             total_invested, 10000, "Total invested in account should be 10k"
+        )
+
+    def test_validations(self):
+        account = Account(
+            id=50,
+            name="test",
+            code="Error",
+            base_currency="EUR",
+            enabled=True,
+        )
+        with self.assertRaises(ValidationException) as cm:
+            account.name = ""
+        self.assertEquals(
+            type(cm.exception), ValidationException, "Account must have a name"
+        )
+
+        with self.assertRaises(ValidationException) as cm:
+            account.name = "a" * 251
+        self.assertEquals(
+            type(cm.exception),
+            ValidationException,
+            "Account shouldn't have a name with more than 250 characters",
+        )
+
+        with self.assertRaises(ValidationException) as cm:
+            account.code = "a" * 251
+        self.assertEquals(
+            type(cm.exception),
+            ValidationException,
+            "Account shouldn't have a code with more than 250 characters",
+        )
+
+        with self.assertRaises(ValidationException) as cm:
+            account.base_currency = ""
+        self.assertEquals(
+            type(cm.exception), ValidationException, "Account must have a base currency"
         )

@@ -3,7 +3,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date, Enum
 
-from .base import Base, FillException
+from .base import Base, FillException, ValidationException
 from .transaction import TransactionTypes
 
 _ = gettext.gettext
@@ -33,6 +33,38 @@ class Account(Base):
 
     def get_transactions(self):
         return self.transactions
+
+    @sqlalchemy.orm.validates("name")
+    def validate_name(self, key, value):
+        if value == "":
+            raise ValidationException(
+                _("Missing account {field_name}").format(field_name=key)
+            )
+        if len(value) > 250:
+            raise ValidationException(
+                _("Max length for account {field_name} is 250 characters").format(
+                    field_name=key
+                )
+            )
+        return value
+
+    @sqlalchemy.orm.validates("code")
+    def validate_code(self, key, value):
+        if len(value) > 250:
+            raise ValidationException(
+                _("Max length for account {field_name} is 250 characters").format(
+                    field_name=key
+                )
+            )
+        return value
+
+    @sqlalchemy.orm.validates("base_currency")
+    def validate_base_currency(self, key, value):
+        if value == "":
+            raise ValidationException(
+                _("Missing account {field_name}").format(field_name=key)
+            )
+        return value
 
     def __getattr__(self, attr):
         if attr == "balance":
