@@ -14,11 +14,15 @@ I haven't found any that matches all those requirements. Therefore, I decided to
 
 ## What is the status of this project?
 
-In summary: barely starting.
+Done:
+- Database models exist for stocks, stock prices, transactions, accounts
+- Validations exist for transactions & accounts
+- UI to list and edit accounts (including held shares)
 
 What is remaining:
-- Create models for stocks, stock prices, transactions, accounts
-- Create UI to manage stocks, stock prices, transactions, accounts
+- Add validations to the stock & stock prices models
+- Create UI to create new accounts
+- Create UI to manage stocks, stock prices, transactions
 - Create API to manage stocks, stock prices, transactions, accounts
 - Create calculation engine (% of variation given different parameters)
 - Create graphs
@@ -26,7 +30,7 @@ What is remaining:
 ## What is NOT this project?
 
 Amongst other things, this is not:
-- An application to get share prices
+- An application to get share prices (there are many free tools for this)
 - A possibility to make actual transactions
 
 ## What else should you know?
