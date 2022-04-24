@@ -1,0 +1,159 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-24 12:06+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: PiratJack <demetZ.jacques@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: investmenttracker/models/transaction.py:14
+msgid "Arbitrage - Buy"
+msgstr "Arbitrage - Achat"
+
+#: investmenttracker/models/transaction.py:20
+msgid "Arbitrage - Sell"
+msgstr "Arbitrage - Vente"
+
+#: investmenttracker/models/transaction.py:26
+msgid "Asset buy / subscription"
+msgstr "Achat"
+
+#: investmenttracker/models/transaction.py:32
+msgid "Asset refund"
+msgstr "Revente immédiate"
+
+#: investmenttracker/models/transaction.py:38
+msgid "Asset sell"
+msgstr "Vente"
+
+#: investmenttracker/models/transaction.py:44
+msgid "Cash deposit"
+msgstr "Dépôt"
+
+#: investmenttracker/models/transaction.py:50
+msgid "Cash withdrawal"
+msgstr "Retrait"
+
+#: investmenttracker/models/transaction.py:56
+msgid "Company funding"
+msgstr "Rémunération employeur"
+
+#: investmenttracker/models/transaction.py:62
+msgid "Dividends"
+msgstr "Dividendes"
+
+#: investmenttracker/models/transaction.py:68
+msgid "Management fee - in units"
+msgstr "Frais de gestion en nature"
+
+#: investmenttracker/models/transaction.py:74
+msgid "Management fee - in cash"
+msgstr "Frais de gestion en espèces"
+
+#: investmenttracker/models/transaction.py:80
+msgid "Foreign exchange"
+msgstr "Conversion"
+
+#: investmenttracker/models/transaction.py:86
+msgid "Interests"
+msgstr "Intérêts"
+
+#: investmenttracker/models/transaction.py:92
+msgid "Movement fee"
+msgstr "Frais d'arbitrage"
+
+#: investmenttracker/models/transaction.py:98
+msgid "Profit - in units"
+msgstr "Profit - en titres"
+
+#: investmenttracker/models/transaction.py:104
+msgid "Profit - in cash"
+msgstr "Profit - en espèces"
+
+#: investmenttracker/models/transaction.py:110
+msgid "Split & merge - Source"
+msgstr "Fusion/Division - Source"
+
+#: investmenttracker/models/transaction.py:116
+msgid "Split & merge - Target"
+msgstr "Fusion/Division - Cible"
+
+#: investmenttracker/models/transaction.py:122
+msgid "Taxes - in cash"
+msgstr "Taxes - en espèces"
+
+#: investmenttracker/models/transaction.py:128
+msgid "Taxes - in units"
+msgstr "Taxes - en titres"
+
+#: investmenttracker/models/share.py:33
+#, python-brace-format
+msgid "No price available for share {name} ({main_code})"
+msgstr "Prix inconnu pour action {name} ({main_code})"
+
+#: investmenttracker/models/account.py:31
+#, python-brace-format
+msgid "Key {key} is not fillable for account model"
+msgstr "La valeur {key} ne peut être renseignée directement sur le compte"
+
+#: investmenttracker/controllers/console.py:11
+msgid "Displays detailed information (for debug purpose)"
+msgstr "Afficher plus de détails (debug)"
+
+#: investmenttracker/controllers/console.py:20
+msgid "Displays additional information (for end users)"
+msgstr "Afficher plus de détails (utilisateurs finaux)"
+
+#: investmenttracker/controllers/accounts.py:15
+msgid "Name"
+msgstr "Nom"
+
+#: investmenttracker/controllers/accounts.py:20
+msgid "ID"
+msgstr "ID"
+
+#: investmenttracker/controllers/accounts.py:25
+msgid "Code"
+msgstr "Code"
+
+#: investmenttracker/controllers/accounts.py:30
+msgid "Quantity"
+msgstr "Quantité"
+
+#: investmenttracker/controllers/accounts.py:35
+msgid "Value"
+msgstr "Valeur"
+
+#: investmenttracker/controllers/accounts.py:40
+msgid "As of date"
+msgstr "A date"
+
+#: investmenttracker/controllers/accounts.py:45
+msgid "Total invested"
+msgstr "Total investi"
+
+#: investmenttracker/controllers/accounts.py:97
+#: investmenttracker/controllers/accounts.py:98
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: investmenttracker/controllers/accounts.py:137
+msgid "Accounts"
+msgstr "Comptes"
+
+#: investmenttracker/controllers/accounts.py:138
+msgid "Display your accounts"
+msgstr "Afficher vos comptes"
+
+#: investmenttracker/controllers/mainwindow.py:21
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+#: investmenttracker/controllers/mainwindow.py:42
+msgid "My main toolbar"
+msgstr "Barre des tâches"
