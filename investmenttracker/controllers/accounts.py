@@ -6,6 +6,7 @@ import PyQt5.QtCore
 
 from models.base import NoPriceException
 import models.shareprice
+import controllers.account
 
 _ = gettext.gettext
 
@@ -14,7 +15,7 @@ class AccountsTree(QTreeWidget):
     columns = [
         {
             "name": _("Name"),
-            "size": 0.3,
+            "size": 0.4,
             "alignment": PyQt5.QtCore.Qt.AlignLeft,
         },
         {
@@ -44,13 +45,21 @@ class AccountsTree(QTreeWidget):
         },
         {
             "name": _("Total invested"),
-            "size": 0.2,
+            "size": 0.1,
             "alignment": PyQt5.QtCore.Qt.AlignRight,
+        },
+        {
+            "name": _("Edit"),
+            "size": 50,
+            "alignment": PyQt5.QtCore.Qt.AlignLeft,
         },
     ]
 
-    def __init__(self, database):
+    column_edit_button = 7
+
+    def __init__(self, parent_window, database):
         super().__init__()
+        self.parent_window = parent_window
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([col["name"] for col in self.columns])
         self.setSortingEnabled(True)
@@ -69,6 +78,7 @@ class AccountsTree(QTreeWidget):
                     str(account.total_value),
                     "",
                     str(account.total_invested),
+                    "",
                 ]
             )
             for i in range(len(self.columns)):
@@ -88,6 +98,7 @@ class AccountsTree(QTreeWidget):
                         str(account.shares[share.id] * last_price.price),
                         str(last_price.date),  # TODO: display date in system format
                         "",
+                        "",
                     ]
                 except NoPriceException:
                     child = [
@@ -97,6 +108,7 @@ class AccountsTree(QTreeWidget):
                         str(account.shares[share.id]),
                         _("Unknown"),
                         _("Unknown"),
+                        "",
                         "",
                     ]
 
@@ -113,6 +125,19 @@ class AccountsTree(QTreeWidget):
         self.insertTopLevelItems(0, tree_items)
         self.hideColumn(1)
 
+        for i, account in enumerate(accounts):
+            tree_item = tree_items[i]
+            account_id = account.id
+
+            edit_button = QPushButton()
+            edit_button.setIcon(QIcon("assets/images/modify.png"))
+            edit_button.setProperty("class", "imagebutton")
+            edit_button.clicked.connect(
+                lambda _, name=account_id: self.on_click_edit_button(name)
+            )
+
+            self.setItemWidget(tree_item, self.column_edit_button, edit_button)
+
     def resizeEvent(self, event):
         PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
@@ -127,24 +152,32 @@ class AccountsTree(QTreeWidget):
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])
 
+    def on_click_edit_button(self, account_id):
+        self.account_details = controllers.account.AccountController(
+            self.parent_window, self.database, account_id
+        )
+        self.account_details.show_window()
+        # TODO: When window is closed, refresh the tree
+
 
 class AccountsController:
     name = "Accounts"
 
-    def __init__(self, parent):
-        self.parent = parent
-        self.database = parent.database
+    def __init__(self, parent_window, database):
+        self.database = database
         self.accounts = self.database.accounts_get_all()
 
-    def get_toolbar_button(self, window):
-        button = QAction(QIcon("assets/images/accounts.png"), _("Accounts"), window)
+    def get_toolbar_button(self, parent_window):
+        button = QAction(
+            QIcon("assets/images/accounts.png"), _("Accounts"), parent_window
+        )
         button.setStatusTip(_("Display your accounts"))
-        button.triggered.connect(lambda: window.display_tab(self.name))
+        button.triggered.connect(lambda: parent_window.display_tab(self.name))
         return button
 
-    def get_window(self, window):
-        self.tree = AccountsTree(self.database)
+    def get_window(self, parent_widget):
+        self.tree = AccountsTree(parent_widget, self.database)
         self.tree.fill_accounts(self.accounts)
-        window.setCentralWidget(self.tree)
+        parent_widget.setCentralWidget(self.tree)
 
         return self.tree

@@ -12,7 +12,8 @@ class MainWindow(QMainWindow):
         self.database = database
 
         self.elements = {
-            "Accounts": controllers.accounts.AccountsController(self),
+            "Accounts": controllers.accounts.AccountsController(self, self.database),
+            # TODO: Add windows for Shares, Transactions & Graphs
         }
 
         self.setMinimumSize(800, 600)
