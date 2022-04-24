@@ -36,10 +36,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
-        if value == "":
-            raise ValidationException(
-                _("Missing account {field_name}").format(field_name=key)
-            )
+        self.validate_missing_field(key, value)
         if len(value) > 250:
             raise ValidationException(
                 _("Max length for account {field_name} is 250 characters").format(
@@ -60,10 +57,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("base_currency")
     def validate_base_currency(self, key, value):
-        if value == "":
-            raise ValidationException(
-                _("Missing account {field_name}").format(field_name=key)
-            )
+        self.validate_missing_field(key, value)
         return value
 
     def __getattr__(self, attr):
@@ -114,3 +108,10 @@ class Account(Base):
             return value
 
         raise AttributeError
+
+    def validate_missing_field(self, key, value):
+        if value == "" or value is None:
+            raise ValidationException(
+                _("Missing transaction {field_name}").format(field_name=key)
+            )
+        return value

@@ -115,6 +115,12 @@ class TestAccount(unittest.TestCase):
         )
 
         with self.assertRaises(ValidationException) as cm:
+            account.name = None
+        self.assertEquals(
+            type(cm.exception), ValidationException, "Account must have a name"
+        )
+
+        with self.assertRaises(ValidationException) as cm:
             account.name = "a" * 251
         self.assertEquals(
             type(cm.exception),
