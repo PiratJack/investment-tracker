@@ -34,6 +34,10 @@ Amongst other things, this is not:
 So far, I have built only small python scripts. I've never used PyQt. I've never packaged actual applications.
 Therefore, all this is as much an experimentation as a functional application.
 
+## Another thing
+
+The images are courtesy of [Elegant Themes](https://www.elegantthemes.com/blog/freebie-of-the-week/beautiful-flat-icons-for-free), and were released under GPL.
+
 ## Disclaimer
 
 Neighet GitHub or I are responsible for any decision you take based on the use of this application. The information presented by the application may be outdated, incorrect or wrong. Use this application at your own risk.
