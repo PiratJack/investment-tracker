@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-01 14:19+0200\n"
+"POT-Creation-Date: 2022-05-01 17:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -175,18 +175,30 @@ msgstr ""
 msgid "My main toolbar"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:17
 #: investmenttracker/controllers/account.py:31
+#: investmenttracker/controllers/accounts.py:17
 msgid "Name"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:35
+#: investmenttracker/controllers/accounts.py:27
+msgid "Code"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:39
+msgid "Currency"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:43
+msgid "Active"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:78
+msgid "Account"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:22
 msgid "ID"
-msgstr ""
-
-#: investmenttracker/controllers/accounts.py:27
-#: investmenttracker/controllers/account.py:35
-msgid "Code"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:32
@@ -209,27 +221,19 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:109
-#: investmenttracker/controllers/accounts.py:110
+#: investmenttracker/controllers/accounts.py:111
+#: investmenttracker/controllers/accounts.py:112
 msgid "Unknown"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:172
+#: investmenttracker/controllers/accounts.py:130
+msgid "Add new account"
+msgstr ""
+
+#: investmenttracker/controllers/accounts.py:196
 msgid "Accounts"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:174
+#: investmenttracker/controllers/accounts.py:198
 msgid "Display your accounts"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:39
-msgid "Currency"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:43
-msgid "Active"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:73
-msgid "Account"
 msgstr ""
