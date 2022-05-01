@@ -3,7 +3,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date, Enum
 
-from .base import Base, FillException, ValidationException
+from .base import Base, ValidationException
 from .transaction import TransactionTypes
 
 _ = gettext.gettext

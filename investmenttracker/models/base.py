@@ -3,10 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class FillException(Exception):
-    pass
-
-
 class NoPriceException(Exception):
     def __init__(self, message, share):
         super().__init__(message)
