@@ -68,6 +68,7 @@ class AccountsTree(QTreeWidget):
     def fill_accounts(self, accounts):
         tree_items = []
 
+        # Fill in the data
         for account in accounts:
             account_widget = QTreeWidgetItem(
                 [
@@ -84,6 +85,7 @@ class AccountsTree(QTreeWidget):
             for i in range(len(self.columns)):
                 account_widget.setTextAlignment(i, self.columns[i]["alignment"])
 
+            # Add held shares
             children = []
             for share_id in account.shares:
                 share = self.database.share_get_by_id(share_id)
@@ -122,9 +124,27 @@ class AccountsTree(QTreeWidget):
 
             tree_items.append(account_widget)
 
+        # Add new account
+        new_account_widget = QTreeWidgetItem(
+            [
+                _("Add new account"),
+                "0",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        )
+        new_account_widget.setIcon(0, QIcon("assets/images/add.png"))
+        tree_items.append(new_account_widget)
+
+        # Put everything in the tree
         self.insertTopLevelItems(0, tree_items)
         self.hideColumn(1)
 
+        # Add Edit buttons
         for i, account in enumerate(accounts):
             tree_item = tree_items[i]
             account_id = account.id
@@ -137,6 +157,11 @@ class AccountsTree(QTreeWidget):
             )
 
             self.setItemWidget(tree_item, self.column_edit_button, edit_button)
+
+        create_button = QPushButton()
+        create_button.setProperty("class", "imagebutton align_left")
+        create_button.clicked.connect(lambda _, name=0: self.on_click_edit_button(name))
+        self.setItemWidget(new_account_widget, 0, create_button)
 
     def resizeEvent(self, event):
         PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
@@ -163,22 +188,23 @@ class AccountsTree(QTreeWidget):
 class AccountsController:
     name = "Accounts"
 
-    def __init__(self, parent_window, database):
-        self.database = database
+    def __init__(self, parent_window):
+        self.parent_window = parent_window
+        self.database = parent_window.database
         self.accounts = self.database.accounts_get_all()
 
-    def get_toolbar_button(self, parent_window):
+    def get_toolbar_button(self):
         button = QAction(
-            QIcon("assets/images/accounts.png"), _("Accounts"), parent_window
+            QIcon("assets/images/accounts.png"), _("Accounts"), self.parent_window
         )
         button.setStatusTip(_("Display your accounts"))
-        button.triggered.connect(lambda: parent_window.display_tab(self.name))
+        button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
         return button
 
-    def get_window(self, parent_window):
+    def get_window(self):
         self.window = AccountsTree(self)
         self.window.fill_accounts(self.accounts)
-        parent_window.setCentralWidget(self.window)
+        self.parent_window.setCentralWidget(self.window)
 
         return self.window
 

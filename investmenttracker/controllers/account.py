@@ -1,10 +1,9 @@
 import gettext
 
-from PyQt5.QtGui import QIcon, QRegExpValidator, QValidator
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QDialog,
     QDialogButtonBox,
     QGroupBox,
     QFormLayout,
@@ -12,11 +11,12 @@ from PyQt5.QtWidgets import (
     QLabel,
     QCheckBox,
     QComboBox,
+    QDialog,
 )
 import PyQt5.QtCore
 
 from models.base import NoPriceException
-import models.shareprice
+import models.account
 from models.base import ValidationException
 
 
@@ -42,7 +42,6 @@ class AccountController:
         "enabled": {
             "label": _("Active"),
             "type": "checkbox",
-            "default": True,
         },
     }
 
@@ -57,7 +56,13 @@ class AccountController:
             self.fields["name"]["default"] = self.account.name
             self.fields["code"]["default"] = self.account.code
             self.fields["base_currency"]["default"] = self.account.base_currency
-            self.fields["name"]["enabled"] = self.account.enabled
+            self.fields["enabled"]["default"] = self.account.enabled
+        else:
+            self.account = models.account.Account()
+            self.fields["name"]["default"] = ""
+            self.fields["code"]["default"] = ""
+            self.fields["base_currency"]["default"] = ""
+            self.fields["enabled"]["default"] = True
 
     def show_window(self):
         # Discard previous ones
@@ -65,8 +70,8 @@ class AccountController:
             self.window.close()
             self.window = None
 
-        self.window = QDialog()
-        self.window.setAttribute(PyQt5.QtCore.Qt.WA_DeleteOnClose)
+        self.window = QDialog(self.parent_controller.parent_window)
+        self.window.setModal(True)
 
         # Display content
         self.window.layout = QVBoxLayout()
@@ -77,22 +82,6 @@ class AccountController:
         self.window.setMinimumSize(300, 200)
         self.window.resize(500, 300)
         # TODO: Center the dialog compared to its parent
-        # TODO: Ensure this dialog is closed once its parent is closed
-        # print ('#######')
-        # print ('before')
-        # print ('window', self.window.geometry())
-        # print ('window x', self.window.pos().x())
-        # print ('window y', self.window.pos().y())
-        # print ('parent', self.parent.geometry())
-        # print ('parent', self.parent.geometry().center())
-        # qtRectangle = self.window.geometry()
-        # centerPoint = self.parent.geometry().center()
-        # qtRectangle.moveCenter(centerPoint)
-        # self.window.move(qtRectangle.topLeft())
-        # print ('after')
-        # print ('qtRectangle', qtRectangle.topLeft())
-        # print ('qtRectangle', self.window.geometry().topLeft())
-        # print ('window', self.window.geometry())
 
         # Create the form
         form_group = QGroupBox("")
@@ -135,7 +124,7 @@ class AccountController:
 
         self.window.layout.addWidget(buttonBox)
 
-        self.window.show()
+        self.window.exec()
 
     def save_account(self):
         # Clear previous errors

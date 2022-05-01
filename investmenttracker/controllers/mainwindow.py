@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
         self.database = database
 
         self.elements = {
-            "Accounts": controllers.accounts.AccountsController(self, self.database),
+            "Accounts": controllers.accounts.AccountsController(self),
             # TODO: Add windows for Shares, Transactions & Graphs
         }
 
@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         self.layout = QStackedLayout()
 
         for element in self.elements:
-            element_window = self.elements[element].get_window(self)
+            element_window = self.elements[element].get_window()
             if element_window:
                 self.layout.addWidget(element_window)
 
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
 
         # Add buttons
         for element in self.elements:
-            button = self.elements[element].get_toolbar_button(self)
+            button = self.elements[element].get_toolbar_button()
             if button:
                 self.toolbar.addAction(button)
 
