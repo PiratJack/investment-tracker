@@ -173,25 +173,20 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("account")
     def validate_account(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing transaction account"))
         return value
 
     @sqlalchemy.orm.validates("quantity")
     def validate_quantity(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing transaction quantity"))
         return value
 
     @sqlalchemy.orm.validates("unit_price")
     def validate_unit_price(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing transaction unit price"))
         return value
 
-    def validate_missing_field(self, key, value):
+    def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
-            raise ValidationException(
-                _("Missing transaction {field_name}").format(field_name=key),
-                self,
-                key,
-                value,
-            )
+            raise ValidationException(message, self, key, value)
         return value
