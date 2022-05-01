@@ -149,9 +149,12 @@ class Transaction(Base):
     def validate_label(self, key, value):
         if len(value) > 250:
             raise ValidationException(
-                _("Max length for account {field_name} is 250 characters").format(
+                _("Max length for transaction {field_name} is 250 characters").format(
                     field_name=key
-                )
+                ),
+                self,
+                key,
+                value,
             )
         return value
 
@@ -161,7 +164,10 @@ class Transaction(Base):
 
         if value not in self.__table__.columns["type"].type.enums:
             raise ValidationException(
-                _("Transaction type {field_name} is invalid").format(field_name=key)
+                _("Transaction type {field_name} is invalid").format(field_name=key),
+                self,
+                key,
+                value,
             )
         return value
 
@@ -183,6 +189,9 @@ class Transaction(Base):
     def validate_missing_field(self, key, value):
         if value == "" or value is None:
             raise ValidationException(
-                _("Missing transaction {field_name}").format(field_name=key)
+                _("Missing transaction {field_name}").format(field_name=key),
+                self,
+                key,
+                value,
             )
         return value

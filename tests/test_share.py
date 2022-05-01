@@ -51,12 +51,17 @@ class TestShare(unittest.TestCase):
 
     def test_last_price(self):
         # No last price
+        test_name = "Missing last price should raise NoPriceException"
         share = self.database.share_get_by_id(1)
         self.assertRaises(
             NoPriceException,
             lambda _: share.last_price,
-            "Missing last price should raise NoPriceException",
+            test_name,
         )
+        try:
+            share.last_price
+        except NoPriceException as e:
+            self.assertEqual(e.share, share, test_name + " - exception.share is wrong")
 
         # Last price exists
         last_price = self.database.share_get_by_id(2).last_price

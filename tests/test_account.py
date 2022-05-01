@@ -100,6 +100,10 @@ class TestAccount(unittest.TestCase):
             total_invested, 10000, "Total invested in account should be 10k"
         )
 
+    def test_total_value(self):
+        total_value = self.database.accounts_get_all()[0].total_value
+        self.assertEqual(total_value, 0, "INVALID TEST")
+
     def test_validations(self):
         account = Account(
             id=50,
@@ -108,36 +112,100 @@ class TestAccount(unittest.TestCase):
             base_currency="EUR",
             enabled=True,
         )
+        # Test empty account name
+        test_name = "Account must have a non-empty name"
         with self.assertRaises(ValidationException) as cm:
             account.name = ""
-        self.assertEquals(
-            type(cm.exception), ValidationException, "Account must have a name"
+        self.assertEqual(type(cm.exception), ValidationException, test_name)
+        self.assertEqual(
+            cm.exception.item,
+            account,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "name",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "",
+            test_name + " - exception.invalid_value is wrong",
         )
 
+        # Test None account name
+        test_name = "Account must have a name that is not None"
         with self.assertRaises(ValidationException) as cm:
             account.name = None
-        self.assertEquals(
-            type(cm.exception), ValidationException, "Account must have a name"
+        self.assertEqual(type(cm.exception), ValidationException, test_name)
+        self.assertEqual(
+            cm.exception.item,
+            account,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "name",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            None,
+            test_name + " - exception.invalid_value is wrong",
         )
 
+        # Test account name max length
+        test_name = "Account can't have a name with more than 250 characters"
         with self.assertRaises(ValidationException) as cm:
             account.name = "a" * 251
-        self.assertEquals(
+        self.assertEqual(
             type(cm.exception),
             ValidationException,
-            "Account shouldn't have a name with more than 250 characters",
+            test_name,
+        )
+        self.assertEqual(
+            cm.exception.item,
+            account,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "name",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "a" * 251,
+            test_name + " - exception.invalid_value is wrong",
         )
 
+        # Test account code max length
+        test_name = "Account can't have a code with more than 250 characters"
         with self.assertRaises(ValidationException) as cm:
             account.code = "a" * 251
-        self.assertEquals(
+        self.assertEqual(
             type(cm.exception),
             ValidationException,
-            "Account shouldn't have a code with more than 250 characters",
+            test_name,
+        )
+        self.assertEqual(
+            cm.exception.item,
+            account,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "code",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "a" * 251,
+            test_name + " - exception.invalid_value is wrong",
         )
 
         with self.assertRaises(ValidationException) as cm:
             account.base_currency = ""
-        self.assertEquals(
+        self.assertEqual(
             type(cm.exception), ValidationException, "Account must have a base currency"
         )

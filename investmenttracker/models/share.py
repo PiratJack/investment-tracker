@@ -32,7 +32,8 @@ class Share(Base):
                 raise NoPriceException(
                     _("No price available for share {name} ({main_code})").format(
                         name=self.name, main_code=self.main_code
-                    )
+                    ),
+                    self,
                 )
 
         raise AttributeError

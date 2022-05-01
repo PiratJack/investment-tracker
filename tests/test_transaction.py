@@ -94,28 +94,105 @@ class TestTransaction(unittest.TestCase):
             unit_price=1,
         )
 
+        # Test invalid type attribute
+        test_name = "Transaction must have a valid type"
         with self.assertRaises(ValidationException) as cm:
             transaction.type = "hfeozhfze"
-        self.assertEquals(
+        self.assertEqual(
             type(cm.exception),
             ValidationException,
-            "Transaction must have a valid type",
+            test_name + " - exception type is wrong",
+        )
+        self.assertEqual(
+            cm.exception.item,
+            transaction,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "type",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "hfeozhfze",
+            test_name + " - exception.invalid_value is wrong",
+        )
+
+        # Test max length for transaction label
+        test_name = "Transaction must have a label with less than 250 characters"
+        with self.assertRaises(ValidationException) as cm:
+            transaction.label = "a" * 251
+        self.assertEqual(
+            type(cm.exception),
+            ValidationException,
+            test_name + " - exception type is wrong",
+        )
+        self.assertEqual(
+            cm.exception.item,
+            transaction,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "label",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "a" * 251,
+            test_name + " - exception.invalid_value is wrong",
         )
 
         mandatory_attributes = ["type", "account", "quantity", "unit_price"]
         for attribute in mandatory_attributes:
+            # Test empty value
+            test_name = "Transaction must have non-empty " + attribute
             with self.assertRaises(ValidationException) as cm:
                 setattr(transaction, attribute, "")
-            self.assertEquals(
+            self.assertEqual(
                 type(cm.exception),
                 ValidationException,
-                "Transaction must have " + attribute,
+                test_name,
+            )
+            self.assertEqual(
+                cm.exception.item,
+                transaction,
+                test_name + " - exception.item is wrong",
+            )
+            self.assertEqual(
+                cm.exception.key,
+                attribute,
+                test_name + " - exception.key is wrong",
+            )
+            self.assertEqual(
+                cm.exception.invalid_value,
+                "",
+                test_name + " - exception.invalid_value is wrong",
             )
 
+            # Test None value
+            test_name = "Transaction must have non-None " + attribute
             with self.assertRaises(ValidationException) as cm:
                 setattr(transaction, attribute, None)
-            self.assertEquals(
+            self.assertEqual(
                 type(cm.exception),
                 ValidationException,
-                "Transaction must have " + attribute,
+                test_name,
+            )
+
+            self.assertEqual(
+                cm.exception.item,
+                transaction,
+                test_name + " - exception.item is wrong",
+            )
+            self.assertEqual(
+                cm.exception.key,
+                attribute,
+                test_name + " - exception.key is wrong",
+            )
+            self.assertEqual(
+                cm.exception.invalid_value,
+                None,
+                test_name + " - exception.invalid_value is wrong",
             )
