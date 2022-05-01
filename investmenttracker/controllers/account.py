@@ -48,9 +48,9 @@ class AccountController:
 
     error_widgets = []
 
-    def __init__(self, parent_window, database, account_id=0):
-        self.parent_window = parent_window
-        self.database = database
+    def __init__(self, parent_controller, account_id=0):
+        self.parent_controller = parent_controller
+        self.database = parent_controller.database
         self.account_id = int(account_id)
         if account_id:
             self.account = self.database.accounts_get_by_id(account_id)
@@ -171,6 +171,8 @@ class AccountController:
         if not has_error:
             self.database.session.add(self.account)
             self.database.session.commit()
+
+            self.parent_controller.reload_data()
 
             self.window.close()
 

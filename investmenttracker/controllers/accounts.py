@@ -57,13 +57,13 @@ class AccountsTree(QTreeWidget):
 
     column_edit_button = 7
 
-    def __init__(self, parent_window, database):
+    def __init__(self, parent_controller):
         super().__init__()
-        self.parent_window = parent_window
+        self.parent_controller = parent_controller
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([col["name"] for col in self.columns])
         self.setSortingEnabled(True)
-        self.database = database
+        self.database = parent_controller.database
 
     def fill_accounts(self, accounts):
         tree_items = []
@@ -154,7 +154,7 @@ class AccountsTree(QTreeWidget):
 
     def on_click_edit_button(self, account_id):
         self.account_details = controllers.account.AccountController(
-            self.parent_window, self.database, account_id
+            self.parent_controller, account_id
         )
         self.account_details.show_window()
         # TODO: When window is closed, refresh the tree
@@ -175,9 +175,16 @@ class AccountsController:
         button.triggered.connect(lambda: parent_window.display_tab(self.name))
         return button
 
-    def get_window(self, parent_widget):
-        self.tree = AccountsTree(parent_widget, self.database)
-        self.tree.fill_accounts(self.accounts)
-        parent_widget.setCentralWidget(self.tree)
+    def get_window(self, parent_window):
+        self.window = AccountsTree(self)
+        self.window.fill_accounts(self.accounts)
+        parent_window.setCentralWidget(self.window)
 
-        return self.tree
+        return self.window
+
+    def reload_data(self):
+        self.accounts = self.database.accounts_get_all()
+        self.window.clear()
+        self.window.fill_accounts(self.accounts)
+
+        return self.window
