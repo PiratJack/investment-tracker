@@ -20,20 +20,6 @@ class Account(Base):
         "Transaction", order_by="Transaction.date", back_populates="account"
     )
 
-    fillable = ["id", "name", "code", "base_currency", "enabled"]
-
-    def fill(self, data):
-        for key, value in data.items():
-            if key in self.fillable:
-                setattr(self, key, data[key])
-            else:
-                raise FillException(
-                    _("Key {key} is not fillable for account model").format(key=key)
-                )
-
-    def get_transactions(self):
-        return self.transactions
-
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
         self.validate_missing_field(key, value)
@@ -41,7 +27,10 @@ class Account(Base):
             raise ValidationException(
                 _("Max length for account {field_name} is 250 characters").format(
                     field_name=key
-                )
+                ),
+                self,
+                key,
+                value,
             )
         return value
 
@@ -51,7 +40,10 @@ class Account(Base):
             raise ValidationException(
                 _("Max length for account {field_name} is 250 characters").format(
                     field_name=key
-                )
+                ),
+                self,
+                key,
+                value,
             )
         return value
 
@@ -112,6 +104,9 @@ class Account(Base):
     def validate_missing_field(self, key, value):
         if value == "" or value is None:
             raise ValidationException(
-                _("Missing transaction {field_name}").format(field_name=key)
+                _("Missing transaction {field_name}").format(field_name=key),
+                self,
+                key,
+                value,
             )
         return value

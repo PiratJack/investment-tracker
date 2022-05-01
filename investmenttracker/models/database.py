@@ -38,11 +38,3 @@ class Database:
 
     def share_get_by_id(self, share_id):
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
-
-
-if __name__ == "__main__":
-    import logging
-
-    logging.basicConfig(level=logging.DEBUG)
-    DATABASE_FILE = "../data.sqlite"
-    database = Database(DATABASE_FILE)
