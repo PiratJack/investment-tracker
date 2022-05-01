@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-24 20:20+0200\n"
+"POT-Creation-Date: 2022-05-01 14:11+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: PiratJack <demetZ.jacques@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,6 +15,17 @@ msgstr ""
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr "Prix inconnu pour action {name} ({main_code})"
+
+#: investmenttracker/models/account.py:28
+#: investmenttracker/models/account.py:41
+#, python-brace-format
+msgid "Max length for account {field_name} is 250 characters"
+msgstr "La longueur maximale du champ {field_name} est de 250 caractères"
+
+#: investmenttracker/models/account.py:107
+#, fuzzy, python-brace-format
+msgid "Missing transaction {field_name}"
+msgstr "Champ de transaction manquant: {field_name}"
 
 #: investmenttracker/models/transaction.py:14
 msgid "Arbitrage - Buy"
@@ -96,22 +107,30 @@ msgstr "Taxes - en espèces"
 msgid "Taxes - in units"
 msgstr "Taxes - en titres"
 
-#: investmenttracker/models/account.py:31
-#, python-brace-format
-msgid "Key {key} is not fillable for account model"
-msgstr "La valeur {key} ne peut être renseignée directement sur le compte"
-
-#: investmenttracker/models/account.py:40
-#: investmenttracker/models/account.py:54
-#, python-brace-format
-msgid "Missing account {field_name}"
-msgstr "Champ du compte manquant: {field_name}"
-
-#: investmenttracker/models/account.py:42
-#: investmenttracker/models/account.py:48
-#, python-brace-format
-msgid "Max length for account {field_name} is 250 characters"
+#: investmenttracker/models/transaction.py:152
+#, fuzzy, python-brace-format
+msgid "Max length for transaction {field_name} is 250 characters"
 msgstr "La longueur maximale du champ {field_name} est de 250 caractères"
+
+#: investmenttracker/models/transaction.py:167
+#, python-brace-format
+msgid "Transaction type {field_name} is invalid"
+msgstr "Le type de transaction {field_name} est invalide"
+
+#: investmenttracker/models/transaction.py:176
+#, fuzzy
+msgid "Missing transaction account"
+msgstr "Compte manquant pour la transaction"
+
+#: investmenttracker/models/transaction.py:181
+#, fuzzy
+msgid "Missing transaction quantity"
+msgstr "Quantité manquante pour la transaction"
+
+#: investmenttracker/models/transaction.py:186
+#, fuzzy
+msgid "Missing transaction unit price"
+msgstr "Prix unitaire manquant pour la transaction"
 
 #: investmenttracker/controllers/graphs.py:12
 msgid "Graphs"
@@ -153,32 +172,19 @@ msgstr "Suivi boursier"
 msgid "My main toolbar"
 msgstr "Barre des tâches"
 
-#: investmenttracker/controllers/account.py:20
 #: investmenttracker/controllers/accounts.py:17
+#: investmenttracker/controllers/account.py:31
 msgid "Name"
 msgstr "Nom"
-
-#: investmenttracker/controllers/account.py:24
-#: investmenttracker/controllers/accounts.py:27
-msgid "Code"
-msgstr "Code"
-
-#: investmenttracker/controllers/account.py:28
-msgid "Currency"
-msgstr "Monnaie"
-
-#: investmenttracker/controllers/account.py:32
-msgid "Active"
-msgstr "Actif"
-
-#: investmenttracker/controllers/account.py:60
-#, fuzzy
-msgid "Account"
-msgstr "Comptes"
 
 #: investmenttracker/controllers/accounts.py:22
 msgid "ID"
 msgstr "ID"
+
+#: investmenttracker/controllers/accounts.py:27
+#: investmenttracker/controllers/account.py:35
+msgid "Code"
+msgstr "Code"
 
 #: investmenttracker/controllers/accounts.py:32
 msgid "Quantity"
@@ -205,10 +211,26 @@ msgstr "Modifier"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: investmenttracker/controllers/accounts.py:166
+#: investmenttracker/controllers/accounts.py:172
 msgid "Accounts"
 msgstr "Comptes"
 
-#: investmenttracker/controllers/accounts.py:167
+#: investmenttracker/controllers/accounts.py:174
 msgid "Display your accounts"
 msgstr "Afficher vos comptes"
+
+#: investmenttracker/controllers/account.py:39
+msgid "Currency"
+msgstr "Monnaie"
+
+#: investmenttracker/controllers/account.py:43
+msgid "Active"
+msgstr "Actif"
+
+#: investmenttracker/controllers/account.py:73
+msgid "Account"
+msgstr "Compte"
+
+#, python-brace-format
+#~ msgid "Key {key} is not fillable for account model"
+#~ msgstr "La valeur {key} ne peut être renseignée directement sur le compte"

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-24 20:20+0200\n"
+"POT-Creation-Date: 2022-05-01 14:11+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: PiratJack <demetZ.jacques@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,6 +14,17 @@ msgstr ""
 #: investmenttracker/models/share.py:33
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
+msgstr ""
+
+#: investmenttracker/models/account.py:28
+#: investmenttracker/models/account.py:41
+#, python-brace-format
+msgid "Max length for account {field_name} is 250 characters"
+msgstr ""
+
+#: investmenttracker/models/account.py:107
+#, python-brace-format
+msgid "Missing transaction {field_name}"
 msgstr ""
 
 #: investmenttracker/models/transaction.py:14
@@ -96,21 +107,26 @@ msgstr ""
 msgid "Taxes - in units"
 msgstr ""
 
-#: investmenttracker/models/account.py:31
+#: investmenttracker/models/transaction.py:152
 #, python-brace-format
-msgid "Key {key} is not fillable for account model"
+msgid "Max length for transaction {field_name} is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/account.py:40
-#: investmenttracker/models/account.py:54
+#: investmenttracker/models/transaction.py:167
 #, python-brace-format
-msgid "Missing account {field_name}"
+msgid "Transaction type {field_name} is invalid"
 msgstr ""
 
-#: investmenttracker/models/account.py:42
-#: investmenttracker/models/account.py:48
-#, python-brace-format
-msgid "Max length for account {field_name} is 250 characters"
+#: investmenttracker/models/transaction.py:176
+msgid "Missing transaction account"
+msgstr ""
+
+#: investmenttracker/models/transaction.py:181
+msgid "Missing transaction quantity"
+msgstr ""
+
+#: investmenttracker/models/transaction.py:186
+msgid "Missing transaction unit price"
 msgstr ""
 
 #: investmenttracker/controllers/graphs.py:12
@@ -153,30 +169,18 @@ msgstr ""
 msgid "My main toolbar"
 msgstr ""
 
-#: investmenttracker/controllers/account.py:20
 #: investmenttracker/controllers/accounts.py:17
+#: investmenttracker/controllers/account.py:31
 msgid "Name"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:24
-#: investmenttracker/controllers/accounts.py:27
-msgid "Code"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:28
-msgid "Currency"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:32
-msgid "Active"
-msgstr ""
-
-#: investmenttracker/controllers/account.py:60
-msgid "Account"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:22
 msgid "ID"
+msgstr ""
+
+#: investmenttracker/controllers/accounts.py:27
+#: investmenttracker/controllers/account.py:35
+msgid "Code"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:32
@@ -204,10 +208,22 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:166
+#: investmenttracker/controllers/accounts.py:172
 msgid "Accounts"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:167
+#: investmenttracker/controllers/accounts.py:174
 msgid "Display your accounts"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:39
+msgid "Currency"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:43
+msgid "Active"
+msgstr ""
+
+#: investmenttracker/controllers/account.py:73
+msgid "Account"
 msgstr ""

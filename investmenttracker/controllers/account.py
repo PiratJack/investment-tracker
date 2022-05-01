@@ -46,6 +46,8 @@ class AccountController:
         },
     }
 
+    error_widgets = []
+
     def __init__(self, parent_window, database, account_id=0):
         self.parent_window = parent_window
         self.database = database
@@ -94,8 +96,8 @@ class AccountController:
 
         # Create the form
         form_group = QGroupBox("")
-        form_layout = QFormLayout()
-        form_group.setLayout(form_layout)
+        self.form_layout = QFormLayout()
+        form_group.setLayout(self.form_layout)
         self.window.layout.addWidget(form_group)
 
         # Create the fields
@@ -123,7 +125,7 @@ class AccountController:
                     field["widget"].setChecked(field["default"])
 
             # Add to layout
-            form_layout.addRow(label, field["widget"])
+            self.form_layout.addRow(label, field["widget"])
 
         # Create the validation buttons
         buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -136,27 +138,41 @@ class AccountController:
         self.window.show()
 
     def save_account(self):
+        # Clear previous errors
         has_error = False
+        for error_widget in self.error_widgets:
+            self.form_layout.removeRow(error_widget)
+        self.error_widgets = []
+
+        # Apply user entry
         for field_id in self.fields:
             try:
+                field_widget = self.fields[field_id]["widget"]
                 if self.fields[field_id]["type"] == "text":
-                    value = self.fields[field_id]["widget"].text()
+                    value = field_widget.text()
                 elif self.fields[field_id]["type"] == "list":
-                    value = self.fields[field_id]["widget"].currentIndex()
+                    value = field_widget.currentIndex()
                 else:
-                    value = self.fields[field_id]["widget"].isChecked()
+                    value = field_widget.isChecked()
                 setattr(self.account, field_id, value)
-                self.fields[field_id]["widget"].setStyleSheet("")
-            except ValidationException:
-                self.fields[field_id]["widget"].setStyleSheet(
+
+                field_widget.setStyleSheet("")
+            except ValidationException as e:
+                field_widget.setStyleSheet(
                     "QLineEdit {{ background-color: {color} }}".format(color="#f6989d")
                 )
+
+                error_widget = QLabel(e.message)
+                self.error_widgets.append(error_widget)
+                field_row = self.form_layout.getWidgetPosition(field_widget)
+                self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
                 has_error = True
 
-        self.database.session.add(self.account)
-        self.database.session.commit()
+        if not has_error:
+            self.database.session.add(self.account)
+            self.database.session.commit()
 
-        self.window.close()
+            self.window.close()
 
     def close(self):
         self.window.close()
