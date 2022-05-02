@@ -2,3 +2,7 @@ QPushButton.imagebutton {
     border: none;
     background: transparent;
 }
+
+.validation_error {
+    background-color: #f6989d;
+}

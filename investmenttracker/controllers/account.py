@@ -145,11 +145,11 @@ class AccountController:
                     value = field_widget.isChecked()
                 setattr(self.account, field_id, value)
 
-                field_widget.setStyleSheet("")
+                field_widget.setProperty("class", "")
+                field_widget.style().polish(field_widget)
             except ValidationException as e:
-                field_widget.setStyleSheet(
-                    "QLineEdit {{ background-color: {color} }}".format(color="#f6989d")
-                )
+                field_widget.setProperty("class", "validation_error")
+                field_widget.style().polish(field_widget)
 
                 error_widget = QLabel(e.message)
                 self.error_widgets.append(error_widget)
