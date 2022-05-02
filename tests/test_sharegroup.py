@@ -17,7 +17,7 @@ except OSError:
     pass
 
 
-class TestSharePrice(unittest.TestCase):
+class TestShareGroup(unittest.TestCase):
     def setUp(self):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
@@ -57,6 +57,14 @@ class TestSharePrice(unittest.TestCase):
         self.database.session.close()
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
+
+    def test_gets(self):
+        share_group = self.database.share_group_get_by_id(1)
+        self.assertEqual(
+            len(share_group.shares),
+            2,
+            "AMEX group has 2 shares",
+        )
 
     def test_validations(self):
         share_group = self.database.share_group_get_by_id(1)
@@ -107,11 +115,3 @@ class TestSharePrice(unittest.TestCase):
                 value,
                 test_name + " - exception.invalid_value is wrong",
             )
-
-    def test_relationships(self):
-        share_group = self.database.share_group_get_by_id(1)
-        self.assertEqual(
-            len(share_group.shares),
-            2,
-            "AMEX group has 2 shares",
-        )

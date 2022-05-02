@@ -56,7 +56,8 @@ class TestShare(unittest.TestCase):
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
 
-    def test_hidden(self):
+    def test_gets(self):
+        # Database selects & filters
         self.assertEqual(
             len(self.database.shares_get_all()),
             2,
@@ -66,6 +67,26 @@ class TestShare(unittest.TestCase):
             len(self.database.shares_get_all_with_hidden()),
             3,
             "There are 3 shares in total",
+        )
+
+        # String representation
+        share = self.database.share_get_by_id(1)
+        self.assertEqual(
+            str(share),
+            "Share AXA (FR847238, EUR, synced, enabled)",
+            "Share representation is wrong",
+        )
+        share = Share(
+            id=3,
+            name="Hidden share",
+            main_code="FEFZE",
+            base_currency="XFE",
+            hidden=True,
+        )
+        self.assertEqual(
+            str(share),
+            "Share Hidden share (FEFZE, XFE, synced, enabled)",
+            "Share representation is wrong",
         )
 
     def test_last_price(self):

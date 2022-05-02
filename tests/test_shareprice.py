@@ -49,6 +49,47 @@ class TestSharePrice(unittest.TestCase):
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
 
+    def test_gets(self):
+        share = self.database.share_get_by_id(2)
+        share_prices = share.prices
+        self.assertEqual(
+            len(share_prices),
+            2,
+            "Share Accenture has 2 prices",
+        )
+
+        # String representation
+        share_price = share_prices[0]
+        self.assertEqual(
+            str(share_price),
+            "Price (Accenture at 458.0 EUR on 2022-01-01)",
+            "Share price representation is wrong",
+        )
+
+        share_price = SharePrice(
+            share_id=1,
+            date=datetime.datetime(2022, 4, 1),
+            currency="USD",
+            source="Second test",
+        )
+        self.assertEqual(
+            str(share_price),
+            "Price (Unknown on 2022-04-01 00:00:00)",
+            "Share price representation is wrong",
+        )
+
+        share_price = SharePrice(
+            share_id=1,
+            price=125,
+            source="Second test",
+        )
+
+        self.assertEqual(
+            str(share_price),
+            "Price (Unknown)",
+            "Share price representation is wrong",
+        )
+
     def test_validations(self):
         share_price = SharePrice(
             share_id=1,

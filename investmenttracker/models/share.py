@@ -28,6 +28,15 @@ class Share(Base):
     )
     prices = sqlalchemy.orm.relationship("SharePrice", back_populates="share")
 
+    def __init__(self, **kwargs):
+        if "sync" not in kwargs:
+            kwargs["sync"] = self.__table__.c.sync.default.arg
+        if "enabled" not in kwargs:
+            kwargs["enabled"] = self.__table__.c.enabled.default.arg
+        if "hidden" not in kwargs:
+            kwargs["hidden"] = self.__table__.c.hidden.default.arg
+        super().__init__(**kwargs)
+
     def __getattr__(self, attr):
         if attr == "last_price":
             try:
@@ -68,3 +77,14 @@ class Share(Base):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
+
+    def __repr__(self):
+        output = "Share " + self.name + " ("
+        if self.main_code:
+            output += self.main_code + ", "
+        if self.main_code:
+            output += self.base_currency + ", "
+        output += "synced, " if self.sync else "unsynced, "
+        output += "enabled" if self.enabled else "disabled"
+        output += ")"
+        return output

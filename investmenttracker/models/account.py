@@ -24,14 +24,19 @@ class Account(Base):
         "Transaction", order_by="Transaction.date", back_populates="account"
     )
 
+    def __init__(self, **kwargs):
+        if "enabled" not in kwargs:
+            kwargs["enabled"] = self.__table__.c.enabled.default.arg
+        if "hidden" not in kwargs:
+            kwargs["hidden"] = self.__table__.c.hidden.default.arg
+        super().__init__(**kwargs)
+
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
         self.validate_missing_field(key, value, _("Missing account name"))
         if len(value) > 250:
             raise ValidationException(
-                _("Max length for account {field_name} is 250 characters").format(
-                    field_name=key
-                ),
+                _("Max length for account name is 250 characters"),
                 self,
                 key,
                 value,
@@ -42,9 +47,7 @@ class Account(Base):
     def validate_code(self, key, value):
         if len(value) > 250:
             raise ValidationException(
-                _("Max length for account {field_name} is 250 characters").format(
-                    field_name=key
-                ),
+                _("Max length for account code is 250 characters"),
                 self,
                 key,
                 value,
@@ -109,3 +112,12 @@ class Account(Base):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
+
+    def __repr__(self):
+        output = "Account " + self.name + " ("
+        if self.code:
+            output += self.code + ", "
+        output += "enabled, " if self.enabled else "disabled, "
+        output += "hidden" if self.hidden else "visible"
+        output += ")"
+        return output

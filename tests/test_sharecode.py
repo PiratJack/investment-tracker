@@ -17,7 +17,7 @@ except OSError:
     pass
 
 
-class TestSharePrice(unittest.TestCase):
+class TestShareCode(unittest.TestCase):
     def setUp(self):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
@@ -36,11 +36,35 @@ class TestSharePrice(unittest.TestCase):
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
 
+    def test_gets(self):
+        share = self.database.share_get_by_id(1)
+        share_code = share.codes[0]
+        self.assertEqual(
+            len(share.codes),
+            3,
+            "ACN share must have 3 codes",
+        )
+
+        self.assertEqual(
+            str(share_code),
+            "ShareCode AXA (1rACN @ Boursorama)",
+            "ShareCode representation is wrong",
+        )
+        share_code = ShareCode(
+            share_id=2,
+            value="EFEZ",
+        )
+        self.assertEqual(
+            str(share_code),
+            "ShareCode (EFEZ @ None)",
+            "ShareCode representation is wrong",
+        )
+
     def test_validations(self):
         share_code = self.database.share_get_by_id(1).codes[0]
 
         # Test mandatory fields
-        for field in ["origin", "value"]:
+        for field in ["share_id", "origin", "value"]:
             for value in ["", None]:
                 test_name = "Share code must have a " + field + " that is not "
                 test_name += "None" if value == None else "empty"
@@ -85,12 +109,3 @@ class TestSharePrice(unittest.TestCase):
                 value,
                 test_name + " - exception.invalid_value is wrong",
             )
-
-    def test_relationships(self):
-        share = self.database.share_get_by_id(1)
-        share_code = share.codes[0]
-        self.assertEqual(
-            len(share.codes),
-            3,
-            "ACN share must have 3 codes",
-        )

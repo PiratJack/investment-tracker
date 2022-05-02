@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-02 10:10+0200\n"
-"PO-Revision-Date: 2022-05-02 10:10+0200\n"
+"POT-Creation-Date: 2022-05-02 14:19+0200\n"
+"PO-Revision-Date: 2022-05-02 14:20+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -13,21 +13,95 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: investmenttracker/models/account.py:30
-#: investmenttracker/models/account.py:43
-#, python-brace-format
-msgid "Max length for account {field_name} is 250 characters"
-msgstr "La longueur maximale du champ {field_name} est de 250 caractères"
+#: investmenttracker/models/sharegroup.py:22
+msgid "Missing share group name"
+msgstr "Valeur manquante: nom du groupe"
 
-#: investmenttracker/models/account.py:109
-#, python-brace-format
-msgid "Missing transaction {field_name}"
-msgstr "Champ de transaction manquant: {field_name}"
+#: investmenttracker/models/sharegroup.py:25
+msgid "Max length for share group name is 250 characters"
+msgstr "La longueur maximale du nom du groupe est de 250 caractères"
 
-#: investmenttracker/models/share.py:34
+#: investmenttracker/models/share.py:46
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr "Prix inconnu pour action {name} ({main_code})"
+
+#: investmenttracker/models/share.py:58
+msgid "Max length for share main code is 250 characters"
+msgstr ""
+"La longueur maximale du code principal de l'action est de 250 caractères"
+
+#: investmenttracker/models/share.py:64
+msgid "Missing share name"
+msgstr "Valeur manquante: nom de l'action"
+
+#: investmenttracker/models/share.py:67
+msgid "Max length for share name is 250 characters"
+msgstr "La longueur maximale du nom de l'acion est de 250 caractères"
+
+#: investmenttracker/models/share.py:73
+msgid "Missing share base currency"
+msgstr "Valeur manquante: monnaie du compte"
+
+#: investmenttracker/models/sharecode.py:25
+msgid "Missing share code share ID"
+msgstr "Valeur manquante: ID de l'action sur le code"
+
+#: investmenttracker/models/sharecode.py:30
+msgid "Missing share code origin"
+msgstr "Valeur manquante: origine du code"
+
+#: investmenttracker/models/sharecode.py:33
+msgid "Max length for share code origin is 250 characters"
+msgstr "La longueur maximale de l'origine du code est de 250 caractères"
+
+#: investmenttracker/models/sharecode.py:42
+msgid "Missing share code value"
+msgstr "Valeur manquante: code de l'action"
+
+#: investmenttracker/models/sharecode.py:45
+msgid "Max length for share code value is 250 characters"
+msgstr "La longueur maximale du code est de 250 caractères"
+
+#: investmenttracker/models/shareprice.py:25
+msgid "Missing share price share ID"
+msgstr "Valeur manquante: ID de l'action sur le prix"
+
+#: investmenttracker/models/shareprice.py:30
+msgid "Missing share price date"
+msgstr "Valeur manquante: date du prix"
+
+#: investmenttracker/models/shareprice.py:35
+msgid "Missing share price actual price"
+msgstr "Valeur manquante: prix unitaire de l'action"
+
+#: investmenttracker/models/shareprice.py:40
+msgid "Missing share price currency"
+msgstr "Valeur manquante: monnaie du prix"
+
+#: investmenttracker/models/shareprice.py:45
+msgid "Missing share price source"
+msgstr "Valeur manquante: source du prix"
+
+#: investmenttracker/models/shareprice.py:48
+msgid "Max length for share price source is 250 characters"
+msgstr "La longueur maximale de la source du prix est de 250 caractères"
+
+#: investmenttracker/models/account.py:36
+msgid "Missing account name"
+msgstr "Nom du compte manquant"
+
+#: investmenttracker/models/account.py:39
+msgid "Max length for account name is 250 characters"
+msgstr "La longueur maximale du nom du compte est de 250 caractères"
+
+#: investmenttracker/models/account.py:50
+msgid "Max length for account code is 250 characters"
+msgstr "La longueur maximale du code du compte est de 250 caractères"
+
+#: investmenttracker/models/account.py:59
+msgid "Missing account base currency"
+msgstr "Monnaie du compte manquante"
 
 #: investmenttracker/models/transaction.py:14
 msgid "Arbitrage - Buy"
@@ -110,30 +184,26 @@ msgid "Taxes - in units"
 msgstr "Taxes - en titres"
 
 #: investmenttracker/models/transaction.py:152
-#, python-brace-format
-msgid "Max length for transaction {field_name} is 250 characters"
-msgstr ""
-"La longueur maximale du champ de transaction {field_name} est de 250 "
-"caractères"
+msgid "Max length for transaction label is 250 characters"
+msgstr "La longueur maximale du libellé de transaction est de 250 caractères"
 
-#: investmenttracker/models/transaction.py:163
+#: investmenttracker/models/transaction.py:161
 msgid "Missing transaction type"
 msgstr "Type manquant pour la transaction"
 
-#: investmenttracker/models/transaction.py:167
-#, python-brace-format
-msgid "Transaction type {field_name} is invalid"
-msgstr "Le type de transaction {field_name} est invalide"
+#: investmenttracker/models/transaction.py:165
+msgid "Transaction type is invalid"
+msgstr "Le type de transaction est invalide"
 
-#: investmenttracker/models/transaction.py:176
+#: investmenttracker/models/transaction.py:174
 msgid "Missing transaction account"
 msgstr "Compte manquant pour la transaction"
 
-#: investmenttracker/models/transaction.py:181
+#: investmenttracker/models/transaction.py:179
 msgid "Missing transaction quantity"
 msgstr "Quantité manquante pour la transaction"
 
-#: investmenttracker/models/transaction.py:186
+#: investmenttracker/models/transaction.py:184
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
 
@@ -146,12 +216,13 @@ msgid "Displays additional information (for end users)"
 msgstr "Afficher plus de détails (utilisateurs finaux)"
 
 #: investmenttracker/controllers/account.py:31
-#: investmenttracker/controllers/accounts.py:17
+#: investmenttracker/controllers/accounts.py:25
+#: investmenttracker/controllers/shares.py:8
 msgid "Name"
 msgstr "Nom"
 
 #: investmenttracker/controllers/account.py:35
-#: investmenttracker/controllers/accounts.py:27
+#: investmenttracker/controllers/accounts.py:35
 msgid "Code"
 msgstr "Code"
 
@@ -171,22 +242,6 @@ msgstr "Masqué"
 msgid "Account"
 msgstr "Compte"
 
-#: investmenttracker/controllers/mainwindow.py:22
-msgid "Investment Tracker"
-msgstr "Suivi boursier"
-
-#: investmenttracker/controllers/mainwindow.py:43
-msgid "My main toolbar"
-msgstr "Barre des tâches"
-
-#: investmenttracker/controllers/shares.py:12
-msgid "Shares"
-msgstr "Titres"
-
-#: investmenttracker/controllers/shares.py:13
-msgid "Display shares"
-msgstr "Afficher les titres"
-
 #: investmenttracker/controllers/transactions.py:13
 msgid "Transactions"
 msgstr "Transactions"
@@ -203,50 +258,79 @@ msgstr "Graphes"
 msgid "Analysis"
 msgstr "Analyse"
 
-#: investmenttracker/controllers/accounts.py:22
+#: investmenttracker/controllers/accounts.py:30
+#: investmenttracker/controllers/shares.py:13
 msgid "ID"
 msgstr "ID"
 
-#: investmenttracker/controllers/accounts.py:32
+#: investmenttracker/controllers/accounts.py:40
+#: investmenttracker/controllers/shares.py:23
 msgid "Quantity"
 msgstr "Quantité"
 
-#: investmenttracker/controllers/accounts.py:37
+#: investmenttracker/controllers/accounts.py:45
+#: investmenttracker/controllers/shares.py:28
 msgid "Value"
 msgstr "Valeur"
 
-#: investmenttracker/controllers/accounts.py:42
+#: investmenttracker/controllers/accounts.py:50
+#: investmenttracker/controllers/shares.py:33
 msgid "As of date"
 msgstr "A date"
 
-#: investmenttracker/controllers/accounts.py:47
+#: investmenttracker/controllers/accounts.py:55
+#: investmenttracker/controllers/shares.py:38
 msgid "Total invested"
 msgstr "Total investi"
 
-#: investmenttracker/controllers/accounts.py:52
+#: investmenttracker/controllers/accounts.py:60
+#: investmenttracker/controllers/shares.py:43
 msgid "Edit"
 msgstr "Modifier"
 
-#: investmenttracker/controllers/accounts.py:111
-#: investmenttracker/controllers/accounts.py:112
+#: investmenttracker/controllers/accounts.py:130
+#: investmenttracker/controllers/accounts.py:131
+#: investmenttracker/controllers/shares.py:113
+#: investmenttracker/controllers/shares.py:114
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: investmenttracker/controllers/accounts.py:130
+#: investmenttracker/controllers/accounts.py:149
+#: investmenttracker/controllers/shares.py:132
 msgid "Add new account"
 msgstr "Ajouter un nouveau compte"
 
-#: investmenttracker/controllers/accounts.py:197
+#: investmenttracker/controllers/accounts.py:221
 msgid "Accounts"
 msgstr "Comptes"
 
-#: investmenttracker/controllers/accounts.py:199
+#: investmenttracker/controllers/accounts.py:223
 msgid "Display your accounts"
 msgstr "Afficher vos comptes"
 
-#: investmenttracker/controllers/accounts.py:212
+#: investmenttracker/controllers/accounts.py:236
 msgid "Display hidden accounts?"
 msgstr "Afficher les comptes masqués?"
+
+#: investmenttracker/controllers/mainwindow.py:23
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+#: investmenttracker/controllers/mainwindow.py:44
+msgid "My main toolbar"
+msgstr "Barre des tâches"
+
+#: investmenttracker/controllers/shares.py:18
+msgid "Main code"
+msgstr "Code principal"
+
+#: investmenttracker/controllers/shares.py:200
+msgid "Shares"
+msgstr "Titres"
+
+#: investmenttracker/controllers/shares.py:201
+msgid "Display shares"
+msgstr "Afficher les titres"
 
 #, python-brace-format
 #~ msgid "Key {key} is not fillable for account model"

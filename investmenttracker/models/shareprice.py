@@ -56,3 +56,15 @@ class SharePrice(Base):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
+
+    def __repr__(self):
+        output = [
+            "Price (",
+            self.share.name + " at " if self.share else "",
+            str(self.price) + " " + str(self.currency)
+            if self.price and self.currency
+            else "Unknown",
+            " on " + str(self.date) if self.date else "",
+            ")",
+        ]
+        return "".join(output)

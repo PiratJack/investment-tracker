@@ -82,6 +82,48 @@ class TestTransaction(unittest.TestCase):
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
 
+    def test_gets(self):
+        # Database selects & filters
+        account = self.database.accounts_get_by_id(1)
+        self.assertEqual(
+            len(account.transactions),
+            4,
+            "Account has 4 transactions",
+        )
+
+        self.assertEqual(
+            account.transactions[0].account,
+            account,
+            "Transaction from account must be linked to that account",
+        )
+
+        # String representation
+        self.assertEqual(
+            str(account.transactions[0]),
+            "Transaction ('Cash deposit', '2020-01-01', '', 'Main account')",
+            "Transaction representation is wrong",
+        )
+        self.assertEqual(
+            str(account.transactions[1]),
+            "Transaction ('Asset buy / subscription', '2020-01-05', 'Accenture', 'Main account')",
+            "Transaction representation is wrong",
+        )
+
+        transaction = Transaction(
+            account_id=1,
+            date=datetime.datetime(2020, 4, 15),
+            label="Sell ACN",
+            type="asset_sell",
+            share_id=2,
+            quantity=10,
+            unit_price=1,
+        )
+        self.assertEqual(
+            str(transaction),
+            "Transaction ('asset_sell', '2020-04-15 00:00:00', '', '')",
+            "Transaction representation is wrong",
+        )
+
     def test_validations(self):
         transaction = Transaction(
             account_id=1,
@@ -119,7 +161,7 @@ class TestTransaction(unittest.TestCase):
         )
 
         # Test mandatory fields
-        for field in ["type", "account", "quantity", "unit_price"]:
+        for field in ["type", "account_id", "quantity", "unit_price"]:
             for value in ["", None]:
                 test_name = "Transaction must have a " + field + " that is not "
                 test_name += "None" if value == None else "empty"

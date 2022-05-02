@@ -149,9 +149,7 @@ class Transaction(Base):
     def validate_label(self, key, value):
         if len(value) > 250:
             raise ValidationException(
-                _("Max length for transaction {field_name} is 250 characters").format(
-                    field_name=key
-                ),
+                _("Max length for transaction label is 250 characters"),
                 self,
                 key,
                 value,
@@ -164,15 +162,15 @@ class Transaction(Base):
 
         if value not in self.__table__.columns["type"].type.enums:
             raise ValidationException(
-                _("Transaction type {field_name} is invalid").format(field_name=key),
+                _("Transaction type is invalid"),
                 self,
                 key,
                 value,
             )
         return value
 
-    @sqlalchemy.orm.validates("account")
-    def validate_account(self, key, value):
+    @sqlalchemy.orm.validates("account_id")
+    def validate_account_id(self, key, value):
         self.validate_missing_field(key, value, _("Missing transaction account"))
         return value
 
@@ -190,3 +188,10 @@ class Transaction(Base):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
+
+    def __repr__(self):
+        type_str = self.type if type(self.type) == str else self.type.value["name"]
+        account_str = self.account.name if self.account else ""
+        share_str = self.share.name if self.share else ""
+
+        return "Transaction " + str((type_str, str(self.date), share_str, account_str))

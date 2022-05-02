@@ -90,14 +90,8 @@ class TestAccount(unittest.TestCase):
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
 
-    def test_balance(self):
-        self.assertEqual(
-            self.database.accounts_get_all()[0].balance,
-            3010,
-            "Account balance should be 3010",
-        )
-
     def test_gets(self):
+        # Database selects & filters
         self.assertRaises(
             NoResultFound,
             lambda _: self.database.accounts_get_by_id(0),
@@ -119,18 +113,46 @@ class TestAccount(unittest.TestCase):
             "There are be 2 accounts in total",
         )
 
-    def test_share_ownership(self):
+        # String representation
+        account = self.database.accounts_get_by_id(1)
+        self.assertEqual(
+            str(account),
+            "Account Main account (AUFE1, enabled, visible)",
+            "Account representation is wrong",
+        )
+        account = Account(
+            id=2,
+            name="Hidden account",
+            code="487485",
+            base_currency="EUR",
+            hidden=True,
+        )
+        self.assertEqual(
+            str(account),
+            "Account Hidden account (487485, enabled, hidden)",
+            "Account representation is wrong",
+        )
+
+    def test_attributes(self):
+        # Account balance
+        self.assertEqual(
+            self.database.accounts_get_all()[0].balance,
+            3010,
+            "Account balance should be 3010",
+        )
+
+        # Shares held
         shares = self.database.accounts_get_all()[0].shares
         self.assertEqual(shares[2], 40, "Account should have 40 NYSE:ACN")
         self.assertEqual(shares[3], 10, "Account should have 10 NASDAQ:WDAY")
 
-    def test_total_invested(self):
+        # Total invested
         total_invested = self.database.accounts_get_all()[0].total_invested
         self.assertEqual(
             total_invested, 10000, "Total invested in account should be 10k"
         )
 
-    def test_total_value(self):
+        # Total value
         total_value = self.database.accounts_get_all()[0].total_value
         self.assertEqual(total_value, 0, "INVALID TEST")
 
