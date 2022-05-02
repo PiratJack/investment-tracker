@@ -1,6 +1,6 @@
 import gettext
 
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QBrush, QColor
 from PyQt5.QtWidgets import (
     QAction,
     QTreeWidget,
@@ -93,6 +93,17 @@ class AccountsTree(QTreeWidget):
             for i in range(len(self.columns)):
                 account_widget.setTextAlignment(i, self.columns[i]["alignment"])
 
+            if not account.enabled:
+                font = account_widget.font(0)
+                font.setItalic(True)
+                account_widget.setFont(0, font)
+
+            if account.hidden:
+                font = account_widget.font(0)
+                font.setItalic(True)
+                account_widget.setFont(0, font)
+                account_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
+
             # Add held shares
             children = []
             for share_id in account.shares:
@@ -145,6 +156,10 @@ class AccountsTree(QTreeWidget):
                 "",
             ]
         )
+        font = new_account_widget.font(0)
+        font.setItalic(True)
+        new_account_widget.setFont(0, font)
+        new_account_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
         new_account_widget.setIcon(0, QIcon("assets/images/add.png"))
         tree_items.append(new_account_widget)
 
