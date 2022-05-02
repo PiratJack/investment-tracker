@@ -70,7 +70,7 @@ class EditController:
                 # TODO: Default value for Combobox
                 # field['widget'].setText(field['default'])
                 elif type(field["widget"]) == QCheckBox:
-                    field["widget"].setChecked(field["default"])
+                    field["widget"].setChecked(field["default"] or False)
 
             # Add to layout
             self.form_layout.addRow(label, field["widget"])
@@ -100,6 +100,8 @@ class EditController:
                     value = field_widget.text()
                 elif self.fields[field_id]["type"] == "list":
                     value = field_widget.currentIndex()
+                    if field_widget.currentIndex() == -1:
+                        value = None
                 else:
                     value = field_widget.isChecked()
                 setattr(self.item, field_id, value)
