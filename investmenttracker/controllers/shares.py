@@ -49,7 +49,7 @@ class SharesTree(QTreeWidget):
             "alignment": PyQt5.QtCore.Qt.AlignRight,
         },
         {
-            "name": _("Synced?"),
+            "name": _("Get prices online?"),
             "size": 100,
             "alignment": PyQt5.QtCore.Qt.AlignCenter,
         },
@@ -76,23 +76,9 @@ class SharesTree(QTreeWidget):
         self.database = parent_controller.database
 
     def fill_groups(self, groups, shares_without_group):
-        edit_button = QPushButton()
-        edit_button.setIcon(QIcon("assets/images/modify.png"))
-        edit_button.setProperty("class", "imagebutton")
         # Fill in the data
         for group in groups:
-            group_widget = QTreeWidgetItem(
-                [group.name, str(group.id), "", "", "", "", "", ""]
-            )
-            self.addTopLevelItem(group_widget)
-
-            for i in range(len(self.columns)):
-                group_widget.setTextAlignment(i, self.columns[i]["alignment"])
-
-            edit_button.clicked.connect(
-                lambda _, name=("group", group.id): self.on_click_edit_button(name)
-            )
-            self.setItemWidget(group_widget, self.column_edit_button, edit_button)
+            group_widget = self.add_group(group.name, group.id)
 
             # Add shares
             for share in group.shares:
@@ -105,9 +91,7 @@ class SharesTree(QTreeWidget):
                         share.id,
                         share.main_code,
                         str(share.last_price.price) + " " + share.last_price.currency,
-                        str(
-                            share.last_price.date
-                        ),  # TODO: display date in system format
+                        share.last_price.date,  # TODO: display date in system format
                         share.sync,
                         share.hidden,
                         "",
@@ -124,29 +108,10 @@ class SharesTree(QTreeWidget):
                         "",
                     ]
 
-                child_widget = QTreeWidgetItem(child)
-                for i in range(len(self.columns)):
-                    child_widget.setTextAlignment(i, self.columns[i]["alignment"])
-                group_widget.addChild(child_widget)
-
-                edit_button.clicked.connect(
-                    lambda _, name=("share", child.id): self.on_click_edit_button(name)
-                )
-                self.setItemWidget(child_widget, self.column_edit_button, edit_button)
+                group_widget.addChild(self.add_share(child, group_widget))
 
         # Add a group for shares without one
-        group_widget = QTreeWidgetItem(
-            [_("Shares without group"), "0", "", "", "", "", "", ""]
-        )
-        self.addTopLevelItem(group_widget)
-
-        # Apply style
-        font = group_widget.font(0)
-        font.setItalic(True)
-        group_widget.setFont(0, font)
-        self.addTopLevelItem(group_widget)
-        for i in range(len(self.columns)):
-            group_widget.setTextAlignment(i, self.columns[i]["alignment"])
+        group_widget = self.add_group(_("Shares without group"), -1)
 
         # Add shares without group
         for share in shares_without_group:
@@ -157,7 +122,7 @@ class SharesTree(QTreeWidget):
                     share.id,
                     share.main_code,
                     str(share.last_price.price) + " " + share.last_price.currency,
-                    str(share.last_price.date),  # TODO: display date in system format
+                    share.last_price.date,  # TODO: display date in system format
                     share.sync,
                     share.hidden,
                     "",
@@ -174,36 +139,12 @@ class SharesTree(QTreeWidget):
                     "",
                 ]
 
-            child_widget = QTreeWidgetItem(child)
-            for i in range(len(self.columns)):
-                child_widget.setTextAlignment(i, self.columns[i]["alignment"])
-            group_widget.addChild(child_widget)
-
-            edit_button.clicked.connect(
-                lambda _, name=("share", child.id): self.on_click_edit_button(name)
-            )
-            self.setItemWidget(child_widget, self.column_edit_button, edit_button)
+            group_widget.addChild(self.add_share(child, group_widget))
 
         # Add new elements
-        add_new = ("group", _("Add new group")), ("share", _("Add new share"))
-        for item, label in add_new:
-            new_item_widget = QTreeWidgetItem([label, "0", "", "", "", "", "", ""])
-
-            # Apply style
-            font = new_item_widget.font(0)
-            font.setItalic(True)
-            new_item_widget.setFont(0, font)
-            new_item_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
-            new_item_widget.setIcon(0, QIcon("assets/images/add.png"))
-            self.addTopLevelItem(new_item_widget)
-
-            # Add Create buttons
-            create_button = QPushButton()
-            create_button.setProperty("class", "imagebutton align_left")
-            create_button.clicked.connect(
-                lambda _, name=(item, 0): self.on_click_edit_button(name)
-            )
-            self.setItemWidget(new_item_widget, 0, create_button)
+        self.add_group(_("Add new group"), 0)
+        share_data = [_("Add new share"), 0, "", "", "", "", "", ""]
+        self.add_share(share_data)
 
         # Overall elements
         self.hideColumn(1)
@@ -223,8 +164,91 @@ class SharesTree(QTreeWidget):
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])
 
+    def add_group(self, name, group_id):
+        group_widget = QTreeWidgetItem([name, str(group_id), "", "", "", "", "", ""])
+        self.addTopLevelItem(group_widget)
+
+        for i in range(len(self.columns)):
+            group_widget.setTextAlignment(i, self.columns[i]["alignment"])
+
+        # Existing group that can be changed
+        if group_id > 0:
+            action_button = QPushButton()
+            action_button.setIcon(QIcon("assets/images/modify.png"))
+            action_button.setProperty("class", "imagebutton")
+            action_button.clicked.connect(
+                lambda _, name=("group", group_id): self.on_click_edit_button(name)
+            )
+            self.setItemWidget(group_widget, self.column_edit_button, action_button)
+
+        # Shares not grouped
+        if group_id <= 0:
+            font = group_widget.font(0)
+            font.setItalic(True)
+            group_widget.setFont(0, font)
+
+        # Add new group
+        if group_id == 0:
+            # Apply style
+            group_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
+            group_widget.setIcon(0, QIcon("assets/images/add.png"))
+
+            # Add Create buttons
+            create_button = QPushButton()
+            create_button.setProperty("class", "imagebutton align_left")
+            create_button.clicked.connect(
+                lambda _, name=("group", 0): self.on_click_edit_button(name)
+            )
+            self.setItemWidget(group_widget, 0, create_button)
+
+        return group_widget
+
+    def add_share(self, data, parent_widget=None):
+        share_widget = QTreeWidgetItem([str(field) for field in data])
+        if parent_widget:
+            parent_widget.addChild(share_widget)
+        else:
+            self.addTopLevelItem(share_widget)
+        # Add checkboxes
+        for col, field in enumerate(data):
+            if type(field) != bool:
+                continue
+
+            val = PyQt5.QtCore.Qt.Checked if field else PyQt5.QtCore.Qt.Unchecked
+            share_widget.setCheckState(col, val)
+            share_widget.setText(col, "")
+
+        for i in range(len(self.columns)):
+            share_widget.setTextAlignment(i, self.columns[i]["alignment"])
+
+        if data[1] > 0:
+            # Add share edit button
+            edit_button = QPushButton()
+            edit_button.setIcon(QIcon("assets/images/modify.png"))
+            edit_button.setProperty("class", "imagebutton")
+            edit_button.clicked.connect(
+                lambda _, name=("share", data[1]): self.on_click_edit_button(name)
+            )
+            self.setItemWidget(share_widget, self.column_edit_button, edit_button)
+        else:
+            # Apply style
+            font = share_widget.font(0)
+            font.setItalic(True)
+            share_widget.setFont(0, font)
+            share_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
+            share_widget.setIcon(0, QIcon("assets/images/add.png"))
+
+            # Add Create buttons
+            create_button = QPushButton()
+            create_button.setProperty("class", "imagebutton align_left")
+            create_button.clicked.connect(
+                lambda _, name=("share", 0): self.on_click_edit_button(name)
+            )
+            self.setItemWidget(share_widget, 0, create_button)
+
+        return share_widget
+
     def on_click_edit_button(self, item):
-        print("DEBUG clicked", item)
         if item[0] == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, item[1]

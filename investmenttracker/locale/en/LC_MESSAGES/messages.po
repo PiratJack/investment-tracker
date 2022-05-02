@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-02 18:21+0200\n"
+"POT-Creation-Date: 2022-05-02 19:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: PiratJack <demetZ.jacques@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -289,7 +289,7 @@ msgid "Display your accounts"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:235
-#: investmenttracker/controllers/shares.py:286
+#: investmenttracker/controllers/shares.py:290
 msgid "Display hidden accounts?"
 msgstr ""
 
@@ -325,6 +325,7 @@ msgid "Main code"
 msgstr ""
 
 #: investmenttracker/controllers/share.py:22
+#: investmenttracker/controllers/shares.py:52
 msgid "Get prices online?"
 msgstr ""
 
@@ -344,30 +345,26 @@ msgstr ""
 msgid "Price date"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:52
-msgid "Load values online?"
-msgstr ""
-
 #: investmenttracker/controllers/shares.py:57
 msgid "Hidden?"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:150
+#: investmenttracker/controllers/shares.py:114
 msgid "Shares without group"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:209
+#: investmenttracker/controllers/shares.py:145
 msgid "Add new group"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:209
+#: investmenttracker/controllers/shares.py:146
 msgid "Add new share"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:271
+#: investmenttracker/controllers/shares.py:275
 msgid "Shares"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:273
+#: investmenttracker/controllers/shares.py:277
 msgid "Display shares"
 msgstr ""
