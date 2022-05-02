@@ -237,3 +237,4 @@ class AccountsController:
     def on_click_display_hidden(self):
         self.display_hidden = self.display_hidden_widget.isChecked()
         self.reload_data()
+        self.tree.setFocus()
