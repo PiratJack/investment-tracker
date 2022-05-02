@@ -4,10 +4,10 @@ import unittest
 
 import investmenttracker.models.database as databasemodel
 
+from investmenttracker.models.base import ValidationException
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
-from investmenttracker.models.base import ValidationException
 
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)
