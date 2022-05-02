@@ -15,13 +15,16 @@ class Share(Base):
     main_code = Column(String(250), nullable=True)
     sync = Column(Boolean, default=True)
     enabled = Column(Boolean, default=True)
-    base_currency = Column(
-        String(5), nullable=True
-    )  # TODO: replace with a list of currencies
     hidden = Column(Boolean, default=False)
 
     group_id = Column(Integer, ForeignKey("share_groups.id"), nullable=True)
     group = sqlalchemy.orm.relationship("ShareGroup", back_populates="shares")
+
+    base_currency_id = Column(Integer, ForeignKey("shares.id"), nullable=True)
+    base_currency = sqlalchemy.orm.relationship("Share", remote_side=[id])
+
+    # used_by = sqlalchemy.orm.relationship("Share", back_populates="base_currency")
+
     codes = sqlalchemy.orm.relationship("ShareCode", back_populates="share")
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="share"
@@ -68,6 +71,22 @@ class Share(Base):
             )
         return value
 
+    @sqlalchemy.orm.validates("base_currency_id")
+    def validate_base_currency_id(self, key, value):
+        if value is not None and value == self.id:
+            raise ValidationException(
+                _("Share base currency can't be itself"), self, key, value
+            )
+        return value
+
+    @sqlalchemy.orm.validates("base_currency")
+    def validate_base_currency(self, key, value):
+        if value is not None and value.id == self.id:
+            raise ValidationException(
+                _("Share base currency can't be itself"), self, key, value
+            )
+        return value
+
     def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
@@ -78,7 +97,7 @@ class Share(Base):
         if self.main_code:
             output += self.main_code + ", "
         if self.base_currency:
-            output += self.base_currency + ", "
+            output += self.base_currency.main_code + ", "
         output += "synced, " if self.sync else "unsynced, "
         output += "enabled" if self.enabled else "disabled"
         output += ")"

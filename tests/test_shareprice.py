@@ -22,10 +22,12 @@ class TestSharePrice(unittest.TestCase):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
             [
-                Share(id=1, name="AXA", main_code="FR847238", base_currency="EUR"),
-                Share(
-                    id=2, name="Accenture", main_code="NYSE:ACN", base_currency="USD"
-                ),
+                Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
+                Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
+                Share(id=3, name="Workday", main_code="WDAY", base_currency_id=6),
+                Share(id=4, name="HSBC", main_code="LU4325", base_currency_id=5),
+                Share(id=5, name="Euro", main_code="EUR"),
+                Share(id=6, name="Dollar", main_code="USD"),
                 SharePrice(
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),

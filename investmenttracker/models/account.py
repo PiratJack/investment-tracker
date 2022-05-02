@@ -1,7 +1,7 @@
 import gettext
 import sqlalchemy.orm
 
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
 from .base import Base, ValidationException
 from .transaction import TransactionTypes
@@ -14,12 +14,11 @@ class Account(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     code = Column(String(250))
-    base_currency = Column(
-        String(250), nullable=False
-    )  # TODO: transform into a real list (from shares)
     enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)
 
+    base_currency_id = Column(Integer, ForeignKey("shares.id"))
+    base_currency = sqlalchemy.orm.relationship("Share")
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="account"
     )

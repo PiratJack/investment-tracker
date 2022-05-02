@@ -28,26 +28,24 @@ class TestShareGroup(unittest.TestCase):
                     id=1,
                     name="AXA",
                     main_code="FR847238",
-                    base_currency="EUR",
+                    base_currency_id=4,
                     group_id=2,
                 ),
                 Share(
                     id=2,
                     name="Accenture",
                     main_code="NYSE:ACN",
-                    base_currency="USD",
+                    base_currency_id=4,
                     group_id=1,
                 ),
                 Share(
                     id=3,
                     name="Workday",
                     main_code="NYSE:WDAY",
-                    base_currency="USD",
+                    base_currency_id=4,
                     group_id=1,
                 ),
-                Share(
-                    id=4, name="USD", main_code="USD", base_currency="USD", group_id=3
-                ),
+                Share(id=4, name="Dollar", main_code="USD", group_id=3),
             ]
         )
         self.database.session.commit()

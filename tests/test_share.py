@@ -22,17 +22,18 @@ class TestShare(unittest.TestCase):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
             [
-                Share(id=1, name="AXA", main_code="FR847238", base_currency="EUR"),
-                Share(
-                    id=2, name="Accenture", main_code="NYSE:ACN", base_currency="USD"
-                ),
+                Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
+                Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
                 Share(
                     id=3,
                     name="Hidden share",
                     main_code="FEFZE",
-                    base_currency="XFE",
+                    base_currency_id=7,
                     hidden=True,
                 ),
+                Share(id=5, name="Euro", main_code="EUR"),
+                Share(id=6, name="Dollar", main_code="USD"),
+                Share(id=7, name="Bicoin", main_code="XFE"),
                 SharePrice(
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),
@@ -60,18 +61,18 @@ class TestShare(unittest.TestCase):
         # Database selects & filters
         self.assertEqual(
             len(self.database.shares_query().all()),
-            3,
-            "There are 3 shares in total",
+            6,
+            "There are 6 shares in total",
         )
         self.assertEqual(
             len(self.database.shares_get_all()),
-            2,
-            "Only 2 shares are visible",
+            5,
+            "Only 5 shares are visible",
         )
         self.assertEqual(
             len(self.database.shares_get_all_with_hidden()),
-            3,
-            "There are 3 shares in total",
+            6,
+            "There are 6 shares in total",
         )
 
         # String representation
@@ -85,12 +86,12 @@ class TestShare(unittest.TestCase):
             id=3,
             name="Hidden share",
             main_code="FEFZE",
-            base_currency="XFE",
+            base_currency_id=7,
             hidden=True,
         )
         self.assertEqual(
             str(share),
-            "Share Hidden share (FEFZE, XFE, synced, enabled)",
+            "Share Hidden share (FEFZE, synced, enabled)",
             "Share representation is wrong",
         )
 
@@ -115,7 +116,7 @@ class TestShare(unittest.TestCase):
         self.assertEqual(last_price.source, "Second test", "Last price is Second test")
 
     def test_validations(self):
-        share = Share(id=1, name="Test share", main_code="FE4451", base_currency="EUR")
+        share = Share(id=1, name="Test share", main_code="FE4451")
 
         # Test mandatory fields
         for field in ["name"]:
@@ -163,3 +164,44 @@ class TestShare(unittest.TestCase):
                 value,
                 test_name + " - exception.invalid_value is wrong",
             )
+
+        # Can't have itself as base currency
+        test_name = "Share can't have itself as base currency"
+        with self.assertRaises(ValidationException) as cm:
+            share.base_currency_id = share.id
+        self.assertEqual(type(cm.exception), ValidationException, test_name)
+        self.assertEqual(
+            cm.exception.item,
+            share,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "base_currency_id",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            share.id,
+            test_name + " - exception.invalid_value is wrong",
+        )
+
+        # Can't have itself as base currency - check empty value works
+        share = Share(
+            id=8,
+            name="Hidden share",
+            main_code="FEFZE",
+            hidden=True,
+        )
+        self.database.session.add(share)
+
+        # Base currency - Check direct value
+        share = self.database.share_get_by_id(1)
+        share.base_currency = self.database.share_get_by_id(6)
+        self.assertEqual(
+            share.base_currency.main_code,
+            "USD",
+            "Share has USD as base currency",
+        )
+        with self.assertRaises(ValidationException) as cm:
+            share.base_currency = share

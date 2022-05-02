@@ -138,11 +138,13 @@ class Transaction(Base):
     date = Column(Date, nullable=False)
     label = Column(String(250))
     type = Column(Enum(TransactionTypes, validate_strings=True), nullable=False)
-    share_id = Column(Integer, ForeignKey("shares.id"))
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     quantity = Column(Float, nullable=False)
     unit_price = Column(Float, nullable=False)
+
+    share_id = Column(Integer, ForeignKey("shares.id"))
     share = sqlalchemy.orm.relationship("Share", back_populates="transactions")
+
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     account = sqlalchemy.orm.relationship("Account", back_populates="transactions")
 
     @sqlalchemy.orm.validates("label")

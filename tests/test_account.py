@@ -24,26 +24,24 @@ class TestAccount(unittest.TestCase):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
             [
-                Share(id=1, name="AXA", main_code="FR847238", base_currency="EUR"),
-                Share(
-                    id=2, name="Accenture", main_code="NYSE:ACN", base_currency="USD"
-                ),
-                Share(
-                    id=3, name="Workday", main_code="NASDAQ:WDAY", base_currency="USD"
-                ),
-                Share(id=4, name="HSBC", main_code="LU4325", base_currency="EUR"),
+                Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
+                Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
+                Share(id=3, name="Workday", main_code="WDAY", base_currency_id=6),
+                Share(id=4, name="HSBC", main_code="LU4325", base_currency_id=5),
+                Share(id=5, name="Euro", main_code="EUR"),
+                Share(id=6, name="Dollar", main_code="USD"),
                 Account(
                     id=1,
                     name="Main account",
                     code="AUFE1",
-                    base_currency="EUR",
+                    base_currency_id=5,
                     enabled=True,
                 ),
                 Account(
                     id=2,
                     name="Hidden account",
                     code="487485",
-                    base_currency="EUR",
+                    base_currency_id=5,
                     hidden=True,
                 ),
                 Transaction(
@@ -113,6 +111,15 @@ class TestAccount(unittest.TestCase):
             "There are be 2 accounts in total",
         )
 
+        # Base currency
+        account = self.database.accounts_get_by_id(1)
+        account.base_currency = self.database.share_get_by_id(6)
+        self.assertEqual(
+            account.base_currency.main_code,
+            "USD",
+            "Account has EUR as base currency",
+        )
+
         # String representation
         account = self.database.accounts_get_by_id(1)
         self.assertEqual(
@@ -124,7 +131,7 @@ class TestAccount(unittest.TestCase):
             id=2,
             name="Hidden account",
             code="487485",
-            base_currency="EUR",
+            base_currency_id=5,
             hidden=True,
         )
         self.assertEqual(
@@ -161,7 +168,7 @@ class TestAccount(unittest.TestCase):
             id=50,
             name="test",
             code="Error",
-            base_currency="EUR",
+            base_currency_id=5,
             enabled=True,
         )
 

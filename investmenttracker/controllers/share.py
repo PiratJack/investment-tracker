@@ -26,7 +26,7 @@ class ShareController(EditController):
             "label": _("Enabled"),
             "type": "checkbox",
         },
-        "base_currency": {
+        "base_currency_id": {
             "label": _("Base currency"),
             "type": "list",
         },
@@ -55,10 +55,10 @@ class ShareController(EditController):
             self.fields["main_code"]["default"] = self.item.main_code
             self.fields["sync"]["default"] = self.item.sync
             self.fields["enabled"]["default"] = self.item.enabled
-            self.fields["base_currency"]["default"] = self.item.base_currency
-            self.fields["hidden"]["default"] = self.item.base_currency
+            self.fields["base_currency_id"]["default"] = self.item.base_currency
+            self.fields["hidden"]["default"] = self.item.hidden
             self.fields["group_id"]["default"] = (
-                self.item.group.id if self.item.group else -1
+                self.item.group.id if self.item.group else 0
             )
         else:
             self.item = models.share.Share()
@@ -66,9 +66,9 @@ class ShareController(EditController):
             self.fields["main_code"]["default"] = ""
             self.fields["sync"]["default"] = True
             self.fields["enabled"]["default"] = True
-            self.fields["base_currency"]["default"] = ""
+            self.fields["base_currency_id"]["default"] = 0
             self.fields["hidden"]["default"] = False
-            self.fields["group_id"]["default"] = -1
+            self.fields["group_id"]["default"] = 0
 
     # TODO: Add codes
 
