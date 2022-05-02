@@ -38,6 +38,13 @@ class TestAccount(unittest.TestCase):
                     base_currency="EUR",
                     enabled=True,
                 ),
+                Account(
+                    id=2,
+                    name="Hidden account",
+                    code="487485",
+                    base_currency="EUR",
+                    hidden=True,
+                ),
                 Transaction(
                     account_id=1,
                     date=datetime.datetime(2020, 1, 1),
@@ -87,6 +94,18 @@ class TestAccount(unittest.TestCase):
             self.database.accounts_get_all()[0].balance,
             3010,
             "Account balance should be 3010",
+        )
+
+    def test_hidden(self):
+        self.assertEqual(
+            len(self.database.accounts_get_all()),
+            1,
+            "Only 1 account is visible",
+        )
+        self.assertEqual(
+            len(self.database.accounts_get_all_with_hidden()),
+            2,
+            "There are be 2 accounts in total",
         )
 
     def test_share_ownership(self):

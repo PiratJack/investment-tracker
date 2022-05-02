@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-01 17:29+0200\n"
-"PO-Revision-Date: 2022-05-01 17:29+0200\n"
+"POT-Creation-Date: 2022-05-02 10:10+0200\n"
+"PO-Revision-Date: 2022-05-02 10:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -13,21 +13,21 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: investmenttracker/models/share.py:33
-#, python-brace-format
-msgid "No price available for share {name} ({main_code})"
-msgstr "Prix inconnu pour action {name} ({main_code})"
-
-#: investmenttracker/models/account.py:28
-#: investmenttracker/models/account.py:41
+#: investmenttracker/models/account.py:30
+#: investmenttracker/models/account.py:43
 #, python-brace-format
 msgid "Max length for account {field_name} is 250 characters"
 msgstr "La longueur maximale du champ {field_name} est de 250 caractères"
 
-#: investmenttracker/models/account.py:107
+#: investmenttracker/models/account.py:109
 #, python-brace-format
 msgid "Missing transaction {field_name}"
 msgstr "Champ de transaction manquant: {field_name}"
+
+#: investmenttracker/models/share.py:34
+#, python-brace-format
+msgid "No price available for share {name} ({main_code})"
+msgstr "Prix inconnu pour action {name} ({main_code})"
 
 #: investmenttracker/models/transaction.py:14
 msgid "Arbitrage - Buy"
@@ -116,6 +116,10 @@ msgstr ""
 "La longueur maximale du champ de transaction {field_name} est de 250 "
 "caractères"
 
+#: investmenttracker/models/transaction.py:163
+msgid "Missing transaction type"
+msgstr "Type manquant pour la transaction"
+
 #: investmenttracker/models/transaction.py:167
 #, python-brace-format
 msgid "Transaction type {field_name} is invalid"
@@ -133,22 +137,6 @@ msgstr "Quantité manquante pour la transaction"
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
 
-#: investmenttracker/controllers/graphs.py:12
-msgid "Graphs"
-msgstr "Graphes"
-
-#: investmenttracker/controllers/graphs.py:13
-msgid "Analysis"
-msgstr "Analyse"
-
-#: investmenttracker/controllers/transactions.py:13
-msgid "Transactions"
-msgstr "Transactions"
-
-#: investmenttracker/controllers/transactions.py:15
-msgid "Display transactions"
-msgstr "Afficher les transactions"
-
 #: investmenttracker/controllers/console.py:11
 msgid "Displays detailed information (for debug purpose)"
 msgstr "Afficher plus de détails (debug)"
@@ -156,22 +144,6 @@ msgstr "Afficher plus de détails (debug)"
 #: investmenttracker/controllers/console.py:20
 msgid "Displays additional information (for end users)"
 msgstr "Afficher plus de détails (utilisateurs finaux)"
-
-#: investmenttracker/controllers/shares.py:12
-msgid "Shares"
-msgstr "Titres"
-
-#: investmenttracker/controllers/shares.py:13
-msgid "Display shares"
-msgstr "Afficher les titres"
-
-#: investmenttracker/controllers/mainwindow.py:22
-msgid "Investment Tracker"
-msgstr "Suivi boursier"
-
-#: investmenttracker/controllers/mainwindow.py:43
-msgid "My main toolbar"
-msgstr "Barre des tâches"
 
 #: investmenttracker/controllers/account.py:31
 #: investmenttracker/controllers/accounts.py:17
@@ -191,9 +163,45 @@ msgstr "Monnaie"
 msgid "Active"
 msgstr "Actif"
 
-#: investmenttracker/controllers/account.py:78
+#: investmenttracker/controllers/account.py:47
+msgid "Hidden"
+msgstr "Masqué"
+
+#: investmenttracker/controllers/account.py:82
 msgid "Account"
 msgstr "Compte"
+
+#: investmenttracker/controllers/mainwindow.py:22
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+#: investmenttracker/controllers/mainwindow.py:43
+msgid "My main toolbar"
+msgstr "Barre des tâches"
+
+#: investmenttracker/controllers/shares.py:12
+msgid "Shares"
+msgstr "Titres"
+
+#: investmenttracker/controllers/shares.py:13
+msgid "Display shares"
+msgstr "Afficher les titres"
+
+#: investmenttracker/controllers/transactions.py:13
+msgid "Transactions"
+msgstr "Transactions"
+
+#: investmenttracker/controllers/transactions.py:15
+msgid "Display transactions"
+msgstr "Afficher les transactions"
+
+#: investmenttracker/controllers/graphs.py:12
+msgid "Graphs"
+msgstr "Graphes"
+
+#: investmenttracker/controllers/graphs.py:13
+msgid "Analysis"
+msgstr "Analyse"
 
 #: investmenttracker/controllers/accounts.py:22
 msgid "ID"
@@ -228,13 +236,17 @@ msgstr "Inconnu"
 msgid "Add new account"
 msgstr "Ajouter un nouveau compte"
 
-#: investmenttracker/controllers/accounts.py:196
+#: investmenttracker/controllers/accounts.py:197
 msgid "Accounts"
 msgstr "Comptes"
 
-#: investmenttracker/controllers/accounts.py:198
+#: investmenttracker/controllers/accounts.py:199
 msgid "Display your accounts"
 msgstr "Afficher vos comptes"
+
+#: investmenttracker/controllers/accounts.py:212
+msgid "Display hidden accounts?"
+msgstr "Afficher les comptes masqués?"
 
 #, python-brace-format
 #~ msgid "Key {key} is not fillable for account model"

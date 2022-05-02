@@ -24,6 +24,13 @@ class Database:
         Base.metadata.create_all(self.engine)
 
     def accounts_get_all(self):
+        return (
+            self.session.query(account.Account)
+            .filter(account.Account.hidden == False)
+            .all()
+        )
+
+    def accounts_get_all_with_hidden(self):
         return self.session.query(account.Account).all()
 
     def accounts_get_by_id(self, account_id):
@@ -34,6 +41,9 @@ class Database:
         )
 
     def shares_get_all(self):
+        return self.session.query(share.Share).filter(share.Share.hidden == False).all()
+
+    def shares_get_all_with_hidden(self):
         return self.session.query(share.Share).all()
 
     def share_get_by_id(self, share_id):

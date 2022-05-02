@@ -16,6 +16,8 @@ class Account(Base):
     code = Column(String(250))
     base_currency = Column(String(250), nullable=False)
     enabled = Column(Boolean, default=True)
+    hidden = Column(Boolean, default=False)
+
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="account"
     )

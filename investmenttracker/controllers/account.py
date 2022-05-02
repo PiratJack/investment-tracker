@@ -43,6 +43,10 @@ class AccountController:
             "label": _("Active"),
             "type": "checkbox",
         },
+        "hidden": {
+            "label": _("Hidden"),
+            "type": "checkbox",
+        },
     }
 
     error_widgets = []

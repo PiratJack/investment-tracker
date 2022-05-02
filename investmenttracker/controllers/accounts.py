@@ -1,7 +1,15 @@
 import gettext
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QTreeWidget, QTreeWidgetItem, QPushButton
+from PyQt5.QtWidgets import (
+    QAction,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QPushButton,
+    QWidget,
+    QVBoxLayout,
+    QCheckBox,
+)
 import PyQt5.QtCore
 
 from models.base import NoPriceException
@@ -182,11 +190,11 @@ class AccountsTree(QTreeWidget):
             self.parent_controller, account_id
         )
         self.account_details.show_window()
-        # TODO: When window is closed, refresh the tree
 
 
 class AccountsController:
     name = "Accounts"
+    display_hidden = False
 
     def __init__(self, parent_window):
         self.parent_window = parent_window
@@ -201,16 +209,31 @@ class AccountsController:
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
         return button
 
-    def get_window(self):
-        self.window = AccountsTree(self)
-        self.window.fill_accounts(self.accounts)
-        self.parent_window.setCentralWidget(self.window)
+    def get_display_widget(self):
+        self.display_widget = QWidget()
+        self.display_widget.layout = QVBoxLayout()
+        self.display_widget.setLayout(self.display_widget.layout)
 
-        return self.window
+        self.tree = AccountsTree(self)
+        self.tree.fill_accounts(self.accounts)
+        self.display_widget.layout.addWidget(self.tree)
+
+        self.display_hidden_widget = QCheckBox(_("Display hidden accounts?"))
+        self.display_hidden_widget.stateChanged.connect(self.on_click_display_hidden)
+        self.display_widget.layout.addWidget(self.display_hidden_widget)
+
+        self.parent_window.setCentralWidget(self.display_widget)
+
+        return self.display_widget
 
     def reload_data(self):
-        self.accounts = self.database.accounts_get_all()
-        self.window.clear()
-        self.window.fill_accounts(self.accounts)
+        if self.display_hidden:
+            self.accounts = self.database.accounts_get_all_with_hidden()
+        else:
+            self.accounts = self.database.accounts_get_all()
+        self.tree.clear()
+        self.tree.fill_accounts(self.accounts)
 
-        return self.window
+    def on_click_display_hidden(self):
+        self.display_hidden = self.display_hidden_widget.isChecked()
+        self.reload_data()

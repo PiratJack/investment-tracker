@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         self.layout = QStackedLayout()
 
         for element in self.elements:
-            element_window = self.elements[element].get_window()
+            element_window = self.elements[element].get_display_widget()
             if element_window:
                 self.layout.addWidget(element_window)
 
