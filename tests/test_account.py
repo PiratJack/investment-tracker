@@ -96,7 +96,17 @@ class TestAccount(unittest.TestCase):
             "Account balance should be 3010",
         )
 
-    def test_hidden(self):
+    def test_gets(self):
+        self.assertRaises(
+            sqlalchemy.orm.exc.NoResultFound,
+            lambda _: self.database.accounts_get_by_id(0),
+            "There should be no account with ID 0",
+        )
+        self.assertEqual(
+            type(self.database.accounts_get_by_id(1)),
+            Account,
+            "There should be 1 account with ID 1",
+        )
         self.assertEqual(
             len(self.database.accounts_get_all()),
             1,
