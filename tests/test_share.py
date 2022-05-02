@@ -59,6 +59,11 @@ class TestShare(unittest.TestCase):
     def test_gets(self):
         # Database selects & filters
         self.assertEqual(
+            len(self.database.shares_query().all()),
+            3,
+            "There are 3 shares in total",
+        )
+        self.assertEqual(
             len(self.database.shares_get_all()),
             2,
             "Only 2 shares are visible",

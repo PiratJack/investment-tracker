@@ -58,6 +58,11 @@ class TestShareGroup(unittest.TestCase):
         os.remove(DATABASE_FILE)
 
     def test_gets(self):
+        self.assertEqual(
+            len(self.database.share_groups_get_all()),
+            3,
+            "There are 3 groups in total",
+        )
         share_group = self.database.share_group_get_by_id(1)
         self.assertEqual(
             len(share_group.shares),
