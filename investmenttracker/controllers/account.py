@@ -1,8 +1,6 @@
 import gettext
 
-from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QWidget,
     QVBoxLayout,
     QDialogButtonBox,
     QGroupBox,

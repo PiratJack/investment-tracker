@@ -14,14 +14,12 @@ from .base import Base
 
 class Database:
     def __init__(self, DATABASE_FILE):
-        logging.info("Connecting to database")
         self.engine = sqlalchemy.create_engine("sqlite:///" + DATABASE_FILE)
         self.metadata = sqlalchemy.MetaData()
         self.create_tables()
 
         Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
         self.session = Session()
-        logging.info("Connected to database")
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
