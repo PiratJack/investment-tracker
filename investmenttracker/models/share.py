@@ -17,6 +17,7 @@ class Share(Base):
     enabled = Column(Boolean, default=True)
     base_currency = Column(String(5), nullable=False)
     group = Column(String(250))
+    hidden = Column(Boolean, default=False)
 
     codes = sqlalchemy.orm.relationship("ShareCode", back_populates="share")
     transactions = sqlalchemy.orm.relationship(

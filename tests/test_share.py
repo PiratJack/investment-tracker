@@ -26,6 +26,13 @@ class TestShare(unittest.TestCase):
                 Share(
                     id=2, name="Accenture", main_code="NYSE:ACN", base_currency="USD"
                 ),
+                Share(
+                    id=3,
+                    name="Hidden share",
+                    main_code="FEFZE",
+                    base_currency="XFE",
+                    hidden=True,
+                ),
                 SharePrice(
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),
@@ -48,6 +55,18 @@ class TestShare(unittest.TestCase):
         self.database.session.close()
         self.database.engine.dispose()
         os.remove(DATABASE_FILE)
+
+    def test_hidden(self):
+        self.assertEqual(
+            len(self.database.shares_get_all()),
+            2,
+            "Only 2 shares are visible",
+        )
+        self.assertEqual(
+            len(self.database.shares_get_all_with_hidden()),
+            3,
+            "There are 3 shares in total",
+        )
 
     def test_last_price(self):
         # No last price
