@@ -1,9 +1,8 @@
-import logging
-
 from PyQt5.QtWidgets import QMainWindow, QStackedLayout, QToolBar, QWidget
 from PyQt5.QtCore import Qt, QSize
 
 import controllers.accounts
+import controllers.shares
 
 
 class MainWindow(QMainWindow):
@@ -13,7 +12,8 @@ class MainWindow(QMainWindow):
 
         self.elements = {
             "Accounts": controllers.accounts.AccountsController(self),
-            # TODO: Add windows for Shares, Transactions & Graphs
+            "Shares": controllers.shares.SharesController(self),
+            # TODO: Add windows for Transactions & Graphs
         }
 
         self.setMinimumSize(800, 600)
@@ -41,10 +41,9 @@ class MainWindow(QMainWindow):
     def create_toolbar(self):
         # Create the toolbar itself
         self.toolbar = QToolBar(_("My main toolbar"))
-        self.toolbar.movable = False
-        self.toolbar.floatable = False
-        self.toolbar.floating = False
-        self.toolbar.orientation = Qt.Vertical
+        self.toolbar.setMovable(False)
+        self.toolbar.setFloatable(False)
+        self.toolbar.setOrientation(Qt.Vertical)
         self.toolbar.setIconSize(QSize(128, 128))
 
         self.addToolBar(Qt.LeftToolBarArea, self.toolbar)

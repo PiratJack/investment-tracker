@@ -24,6 +24,7 @@ class Database:
     def create_tables(self):
         Base.metadata.create_all(self.engine)
 
+    # Accounts
     def accounts_get_all(self):
         return (
             self.session.query(account.Account)
@@ -41,6 +42,10 @@ class Database:
             .one()
         )
 
+    # Shares
+    def shares_query(self):
+        return self.session.query(share.Share)
+
     def shares_get_all(self):
         return self.session.query(share.Share).filter(share.Share.hidden == False).all()
 
@@ -49,6 +54,10 @@ class Database:
 
     def share_get_by_id(self, share_id):
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
+
+    # Share groups
+    def share_groups_get_all(self):
+        return self.session.query(sharegroup.ShareGroup).all()
 
     def share_group_get_by_id(self, share_group_id):
         return (

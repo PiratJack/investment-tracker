@@ -20,7 +20,7 @@ Done:
 - UI to list and edit accounts (including held shares)
 
 What is remaining:
-- Create UI to manage stocks, stock prices, transactions
+- Create UI to manage stock prices, transactions
 - Create API to manage stocks, stock prices, transactions, accounts
 - Create calculation engine (% of variation given different parameters)
 - Create graphs

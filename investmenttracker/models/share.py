@@ -11,8 +11,8 @@ _ = gettext.gettext
 class Share(Base):
     __tablename__ = "shares"
     id = Column(Integer, primary_key=True)
-    main_code = Column(String(250), nullable=True)
     name = Column(String(250), nullable=False)
+    main_code = Column(String(250), nullable=True)
     sync = Column(Boolean, default=True)
     enabled = Column(Boolean, default=True)
     base_currency = Column(
