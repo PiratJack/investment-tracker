@@ -27,7 +27,7 @@ class ShareController(EditController):
             "type": "checkbox",
         },
         "base_currency": {
-            "label": _("Monnaie de base"),
+            "label": _("Base currency"),
             "type": "list",
         },
         "hidden": {
@@ -35,7 +35,7 @@ class ShareController(EditController):
             "type": "checkbox",
         },
         "group": {
-            "label": _("Groupe"),
+            "label": _("Group"),
             "type": "list",
         },
     }
