@@ -8,7 +8,6 @@ from investmenttracker.models.base import ValidationException
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
-from sqlalchemy.exc import StatementError
 
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)

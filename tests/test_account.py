@@ -3,6 +3,7 @@ import os
 import unittest
 
 import investmenttracker.models.database as databasemodel
+from sqlalchemy.orm.exc import NoResultFound
 
 from investmenttracker.models.base import ValidationException
 from investmenttracker.models.account import Account
@@ -98,7 +99,7 @@ class TestAccount(unittest.TestCase):
 
     def test_gets(self):
         self.assertRaises(
-            sqlalchemy.orm.exc.NoResultFound,
+            NoResultFound,
             lambda _: self.database.accounts_get_by_id(0),
             "There should be no account with ID 0",
         )
