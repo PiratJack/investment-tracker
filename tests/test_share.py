@@ -91,94 +91,49 @@ class TestShare(unittest.TestCase):
     def test_validations(self):
         share = Share(id=1, name="Test share", main_code="FE4451", base_currency="EUR")
 
-        # Test empty share name
-        test_name = "Share must have a non-empty name"
-        with self.assertRaises(ValidationException) as cm:
-            share.name = ""
-        self.assertEqual(type(cm.exception), ValidationException, test_name)
-        self.assertEqual(
-            cm.exception.item,
-            share,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "name",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            "",
-            test_name + " - exception.invalid_value is wrong",
-        )
+        # Test mandatory fields
+        for field in ["name", "base_currency"]:
+            for value in ["", None]:
+                test_name = "Share must have a " + field + " that is not "
+                test_name += "None" if value == None else "empty"
+                with self.assertRaises(ValidationException) as cm:
+                    setattr(share, field, value)
+                self.assertEqual(type(cm.exception), ValidationException, test_name)
+                self.assertEqual(
+                    cm.exception.item,
+                    share,
+                    test_name + " - exception.item is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.key,
+                    field,
+                    test_name + " - exception.key is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.invalid_value,
+                    value,
+                    test_name + " - exception.invalid_value is wrong",
+                )
 
-        # Test None share name
-        test_name = "Share must have a name that is not None"
-        with self.assertRaises(ValidationException) as cm:
-            share.name = None
-        self.assertEqual(type(cm.exception), ValidationException, test_name)
-        self.assertEqual(
-            cm.exception.item,
-            share,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "name",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            None,
-            test_name + " - exception.invalid_value is wrong",
-        )
-
-        # Test share name max length
-        test_name = "Share can't have a name with more than 250 characters"
-        with self.assertRaises(ValidationException) as cm:
-            share.name = "a" * 251
-        self.assertEqual(
-            type(cm.exception),
-            ValidationException,
-            test_name,
-        )
-        self.assertEqual(
-            cm.exception.item,
-            share,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "name",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            "a" * 251,
-            test_name + " - exception.invalid_value is wrong",
-        )
-
-        # Test share main code max length
-        test_name = "Share can't have a main code with more than 250 characters"
-        with self.assertRaises(ValidationException) as cm:
-            share.main_code = "a" * 251
-        self.assertEqual(
-            type(cm.exception),
-            ValidationException,
-            test_name,
-        )
-        self.assertEqual(
-            cm.exception.item,
-            share,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "main_code",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            "a" * 251,
-            test_name + " - exception.invalid_value is wrong",
-        )
+        # Test max length of fields
+        for field in ["name", "main_code"]:
+            test_name = "Share " + field + " can't be more than 250 characters"
+            value = "a" * 251
+            with self.assertRaises(ValidationException) as cm:
+                setattr(share, field, value)
+            self.assertEqual(type(cm.exception), ValidationException, test_name)
+            self.assertEqual(
+                cm.exception.item,
+                share,
+                test_name + " - exception.item is wrong",
+            )
+            self.assertEqual(
+                cm.exception.key,
+                field,
+                test_name + " - exception.key is wrong",
+            )
+            self.assertEqual(
+                cm.exception.invalid_value,
+                value,
+                test_name + " - exception.invalid_value is wrong",
+            )

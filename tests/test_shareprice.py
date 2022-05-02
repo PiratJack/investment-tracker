@@ -58,49 +58,29 @@ class TestSharePrice(unittest.TestCase):
             source="Test suite",
         )
 
-        # Test empty fields
+        # Test mandatory fields
         for field in ["share_id", "date", "price", "currency", "source"]:
-            test_name = "Share price must have a non-empty " + field
-            with self.assertRaises(ValidationException) as cm:
-                setattr(share_price, field, "")
-            self.assertEqual(type(cm.exception), ValidationException, test_name)
-            self.assertEqual(
-                cm.exception.item,
-                share_price,
-                test_name + " - exception.item is wrong",
-            )
-            self.assertEqual(
-                cm.exception.key,
-                field,
-                test_name + " - exception.key is wrong",
-            )
-            self.assertEqual(
-                cm.exception.invalid_value,
-                "",
-                test_name + " - exception.invalid_value is wrong",
-            )
-
-        # Test None fields
-        for field in ["share_id", "date", "price", "currency", "source"]:
-            test_name = "Share price must have a " + field + " that is not None"
-            with self.assertRaises(ValidationException) as cm:
-                setattr(share_price, field, None)
-            self.assertEqual(type(cm.exception), ValidationException, test_name)
-            self.assertEqual(
-                cm.exception.item,
-                share_price,
-                test_name + " - exception.item is wrong",
-            )
-            self.assertEqual(
-                cm.exception.key,
-                field,
-                test_name + " - exception.key is wrong",
-            )
-            self.assertEqual(
-                cm.exception.invalid_value,
-                None,
-                test_name + " - exception.invalid_value is wrong",
-            )
+            for value in ["", None]:
+                test_name = "Share price must have a " + field + " that is not "
+                test_name += "None" if value == None else "empty"
+                with self.assertRaises(ValidationException) as cm:
+                    setattr(share_price, field, value)
+                self.assertEqual(type(cm.exception), ValidationException, test_name)
+                self.assertEqual(
+                    cm.exception.item,
+                    share_price,
+                    test_name + " - exception.item is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.key,
+                    field,
+                    test_name + " - exception.key is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.invalid_value,
+                    value,
+                    test_name + " - exception.invalid_value is wrong",
+                )
 
         # Test share price source max length
         test_name = "Share price can't have a source with more than 250 characters"
