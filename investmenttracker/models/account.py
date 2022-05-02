@@ -14,7 +14,9 @@ class Account(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     code = Column(String(250))
-    base_currency = Column(String(250), nullable=False)
+    base_currency = Column(
+        String(250), nullable=False
+    )  # TODO: transform into a real list (from shares)
     enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)
 
@@ -24,7 +26,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing account name"))
         if len(value) > 250:
             raise ValidationException(
                 _("Max length for account {field_name} is 250 characters").format(
@@ -51,7 +53,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("base_currency")
     def validate_base_currency(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing account base currency"))
         return value
 
     def __getattr__(self, attr):
@@ -103,12 +105,7 @@ class Account(Base):
 
         raise AttributeError
 
-    def validate_missing_field(self, key, value):
+    def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
-            raise ValidationException(
-                _("Missing transaction {field_name}").format(field_name=key),
-                self,
-                key,
-                value,
-            )
+            raise ValidationException(message, self, key, value)
         return value
