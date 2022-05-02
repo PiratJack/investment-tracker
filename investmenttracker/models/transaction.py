@@ -160,7 +160,7 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("type")
     def validate_type(self, key, value):
-        self.validate_missing_field(key, value)
+        self.validate_missing_field(key, value, _("Missing transaction type"))
 
         if value not in self.__table__.columns["type"].type.enums:
             raise ValidationException(
