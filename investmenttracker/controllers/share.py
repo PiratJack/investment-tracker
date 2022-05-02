@@ -49,13 +49,18 @@ class ShareController(EditController):
         self.fields["group_id"]["possible_values"] = [
             (g.name, g.id) for g in self.database.share_groups_get_all()
         ]
+        self.fields["base_currency_id"]["possible_values"] = [
+            (s.name, s.id) for s in self.database.shares_get_all()
+        ]
         if share_id:
             self.item = self.database.share_get_by_id(share_id)
             self.fields["name"]["default"] = self.item.name
             self.fields["main_code"]["default"] = self.item.main_code
             self.fields["sync"]["default"] = self.item.sync
             self.fields["enabled"]["default"] = self.item.enabled
-            self.fields["base_currency_id"]["default"] = self.item.base_currency
+            self.fields["base_currency_id"]["default"] = (
+                self.item.base_currency.id if self.item.base_currency else 0
+            )
             self.fields["hidden"]["default"] = self.item.hidden
             self.fields["group_id"]["default"] = (
                 self.item.group.id if self.item.group else 0

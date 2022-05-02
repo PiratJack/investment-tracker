@@ -18,7 +18,7 @@ class AccountController(EditController):
             "label": _("Code"),
             "type": "text",
         },
-        "base_currency": {
+        "base_currency_id": {
             "label": _("Currency"),
             "type": "list",
         },
@@ -38,17 +38,22 @@ class AccountController(EditController):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.account_id = int(account_id)
+        self.fields["base_currency_id"]["possible_values"] = [
+            (s.name, s.id) for s in self.database.shares_get_all()
+        ]
         if account_id:
             self.item = self.database.accounts_get_by_id(account_id)
             self.fields["name"]["default"] = self.item.name
             self.fields["code"]["default"] = self.item.code
-            self.fields["base_currency"]["default"] = self.item.base_currency
+            self.fields["base_currency_id"]["default"] = (
+                self.item.base_currency.id if self.item.base_currency else 0
+            )
             self.fields["enabled"]["default"] = self.item.enabled
         else:
             self.item = models.account.Account()
             self.fields["name"]["default"] = ""
             self.fields["code"]["default"] = ""
-            self.fields["base_currency"]["default"] = ""
+            self.fields["base_currency_id"]["default"] = 0
             self.fields["enabled"]["default"] = True
 
     def close(self):
