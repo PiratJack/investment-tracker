@@ -4,6 +4,9 @@ import sqlalchemy
 from . import account
 from . import shareprice
 from . import share
+from . import shareprice
+from . import sharegroup
+from . import sharecode
 from . import transaction
 
 from .base import Base
@@ -48,3 +51,10 @@ class Database:
 
     def share_get_by_id(self, share_id):
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
+
+    def share_group_get_by_id(self, share_group_id):
+        return (
+            self.session.query(sharegroup.ShareGroup)
+            .filter(sharegroup.ShareGroup.id == share_group_id)
+            .one()
+        )

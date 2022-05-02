@@ -18,9 +18,10 @@ class Share(Base):
     base_currency = Column(
         String(5), nullable=False
     )  # TODO: replace with a list of currencies
-    group = Column(String(250))
     hidden = Column(Boolean, default=False)
 
+    group_id = Column(Integer, ForeignKey("share_groups.id"), nullable=True)
+    group = sqlalchemy.orm.relationship("ShareGroup", back_populates="shares")
     codes = sqlalchemy.orm.relationship("ShareCode", back_populates="share")
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="share"
@@ -58,16 +59,12 @@ class Share(Base):
             )
         return value
 
+    @sqlalchemy.orm.validates("base_currency")
+    def validate_base_currency(self, key, value):
+        self.validate_missing_field(key, value, _("Missing share base currency"))
+        return value
+
     def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
-
-
-class ShareCode(Base):
-    __tablename__ = "share_codes"
-    id = Column(Integer, primary_key=True)
-    share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
-    origin = Column(String(250), nullable=False)
-    value = Column(String(250), nullable=False)
-    share = sqlalchemy.orm.relationship(Share, back_populates="codes")
