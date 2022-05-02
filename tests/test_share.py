@@ -118,7 +118,7 @@ class TestShare(unittest.TestCase):
         share = Share(id=1, name="Test share", main_code="FE4451", base_currency="EUR")
 
         # Test mandatory fields
-        for field in ["name", "base_currency"]:
+        for field in ["name"]:
             for value in ["", None]:
                 test_name = "Share must have a " + field + " that is not "
                 test_name += "None" if value == None else "empty"

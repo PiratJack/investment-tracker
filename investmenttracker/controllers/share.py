@@ -1,13 +1,13 @@
 import gettext
 
-import models.sharegroup
+import models.share
 from controllers.editcontroller import EditController
 
 _ = gettext.gettext
 
 
 class ShareController(EditController):
-    name = _("Group")
+    name = _("Share")
 
     fields = {
         "name": {
@@ -42,12 +42,12 @@ class ShareController(EditController):
 
     error_widgets = []
 
-    def __init__(self, parent_controller, group_id=0):
+    def __init__(self, parent_controller, share_id=0):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
-        self.group_id = int(group_id)
-        if group_id:
-            self.item = self.database.group_get_by_id(group_id)
+        self.share_id = int(share_id)
+        if share_id:
+            self.item = self.database.share_get_by_id(share_id)
             self.fields["name"]["default"] = self.item.name
             self.fields["main_code"]["default"] = self.item.main_code
             self.fields["sync"]["default"] = self.item.sync
@@ -56,7 +56,7 @@ class ShareController(EditController):
             self.fields["hidden"]["default"] = self.item.base_currency
             self.fields["group"]["default"] = self.item.group
         else:
-            self.item = models.sharegroup.ShareGroup()
+            self.item = models.share.Share()
             self.fields["name"]["default"] = ""
             self.fields["main_code"]["default"] = ""
             self.fields["sync"]["default"] = True

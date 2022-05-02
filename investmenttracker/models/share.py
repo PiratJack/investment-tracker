@@ -16,7 +16,7 @@ class Share(Base):
     sync = Column(Boolean, default=True)
     enabled = Column(Boolean, default=True)
     base_currency = Column(
-        String(5), nullable=False
+        String(5), nullable=True
     )  # TODO: replace with a list of currencies
     hidden = Column(Boolean, default=False)
 
@@ -68,11 +68,6 @@ class Share(Base):
             )
         return value
 
-    @sqlalchemy.orm.validates("base_currency")
-    def validate_base_currency(self, key, value):
-        self.validate_missing_field(key, value, _("Missing share base currency"))
-        return value
-
     def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
@@ -82,7 +77,7 @@ class Share(Base):
         output = "Share " + self.name + " ("
         if self.main_code:
             output += self.main_code + ", "
-        if self.main_code:
+        if self.base_currency:
             output += self.base_currency + ", "
         output += "synced, " if self.sync else "unsynced, "
         output += "enabled" if self.enabled else "disabled"

@@ -2,7 +2,10 @@ import sqlalchemy
 
 from . import account
 from . import share
+from . import sharecode
 from . import sharegroup
+from . import shareprice
+from . import transaction
 
 from .base import Base
 
