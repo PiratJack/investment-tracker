@@ -1,20 +1,6 @@
 import gettext
 
-from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QDialogButtonBox,
-    QGroupBox,
-    QFormLayout,
-    QLineEdit,
-    QLabel,
-    QCheckBox,
-    QComboBox,
-    QDialog,
-)
-import PyQt5.QtCore
-
 import models.account
-from models.base import NoPriceException, ValidationException
 from controllers.editcontroller import EditController
 
 _ = gettext.gettext

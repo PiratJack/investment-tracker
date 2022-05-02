@@ -4,7 +4,7 @@ import unittest
 
 import investmenttracker.models.database as databasemodel
 
-from investmenttracker.models.base import NoPriceException, ValidationException
+from investmenttracker.models.base import ValidationException
 from investmenttracker.models.share import Share
 from investmenttracker.models.shareprice import SharePrice
 

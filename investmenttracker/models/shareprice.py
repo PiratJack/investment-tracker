@@ -1,7 +1,7 @@
 import gettext
 import sqlalchemy.orm
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, Date
 
 from .base import Base, ValidationException
 

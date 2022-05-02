@@ -11,9 +11,8 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
 )
-import PyQt5.QtCore
 
-from models.base import NoPriceException, ValidationException
+from models.base import ValidationException
 
 
 _ = gettext.gettext

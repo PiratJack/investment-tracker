@@ -1,4 +1,3 @@
-import argparse
 import gettext
 import PyQt5
 import sys

@@ -13,7 +13,6 @@ from PyQt5.QtWidgets import (
 import PyQt5.QtCore
 
 from models.base import NoPriceException
-import models.shareprice
 import controllers.account
 
 _ = gettext.gettext

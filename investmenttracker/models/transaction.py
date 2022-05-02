@@ -2,7 +2,7 @@ import enum
 import gettext
 import sqlalchemy.orm
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date, Enum
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, Date, Enum
 
 from .base import Base, ValidationException
 
