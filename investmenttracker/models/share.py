@@ -3,7 +3,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, Date, Enum
 
-from .base import Base, NoPriceException
+from .base import Base, NoPriceException, ValidationException
 
 _ = gettext.gettext
 
@@ -15,7 +15,9 @@ class Share(Base):
     name = Column(String(250), nullable=False)
     sync = Column(Boolean, default=True)
     enabled = Column(Boolean, default=True)
-    base_currency = Column(String(5), nullable=False)
+    base_currency = Column(
+        String(5), nullable=False
+    )  # TODO: replace with a list of currencies
     group = Column(String(250))
     hidden = Column(Boolean, default=False)
 
@@ -38,6 +40,28 @@ class Share(Base):
                 )
 
         raise AttributeError
+
+    @sqlalchemy.orm.validates("main_code")
+    def validate_main_code(self, key, value):
+        if len(value) > 250:
+            raise ValidationException(
+                _("Max length for share main code is 250 characters"), self, key, value
+            )
+        return value
+
+    @sqlalchemy.orm.validates("name")
+    def validate_name(self, key, value):
+        self.validate_missing_field(key, value, _("Missing share name"))
+        if len(value) > 250:
+            raise ValidationException(
+                _("Max length for share name is 250 characters"), self, key, value
+            )
+        return value
+
+    def validate_missing_field(self, key, value, message):
+        if value == "" or value is None:
+            raise ValidationException(message, self, key, value)
+        return value
 
 
 class ShareCode(Base):
