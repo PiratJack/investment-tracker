@@ -34,7 +34,7 @@ class ShareController(EditController):
             "label": _("Hidden"),
             "type": "checkbox",
         },
-        "group": {
+        "group_id": {
             "label": _("Group"),
             "type": "list",
         },
@@ -46,6 +46,9 @@ class ShareController(EditController):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.share_id = int(share_id)
+        self.fields["group_id"]["possible_values"] = [
+            (g.name, g.id) for g in self.database.share_groups_get_all()
+        ]
         if share_id:
             self.item = self.database.share_get_by_id(share_id)
             self.fields["name"]["default"] = self.item.name
@@ -54,7 +57,9 @@ class ShareController(EditController):
             self.fields["enabled"]["default"] = self.item.enabled
             self.fields["base_currency"]["default"] = self.item.base_currency
             self.fields["hidden"]["default"] = self.item.base_currency
-            self.fields["group"]["default"] = self.item.group
+            self.fields["group_id"]["default"] = (
+                self.item.group.id if self.item.group else -1
+            )
         else:
             self.item = models.share.Share()
             self.fields["name"]["default"] = ""
@@ -63,7 +68,7 @@ class ShareController(EditController):
             self.fields["enabled"]["default"] = True
             self.fields["base_currency"]["default"] = ""
             self.fields["hidden"]["default"] = False
-            self.fields["group"]["default"] = ""
+            self.fields["group_id"]["default"] = -1
 
     # TODO: Add codes
 

@@ -58,7 +58,10 @@ class EditController:
                 field["widget"] = QLineEdit()
             elif field["type"] == "list":
                 field["widget"] = QComboBox()
-                # TODO: Define list of possible values
+                if "possible_values" in field:
+                    field["widget"].addItem("", -1)
+                    for val in field["possible_values"]:
+                        field["widget"].addItem(*val)
             elif field["type"] == "checkbox":
                 field["widget"] = QCheckBox()
 
@@ -66,9 +69,12 @@ class EditController:
             if "default" in field:
                 if type(field["widget"]) == QLineEdit:
                     field["widget"].setText(field["default"])
-                # elif type(field['widget']) == QComboBox:
-                # TODO: Default value for Combobox
-                # field['widget'].setText(field['default'])
+                elif type(field["widget"]) == QComboBox:
+                    print(field)
+                    if type(field["default"]) == int:
+                        field["widget"].setCurrentIndex(field["default"])
+                    else:
+                        field["widget"].setCurrentText(field["default"])
                 elif type(field["widget"]) == QCheckBox:
                     field["widget"].setChecked(field["default"] or False)
 
