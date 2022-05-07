@@ -205,6 +205,9 @@ class SharesTree(QTreeWidget):
 
     def add_share(self, data, parent_widget=None):
         share_widget = QTreeWidgetItem([str(field) for field in data])
+        share_widget.setFlags(
+            share_widget.flags() & ~PyQt5.QtCore.Qt.ItemIsUserCheckable
+        )
         if parent_widget:
             parent_widget.addChild(share_widget)
         else:
