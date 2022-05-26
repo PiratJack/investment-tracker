@@ -2,6 +2,7 @@ import datetime
 import os
 import unittest
 
+import sqlalchemy.orm.exc
 import investmenttracker.models.database as databasemodel
 
 from investmenttracker.models.base import ValidationException
@@ -122,7 +123,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         # String representation
-        share_price = share_prices[0]
+        share_price = self.database.share_price_get_by_id(1)
         self.assertEqual(
             str(share_price),
             "Price (Accenture at 458.0 EUR on 2022-01-01)",
@@ -209,4 +210,31 @@ class TestSharePrice(unittest.TestCase):
             cm.exception.invalid_value,
             "a" * 251,
             test_name + " - exception.invalid_value is wrong",
+        )
+
+    def test_delete(self):
+        # Get from direct query (based on date)
+        share_prices = self.database.share_price_query()
+        share_prices = share_prices.filter(
+            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
+        ).all()
+
+        nb_before_delete = len(share_prices)
+
+        self.database.share_price_delete(share_prices[0])
+        share_prices = self.database.share_price_query()
+        share_prices = share_prices.filter(
+            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
+        ).all()
+
+        self.assertEqual(
+            len(share_prices),
+            nb_before_delete - 1,
+            "Price deletion didn't reduce the number of elements",
+        )
+
+        self.assertRaises(
+            sqlalchemy.orm.exc.NoResultFound,
+            lambda _: self.database.share_price_get_by_id(2),
+            "Price deletion didn't delete the item",
         )

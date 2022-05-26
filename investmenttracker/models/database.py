@@ -67,3 +67,14 @@ class Database:
     # Share prices
     def share_price_query(self):
         return self.session.query(shareprice.SharePrice)
+
+    def share_price_get_by_id(self, share_price_id):
+        return (
+            self.session.query(shareprice.SharePrice)
+            .filter(shareprice.SharePrice.id == share_price_id)
+            .one()
+        )
+
+    def share_price_delete(self, share_price):
+        self.session.delete(share_price)
+        self.session.commit()

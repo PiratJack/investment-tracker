@@ -10,14 +10,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QGroupBox,
     QFormLayout,
-    QComboBox,
     QLabel,
+    QMessageBox,
 )
 import PyQt5.QtCore
 from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QDate, Qt
 
-import models.share
 from .widgets.sharecombobox import ShareComboBox
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
@@ -81,7 +80,48 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
                 return price.currency
             elif col == 5:
                 return price.source
-            return QVariant()
+
+        if role == PyQt5.QtCore.Qt.EditRole:
+            if col == 2:
+                return price.date.strftime("%Y-%m-%d")
+            elif col == 3:
+                return price.price
+            elif col == 4:
+                return price.currency
+            elif col == 5:
+                return price.source
+
+        if role == PyQt5.QtCore.Qt.DecorationRole and col == 6:
+            # pixmap = QPixmap.fromImage(QImage("assets/images/delete.png"))
+            # pixmap = pixmap.scaled(25, 25)
+            # return QVariant(pixmap)
+            return QVariant(QIcon("assets/images/delete.png"))
+
+    def setData(self, index, value, role):
+        price = self.share_prices[index.row()]
+        col = index.column()
+        if role == Qt.EditRole:
+            try:
+                if col == 2:
+                    price.date = datetime.datetime.strptime(value, "%Y-%m-%d")
+                elif col == 3:
+                    price.price = value
+                elif col == 5:
+                    price.source = value
+
+                self.database.session.add(price)
+                self.database.session.commit()
+                self.dataChanged.emit(index, index, [PyQt5.QtCore.Qt.EditRole])
+                return True
+
+            except:
+                return False
+
+    def flags(self, index):
+        if index.column() in (0, 1, 4, 6):
+            return Qt.ItemIsSelectable | Qt.ItemIsEnabled
+        else:
+            return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     def headerData(self, column, orientation, role):
         if role != PyQt5.QtCore.Qt.DisplayRole:
@@ -133,6 +173,26 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         self.count_values = self.query.count()
         self.share_prices = self.query.all()
 
+    def on_table_clicked(self, index):
+        if index.column() == 6:
+            self.on_click_delete_button(index)
+
+    def on_click_delete_button(self, index):
+        price = self.share_prices[index.row()]
+        messagebox = QMessageBox.critical(
+            self.parent(),
+            _("Please confirm"),
+            _("Are you sure you want to delete this price?"),
+            buttons=QMessageBox.Yes | QMessageBox.No,
+            defaultButton=QMessageBox.No,
+        )
+
+        if messagebox == QMessageBox.Yes:
+            self.database.share_price_delete(price)
+            self.beginRemoveRows(index, index.row(), index.row())
+            self.set_filters()  # Reload the data
+            self.endRemoveRows()
+
 
 class SharePricesTableView(QTableView):
     columns = [
@@ -167,18 +227,11 @@ class SharePricesTableView(QTableView):
             "alignment": PyQt5.QtCore.Qt.AlignLeft,
         },
         {
-            "name": _("Edit"),
-            "size": 50,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
-        },
-        {
             "name": _("Delete"),
-            "size": 50,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "size": 80,
+            "alignment": PyQt5.QtCore.Qt.AlignCenter,
         },
     ]
-
-    column_edit_button = 7
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -189,10 +242,11 @@ class SharePricesTableView(QTableView):
         self.setModel(self.model)
         self.hideColumn(1)
 
+        self.clicked.connect(self.on_table_clicked)
+
     def set_filters(self, share=None, date=None):
         self.model.set_filters(share, date)
         self.model.layoutChanged.emit()
-        # self.update()
         self.viewport().update()
 
     def resizeEvent(self, event):
@@ -209,13 +263,8 @@ class SharePricesTableView(QTableView):
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])
 
-    def on_click_edit_button(self, share_price_id):
-        pass
-        # TODO: Add the edit & delete buttons
-        # self.share_details = controllers.shareprice.SharePriceController(
-        # self.parent_controller, share_price_id
-        # )
-        # self.share_details.show_window()
+    def on_table_clicked(self, index):
+        self.model.on_table_clicked(index)
 
 
 class SharePricesController:
