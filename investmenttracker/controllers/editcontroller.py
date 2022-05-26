@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import (
 import PyQt5.QtGui
 
 from models.base import ValidationException
+from .widgets.sharecombobox import ShareComboBox
 
 
 _ = gettext.gettext
@@ -57,32 +58,44 @@ class EditController:
             # Create the field widget
             if field["type"] == "text":
                 field["widget"] = QLineEdit()
+                field["widget"].setText(field.get("default", ""))
+
             elif field["type"] == "list":
                 field["widget"] = QComboBox()
                 if "possible_values" in field:
                     field["widget"].addItem("", 0)
                     for val in field["possible_values"]:
                         field["widget"].addItem(*val)
-            elif field["type"] == "checkbox":
-                field["widget"] = QCheckBox()
-            elif field["type"] == "date":
-                field["widget"] = QDateEdit()
-                field["widget"].setDate(QDate.currentDate())
-            elif field["type"] == "float":
-                field["widget"] = QLineEdit()
-                field["widget"].setValidator(PyQt5.QtGui.QDoubleValidator)
-
-            # Add default values
-            if "default" in field:
-                if type(field["widget"]) == QLineEdit:
-                    field["widget"].setText(field["default"])
-                elif type(field["widget"]) == QComboBox:
+                if "default" in field:
                     if type(field["default"]) == int:
                         field["widget"].setCurrentIndex(field["default"])
                     else:
                         field["widget"].setCurrentText(field["default"])
-                elif type(field["widget"]) == QCheckBox:
-                    field["widget"].setChecked(field["default"] or False)
+
+            elif field["type"] == "checkbox":
+                field["widget"] = QCheckBox()
+                field["widget"].setChecked(field.get("default", False))
+
+            elif field["type"] == "date":
+                field["widget"] = QDateEdit()
+                try:
+                    field["widget"].setDate(QDate.fromString(field["default"]))
+                except:
+                    field["widget"].setDate(QDate.currentDate())
+
+            elif field["type"] == "float":
+                field["widget"] = QLineEdit()
+                field["widget"].setValidator(PyQt5.QtGui.QDoubleValidator)
+                field["widget"].setText(field.get("default", ""))
+
+            elif field["type"] == "sharelist":
+                include_choice_all = field.get(include_all_choice, False)
+                field["widget"] = ShareComboBox(self.database, include_choice_all)
+                if "default" in field:
+                    if type(field["default"]) == int:
+                        field["widget"].setCurrentIndex(field["default"])
+                    else:
+                        field["widget"].setCurrentText(field["default"])
 
             # Add to layout
             self.form_layout.addRow(label, field["widget"])
