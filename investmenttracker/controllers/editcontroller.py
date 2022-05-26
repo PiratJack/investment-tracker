@@ -1,4 +1,5 @@
 import gettext
+import datetime
 
 from PyQt5.QtWidgets import (
     QVBoxLayout,
@@ -6,12 +7,14 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFormLayout,
     QLineEdit,
+    QDateEdit,
     QLabel,
     QCheckBox,
     QComboBox,
     QDialog,
 )
 import PyQt5.QtGui
+from PyQt5.QtCore import QDate, Qt
 
 from models.base import ValidationException
 from .widgets.sharecombobox import ShareComboBox
