@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import (
 
 import models.share
 
+_ = gettext.gettext
+
 
 class ShareComboBox(QComboBox):
     def __init__(self, database, include_choice_all=0):
