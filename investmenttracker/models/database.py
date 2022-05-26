@@ -63,3 +63,7 @@ class Database:
             .filter(sharegroup.ShareGroup.id == share_group_id)
             .one()
         )
+
+    # Share prices
+    def share_price_query(self):
+        return self.session.query(shareprice.SharePrice)

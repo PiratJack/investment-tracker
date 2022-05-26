@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-02 21:30+0200\n"
-"PO-Revision-Date: 2022-05-02 21:31+0200\n"
+"POT-Creation-Date: 2022-05-26 12:59+0200\n"
+"PO-Revision-Date: 2022-05-26 13:08+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -206,40 +206,17 @@ msgstr "La longueur maximale du nom de l'acion est de 250 caractères"
 msgid "Share base currency can't be itself"
 msgstr "Une action ne peut avoir elle-même comme monnaie de base"
 
-#: investmenttracker/controllers/transactions.py:13
-msgid "Transactions"
-msgstr "Transactions"
-
-#: investmenttracker/controllers/transactions.py:15
-msgid "Display transactions"
-msgstr "Afficher les transactions"
-
-#: investmenttracker/controllers/graphs.py:12
-msgid "Graphs"
-msgstr "Graphes"
-
-#: investmenttracker/controllers/graphs.py:13
-msgid "Analysis"
-msgstr "Analyse"
-
-#: investmenttracker/controllers/mainwindow.py:22
-msgid "Investment Tracker"
-msgstr "Suivi boursier"
-
-#: investmenttracker/controllers/mainwindow.py:43
-msgid "My main toolbar"
-msgstr "Barre des tâches"
-
 #: investmenttracker/controllers/accounts.py:24
-#: investmenttracker/controllers/account.py:14
 #: investmenttracker/controllers/sharegroup.py:14
 #: investmenttracker/controllers/share.py:14
+#: investmenttracker/controllers/account.py:14
 #: investmenttracker/controllers/shares.py:27
 msgid "Name"
 msgstr "Nom"
 
 #: investmenttracker/controllers/accounts.py:29
 #: investmenttracker/controllers/shares.py:32
+#: investmenttracker/controllers/shareprices.py:122
 msgid "ID"
 msgstr "ID"
 
@@ -266,6 +243,7 @@ msgstr "Total investi"
 
 #: investmenttracker/controllers/accounts.py:59
 #: investmenttracker/controllers/shares.py:62
+#: investmenttracker/controllers/shareprices.py:147
 msgid "Edit"
 msgstr "Modifier"
 
@@ -287,26 +265,9 @@ msgid "Display your accounts"
 msgstr "Afficher vos comptes"
 
 #: investmenttracker/controllers/accounts.py:235
-#: investmenttracker/controllers/shares.py:290
+#: investmenttracker/controllers/shares.py:293
 msgid "Display hidden accounts?"
 msgstr "Afficher les comptes masqués?"
-
-#: investmenttracker/controllers/account.py:10
-msgid "Account"
-msgstr "Compte"
-
-#: investmenttracker/controllers/account.py:22
-msgid "Currency"
-msgstr "Monnaie"
-
-#: investmenttracker/controllers/account.py:26
-msgid "Active"
-msgstr "Actif"
-
-#: investmenttracker/controllers/account.py:30
-#: investmenttracker/controllers/share.py:34
-msgid "Hidden"
-msgstr "Masqué"
 
 #: investmenttracker/controllers/sharegroup.py:10
 #: investmenttracker/controllers/share.py:38
@@ -322,6 +283,8 @@ msgid "Displays additional information (for end users)"
 msgstr "Afficher plus de détails (utilisateurs finaux)"
 
 #: investmenttracker/controllers/share.py:10
+#: investmenttracker/controllers/shareprices.py:117
+#: investmenttracker/controllers/shareprices.py:226
 msgid "Share"
 msgstr "Titre"
 
@@ -333,7 +296,7 @@ msgstr "Code principal"
 #: investmenttracker/controllers/share.py:22
 #: investmenttracker/controllers/shares.py:52
 msgid "Get prices online?"
-msgstr "Récupérer les valeurs automatiquement?"
+msgstr "Récupérer les valeurs?"
 
 #: investmenttracker/controllers/share.py:26
 msgid "Enabled"
@@ -343,7 +306,26 @@ msgstr "Activé"
 msgid "Base currency"
 msgstr "Monnaie de base"
 
+#: investmenttracker/controllers/share.py:34
+#: investmenttracker/controllers/account.py:30
+msgid "Hidden"
+msgstr "Masqué"
+
+#: investmenttracker/controllers/account.py:10
+msgid "Account"
+msgstr "Compte"
+
+#: investmenttracker/controllers/account.py:22
+#: investmenttracker/controllers/shareprices.py:137
+msgid "Currency"
+msgstr "Monnaie"
+
+#: investmenttracker/controllers/account.py:26
+msgid "Active"
+msgstr "Actif"
+
 #: investmenttracker/controllers/shares.py:42
+#: investmenttracker/controllers/shareprices.py:132
 msgid "Price"
 msgstr "Prix"
 
@@ -356,6 +338,7 @@ msgid "Hidden?"
 msgstr "Masqué?"
 
 #: investmenttracker/controllers/shares.py:114
+#: investmenttracker/controllers/shareprices.py:266
 msgid "Shares without group"
 msgstr "Titres non groupés"
 
@@ -367,13 +350,61 @@ msgstr "Ajouter un nouveau groupe"
 msgid "Add new share"
 msgstr "Ajouter un nouveau titre"
 
-#: investmenttracker/controllers/shares.py:275
+#: investmenttracker/controllers/shares.py:278
 msgid "Shares"
 msgstr "Titres"
 
-#: investmenttracker/controllers/shares.py:277
+#: investmenttracker/controllers/shares.py:280
 msgid "Display shares"
 msgstr "Afficher les titres"
+
+#: investmenttracker/controllers/transactions.py:13
+msgid "Transactions"
+msgstr "Transactions"
+
+#: investmenttracker/controllers/transactions.py:15
+msgid "Display transactions"
+msgstr "Afficher les transactions"
+
+#: investmenttracker/controllers/graphs.py:12
+msgid "Graphs"
+msgstr "Graphes"
+
+#: investmenttracker/controllers/graphs.py:13
+msgid "Analysis"
+msgstr "Analyse"
+
+#: investmenttracker/controllers/mainwindow.py:24
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+#: investmenttracker/controllers/mainwindow.py:45
+msgid "My main toolbar"
+msgstr "Barre des tâches"
+
+#: investmenttracker/controllers/shareprices.py:127
+msgid "Date"
+msgstr "Date"
+
+#: investmenttracker/controllers/shareprices.py:142
+msgid "Source"
+msgstr "Source"
+
+#: investmenttracker/controllers/shareprices.py:152
+msgid "Delete"
+msgstr "Supprimer"
+
+#: investmenttracker/controllers/shareprices.py:207
+msgid "Share Prices"
+msgstr "Valeur des titres"
+
+#: investmenttracker/controllers/shareprices.py:209
+msgid "Displays share prices"
+msgstr "Afficher les valeurs"
+
+#: investmenttracker/controllers/shareprices.py:253
+msgid "All"
+msgstr "Toutes"
 
 #~ msgid "Missing share base currency"
 #~ msgstr "Valeur manquante: monnaie du compte"

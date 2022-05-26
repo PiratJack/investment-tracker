@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QSize
 
 import controllers.accounts
 import controllers.shares
+import controllers.shareprices
 
 
 class MainWindow(QMainWindow):
@@ -13,6 +14,7 @@ class MainWindow(QMainWindow):
         self.elements = {
             "Accounts": controllers.accounts.AccountsController(self),
             "Shares": controllers.shares.SharesController(self),
+            "Share Prices": controllers.shareprices.SharePricesController(self),
             # TODO: Add windows for Transactions & Graphs
         }
 

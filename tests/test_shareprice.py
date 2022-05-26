@@ -42,6 +42,34 @@ class TestSharePrice(unittest.TestCase):
                     currency="USD",
                     source="Second test",
                 ),
+                SharePrice(
+                    share_id=3,
+                    date=datetime.datetime(2022, 1, 1),
+                    price=100,
+                    currency="USD",
+                    source="Test gets",
+                ),
+                SharePrice(
+                    share_id=3,
+                    date=datetime.datetime(2022, 2, 1),
+                    price=120,
+                    currency="USD",
+                    source="Test gets",
+                ),
+                SharePrice(
+                    share_id=3,
+                    date=datetime.datetime(2022, 3, 1),
+                    price=130,
+                    currency="USD",
+                    source="Test gets",
+                ),
+                SharePrice(
+                    share_id=3,
+                    date=datetime.datetime(2022, 4, 1),
+                    price=140,
+                    currency="USD",
+                    source="Test gets",
+                ),
             ]
         )
         self.database.session.commit()
@@ -52,6 +80,39 @@ class TestSharePrice(unittest.TestCase):
         os.remove(DATABASE_FILE)
 
     def test_gets(self):
+        # Get from direct query (based on date)
+        share_prices = self.database.share_price_query()
+        share_prices = share_prices.filter(
+            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
+        )
+
+        self.assertEqual(
+            len(share_prices.all()),
+            3,
+            "There are 3 prices after March 1st, 2022",
+        )
+
+        # Get from direct query (based on share)
+        share_prices = self.database.share_price_query()
+        share_prices = share_prices.filter(SharePrice.share_id == 3)
+        self.assertEqual(
+            len(share_prices.all()),
+            4,
+            "There are 4 prices for Workday",
+        )
+
+        # Get from direct query (based on share + date)
+        share_prices = self.database.share_price_query()
+        share_prices = share_prices.filter(SharePrice.share_id == 3).filter(
+            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
+        )
+        self.assertEqual(
+            len(share_prices.all()),
+            2,
+            "There are 2 prices for Workday after March 1st, 2022",
+        )
+
+        # Get from share
         share = self.database.share_get_by_id(2)
         share_prices = share.prices
         self.assertEqual(
