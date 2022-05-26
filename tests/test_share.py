@@ -95,6 +95,26 @@ class TestShare(unittest.TestCase):
             "Share representation is wrong",
         )
 
+        # String representation
+        share = self.database.share_get_by_id(1)
+        self.assertEqual(
+            share.short_name(),
+            "AXA (FR847238)",
+            "Share short name is wrong",
+        )
+        share = Share(
+            id=3,
+            name="Hidden share",
+            main_code="FEFZE",
+            base_currency_id=7,
+            hidden=True,
+        )
+        self.assertEqual(
+            share.short_name(),
+            "Hidden share (FEFZE)",
+            "Share short name is wrong",
+        )
+
     def test_last_price(self):
         # No last price
         test_name = "Missing last price should raise NoPriceException"

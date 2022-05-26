@@ -102,3 +102,9 @@ class Share(Base):
         output += "enabled" if self.enabled else "disabled"
         output += ")"
         return output
+
+    def short_name(self):
+        output = self.name
+        if self.main_code:
+            output += " (" + self.main_code + ")"
+        return output
