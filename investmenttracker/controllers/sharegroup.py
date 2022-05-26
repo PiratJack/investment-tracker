@@ -11,7 +11,7 @@ class ShareGroupController(EditController):
 
     fields = {
         "name": {
-            "label": _("Name") + " *",  # TODO: Display the star in red
+            "label": _("Name"),  # TODO: Display a star in red
             "type": "text",
         },
     }

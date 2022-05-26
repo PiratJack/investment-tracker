@@ -68,7 +68,7 @@ class AccountsTree(QTreeWidget):
         super().__init__()
         self.parent_controller = parent_controller
         self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([col["name"] for col in self.columns])
+        self.setHeaderLabels([_(col["name"]) for col in self.columns])
         self.setSortingEnabled(True)
         self.database = parent_controller.database
 

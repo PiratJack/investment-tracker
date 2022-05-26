@@ -51,7 +51,7 @@ class EditController:
         # Create the fields
         for field_id in self.fields:
             field = self.fields[field_id]
-            label = QLabel(field["label"])
+            label = QLabel(_(field["label"]))
 
             # Create the field widget
             if field["type"] == "text":
