@@ -18,6 +18,7 @@ from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QDate, Qt
 
 import models.share
+from .widgets.sharecombobox import ShareComboBox
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
 _ = gettext.gettext
@@ -246,11 +247,9 @@ class SharePricesController:
         self.display_widget.layout.addWidget(form_group)
 
         # Add Share field
-        self.field_share = QComboBox()
+        self.field_share = ShareComboBox(self.database, include_choice_all=True)
         self.form_layout.addRow(QLabel(_("Share")), self.field_share)
-        self.set_share_values()
         self.field_share.currentIndexChanged.connect(self.on_select_share)
-        self.field_share.resize(self.field_share.sizeHint())
 
         # Add Date field
         self.field_date = QDateEdit()
@@ -269,31 +268,6 @@ class SharePricesController:
         self.parent_window.setCentralWidget(self.display_widget)
 
         return self.display_widget
-
-    def set_share_values(self):
-        values = []
-        values.append((_("All"), -1, True))
-
-        # Shared in groups
-        groups = self.database.share_groups_get_all()
-        for group in groups:
-            values.append((group.name, group.id, False))
-            for share in group.shares:
-                values.append((share.short_name(), share.id, True))
-
-        # Shares without group
-        shares_without_group = (
-            self.database.shares_query().filter(models.share.Share.group == None).all()
-        )
-        values.append((_("Shares without group"), -1, False))
-        for share in shares_without_group:
-            values.append((share.short_name(), share.id, True))
-
-        # Actually add to the dropdown
-        for i, value in enumerate(values):
-            self.field_share.addItem(value[0], value[1])
-            if not value[2]:
-                self.field_share.model().item(i).setEnabled(False)
 
     def on_select_share(self, index):
         share_id = self.field_share.itemData(index)

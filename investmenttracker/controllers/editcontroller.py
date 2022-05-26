@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QDialog,
 )
+import PyQt5.QtGui
 
 from models.base import ValidationException
 
@@ -64,6 +65,12 @@ class EditController:
                         field["widget"].addItem(*val)
             elif field["type"] == "checkbox":
                 field["widget"] = QCheckBox()
+            elif field["type"] == "date":
+                field["widget"] = QDateEdit()
+                field["widget"].setDate(QDate.currentDate())
+            elif field["type"] == "float":
+                field["widget"] = QLineEdit()
+                field["widget"].setValidator(PyQt5.QtGui.QDoubleValidator)
 
             # Add default values
             if "default" in field:
