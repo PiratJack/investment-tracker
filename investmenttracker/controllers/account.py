@@ -51,9 +51,6 @@ class AccountController(EditController):
             self.fields["enabled"]["default"] = self.item.enabled
         else:
             self.item = models.account.Account()
-            self.fields["name"]["default"] = ""
-            self.fields["code"]["default"] = ""
-            self.fields["base_currency_id"]["default"] = 0
             self.fields["enabled"]["default"] = True
 
     def close(self):

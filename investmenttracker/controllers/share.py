@@ -65,13 +65,8 @@ class ShareController(EditController):
             )
         else:
             self.item = models.share.Share()
-            self.fields["name"]["default"] = ""
-            self.fields["main_code"]["default"] = ""
             self.fields["sync"]["default"] = True
             self.fields["enabled"]["default"] = True
-            self.fields["base_currency_id"]["default"] = 0
-            self.fields["hidden"]["default"] = False
-            self.fields["group_id"]["default"] = 0
 
     # TODO: Add share codes
 

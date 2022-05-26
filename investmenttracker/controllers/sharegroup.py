@@ -27,7 +27,6 @@ class ShareGroupController(EditController):
             self.fields["name"]["default"] = self.item.name
         else:
             self.item = models.sharegroup.ShareGroup()
-            self.fields["name"]["default"] = ""
 
     def close(self):
         self.window.close()
