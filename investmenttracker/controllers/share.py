@@ -28,7 +28,7 @@ class ShareController(EditController):
         },
         "base_currency_id": {
             "label": _("Base currency"),
-            "type": "list",
+            "type": "sharelist",
         },
         "hidden": {
             "label": _("Hidden"),
@@ -49,9 +49,7 @@ class ShareController(EditController):
         self.fields["group_id"]["possible_values"] = [
             (g.name, g.id) for g in self.database.share_groups_get_all()
         ]
-        self.fields["base_currency_id"]["possible_values"] = [
-            (s.name, s.id) for s in self.database.shares_get_all()
-        ]
+        self.fields["base_currency_id"]["excluded"] = self.share_id
         if share_id:
             self.item = self.database.share_get_by_id(share_id)
             self.fields["name"]["default"] = self.item.name
@@ -75,7 +73,7 @@ class ShareController(EditController):
             self.fields["hidden"]["default"] = False
             self.fields["group_id"]["default"] = 0
 
-    # TODO: Add codes
+    # TODO: Add share codes
 
     def close(self):
         self.window.close()

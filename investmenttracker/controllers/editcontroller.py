@@ -89,13 +89,18 @@ class EditController:
                 field["widget"].setText(field.get("default", ""))
 
             elif field["type"] == "sharelist":
-                include_choice_all = field.get(include_all_choice, False)
+                include_choice_all = field.get("include_all_choice", False)
                 field["widget"] = ShareComboBox(self.database, include_choice_all)
+
                 if "default" in field:
                     if type(field["default"]) == int:
-                        field["widget"].setCurrentIndex(field["default"])
+                        index = field["widget"].findData(field["default"])
+                        field["widget"].setCurrentIndex(index)
                     else:
                         field["widget"].setCurrentText(field["default"])
+                if "excluded" in field:
+                    index = field["widget"].findData(field["excluded"])
+                    field["widget"].removeItem(index)
 
             # Add to layout
             self.form_layout.addRow(label, field["widget"])
@@ -123,12 +128,30 @@ class EditController:
                 field_widget = self.fields[field_id]["widget"]
                 if self.fields[field_id]["type"] == "text":
                     value = field_widget.text()
-                elif self.fields[field_id]["type"] == "list":
-                    value = field_widget.currentIndex()
+                elif self.fields[field_id]["type"] in ("list", "sharelist"):
+                    value = field_widget.currentData()
                     if value == 0:
                         value = None
-                else:
+                elif self.fields[field_id]["type"] == "checkbox":
                     value = field_widget.isChecked()
+                elif self.fields[field_id]["type"] == "date":
+                    value = field_widget.date
+
+                    if type(value) == PyQt5.QtCore.QDate:
+                        value = datetime.datetime.fromisoformat(
+                            value.toString(Qt.ISODate)
+                        )
+                    elif type(value) == datetime.datetime:
+                        value = value
+                    elif type(value) == str:
+                        value = datetime.datetime.fromisoformat(value)
+                    elif type(value) == int:
+                        value = datetime.datetime.fromtimestamp(value)
+                    else:
+                        value = ""
+                elif self.fields[field_id]["type"] == "float":
+                    value = float(field_widget.text())
+
                 setattr(self.item, field_id, value)
 
                 field_widget.setProperty("class", "")
