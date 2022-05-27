@@ -25,6 +25,10 @@ class SharePrice(Base):
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
         self.validate_missing_field(key, value, _("Missing share price share ID"))
+        if value is not None and value == self.currency_id:
+            raise ValidationException(
+                _("Share Price currency can't be the share itself"), self, key, value
+            )
         return value
 
     @sqlalchemy.orm.validates("date")

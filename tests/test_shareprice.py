@@ -212,7 +212,7 @@ class TestSharePrice(unittest.TestCase):
             test_name + " - exception.invalid_value is wrong",
         )
 
-        # Can't have the share itself as base currency
+        # Can't have the share itself as base currency (modification of currency)
         share = self.database.share_get_by_id(2)
         share_price = share.prices[0]
         test_name = "Share Price currency can't be the share itself"
@@ -232,6 +232,29 @@ class TestSharePrice(unittest.TestCase):
         self.assertEqual(
             cm.exception.invalid_value,
             share_price.share.id,
+            test_name + " - exception.invalid_value is wrong",
+        )
+
+        # Can't have the share itself as base currency (modification of share)
+        share = self.database.share_get_by_id(2)
+        share_price = share.prices[0]
+        test_name = "Share Price currency can't be the share itself"
+        with self.assertRaises(ValidationException) as cm:
+            share_price.share_id = share_price.currency.id
+        self.assertEqual(type(cm.exception), ValidationException, test_name)
+        self.assertEqual(
+            cm.exception.item,
+            share_price,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "share_id",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            share_price.currency.id,
             test_name + " - exception.invalid_value is wrong",
         )
 
