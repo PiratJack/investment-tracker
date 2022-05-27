@@ -10,8 +10,8 @@ _ = gettext.gettext
 
 
 class ShareComboBox(QComboBox):
-    def __init__(self, database, include_choice_all=0):
-        super().__init__()
+    def __init__(self, database, parent=None, include_choice_all=0):
+        super().__init__(parent)
         self.database = database
 
         values = []
@@ -23,7 +23,7 @@ class ShareComboBox(QComboBox):
         # Shared in groups
         groups = self.database.share_groups_get_all()
         for group in groups:
-            values.append((group.name, group.id, False))
+            values.append((group.name, -1, False))
             for share in group.shares:
                 values.append((share.short_name(), share.id, True))
 

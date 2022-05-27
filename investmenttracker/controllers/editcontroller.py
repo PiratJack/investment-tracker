@@ -93,7 +93,9 @@ class EditController:
 
             elif field["type"] == "sharelist":
                 include_choice_all = field.get("include_all_choice", False)
-                field["widget"] = ShareComboBox(self.database, include_choice_all)
+                field["widget"] = ShareComboBox(
+                    self.database, include_choice_all=include_choice_all
+                )
 
                 if "default" in field:
                     if type(field["default"]) == int:
