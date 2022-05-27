@@ -20,7 +20,7 @@ class AccountController(EditController):
         },
         "base_currency_id": {
             "label": _("Currency"),
-            "type": "list",
+            "type": "sharelist",
         },
         "enabled": {
             "label": _("Active"),
@@ -38,9 +38,6 @@ class AccountController(EditController):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.account_id = int(account_id)
-        self.fields["base_currency_id"]["possible_values"] = [
-            (s.name, s.id) for s in self.database.shares_get_all()
-        ]
         if account_id:
             self.item = self.database.accounts_get_by_id(account_id)
             self.fields["name"]["default"] = self.item.name
