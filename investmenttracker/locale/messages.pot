@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-27 11:16+0200\n"
+"POT-Creation-Date: 2022-05-27 11:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,420 +17,297 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: investmenttracker/models/sharegroup.py:21
 msgid "Missing share group name"
 msgstr ""
 
-#: investmenttracker/models/sharegroup.py:24
 msgid "Max length for share group name is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/sharecode.py:25
 msgid "Missing share code share ID"
 msgstr ""
 
-#: investmenttracker/models/sharecode.py:30
 msgid "Missing share code origin"
 msgstr ""
 
-#: investmenttracker/models/sharecode.py:33
 msgid "Max length for share code origin is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/sharecode.py:42
 msgid "Missing share code value"
 msgstr ""
 
-#: investmenttracker/models/sharecode.py:45
 msgid "Max length for share code value is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/account.py:35
 msgid "Missing account name"
 msgstr ""
 
-#: investmenttracker/models/account.py:38
 msgid "Max length for account name is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/account.py:49
 msgid "Max length for account code is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/account.py:58
 msgid "Missing account base currency"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:14
 msgid "Arbitrage - Buy"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:20
 msgid "Arbitrage - Sell"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:26
 msgid "Asset buy / subscription"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:32
 msgid "Asset refund"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:38
 msgid "Asset sell"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:44
 msgid "Cash deposit"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:50
 msgid "Cash withdrawal"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:56
 msgid "Company funding"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:62
 msgid "Dividends"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:68
 msgid "Management fee - in units"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:74
 msgid "Management fee - in cash"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:80
 msgid "Foreign exchange"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:86
 msgid "Interests"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:92
 msgid "Movement fee"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:98
 msgid "Profit - in units"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:104
 msgid "Profit - in cash"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:110
 msgid "Split & merge - Source"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:116
 msgid "Split & merge - Target"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:122
 msgid "Taxes - in cash"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:128
 msgid "Taxes - in units"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:154
 msgid "Max length for transaction label is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:163
 msgid "Missing transaction type"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:167
 msgid "Transaction type is invalid"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:176
 msgid "Missing transaction account"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:181
 msgid "Missing transaction quantity"
 msgstr ""
 
-#: investmenttracker/models/transaction.py:186
 msgid "Missing transaction unit price"
 msgstr ""
 
-#: investmenttracker/models/share.py:54
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr ""
 
-#: investmenttracker/models/share.py:66
 msgid "Max length for share main code is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/share.py:72
 msgid "Missing share name"
 msgstr ""
 
-#: investmenttracker/models/share.py:75
 msgid "Max length for share name is 250 characters"
 msgstr ""
 
-#: investmenttracker/models/share.py:83 investmenttracker/models/share.py:91
 msgid "Share base currency can't be itself"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:27
 msgid "Missing share price share ID"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:30
-#: investmenttracker/models/shareprice.py:49
 msgid "Share Price currency can't be the share itself"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:36
 msgid "Missing share price date"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:41
 msgid "Missing share price actual price"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:46
 msgid "Missing share price currency"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:55
 msgid "Missing share price source"
 msgstr ""
 
-#: investmenttracker/models/shareprice.py:58
 msgid "Max length for share price source is 250 characters"
 msgstr ""
 
-#: investmenttracker/controllers/console.py:11
 msgid "Displays detailed information (for debug purpose)"
 msgstr ""
 
-#: investmenttracker/controllers/console.py:20
 msgid "Displays additional information (for end users)"
 msgstr ""
 
-#: investmenttracker/controllers/transactions.py:13
 msgid "Transactions"
 msgstr ""
 
-#: investmenttracker/controllers/transactions.py:15
 msgid "Display transactions"
 msgstr ""
 
-#: investmenttracker/controllers/graphs.py:12
 msgid "Graphs"
 msgstr ""
 
-#: investmenttracker/controllers/graphs.py:13
 msgid "Analysis"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:24
-#: investmenttracker/controllers/share.py:14
-#: investmenttracker/controllers/sharegroup.py:14
-#: investmenttracker/controllers/account.py:14
-#: investmenttracker/controllers/shares.py:27
 msgid "Name"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:29
-#: investmenttracker/controllers/shares.py:32
-#: investmenttracker/controllers/shareprices.py:222
 msgid "ID"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:34
-#: investmenttracker/controllers/account.py:18
 msgid "Code"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:39
 msgid "Quantity"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:44
 msgid "Value"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:49
 msgid "As of date"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:54
 msgid "Total invested"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:59
-#: investmenttracker/controllers/shares.py:62
 msgid "Edit"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:129
-#: investmenttracker/controllers/accounts.py:130
 msgid "Unknown"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:148
 msgid "Add new account"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:220
 msgid "Accounts"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:222
 msgid "Display your accounts"
 msgstr ""
 
-#: investmenttracker/controllers/accounts.py:235
-#: investmenttracker/controllers/shares.py:295
 msgid "Display hidden accounts?"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:19
 msgid "All"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:21
 msgid "Select a value"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:34
-#: investmenttracker/controllers/shares.py:116
 msgid "Shares without group"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:10
-#: investmenttracker/controllers/shareprice.py:14
-#: investmenttracker/controllers/shareprices.py:217
-#: investmenttracker/controllers/shareprices.py:320
 msgid "Share"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:18
-#: investmenttracker/controllers/shares.py:37
 msgid "Main code"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:22
-#: investmenttracker/controllers/shares.py:52
 msgid "Get prices online?"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:26
 msgid "Enabled"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:30
 msgid "Base currency"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:34
-#: investmenttracker/controllers/account.py:30
 msgid "Hidden"
 msgstr ""
 
-#: investmenttracker/controllers/share.py:38
-#: investmenttracker/controllers/sharegroup.py:10
 msgid "Group"
 msgstr ""
 
-#: investmenttracker/controllers/shareprice.py:10
 msgid "Share Price"
 msgstr ""
 
-#: investmenttracker/controllers/shareprice.py:19
-#: investmenttracker/controllers/shareprices.py:227
 msgid "Date"
 msgstr ""
 
-#: investmenttracker/controllers/shareprice.py:23
-#: investmenttracker/controllers/shares.py:42
-#: investmenttracker/controllers/shareprices.py:232
 msgid "Price"
 msgstr ""
 
-#: investmenttracker/controllers/shareprice.py:27
-#: investmenttracker/controllers/account.py:22
-#: investmenttracker/controllers/shareprices.py:237
 msgid "Currency"
 msgstr ""
 
-#: investmenttracker/controllers/shareprice.py:32
-#: investmenttracker/controllers/shareprices.py:242
 msgid "Source"
 msgstr ""
 
-#: investmenttracker/controllers/account.py:10
 msgid "Account"
 msgstr ""
 
-#: investmenttracker/controllers/account.py:26
 msgid "Active"
 msgstr ""
 
-#: investmenttracker/controllers/mainwindow.py:24
 msgid "Investment Tracker"
 msgstr ""
 
-#: investmenttracker/controllers/mainwindow.py:45
 msgid "My main toolbar"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:47
 msgid "Price date"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:57
 msgid "Hidden?"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:147
 msgid "Add new group"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:148
 msgid "Add new share"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:280
 msgid "Shares"
 msgstr ""
 
-#: investmenttracker/controllers/shares.py:282
 msgid "Display shares"
 msgstr ""
 
-#: investmenttracker/controllers/shareprices.py:201
 msgid "Please confirm"
 msgstr ""
 
-#: investmenttracker/controllers/shareprices.py:202
 msgid "Are you sure you want to delete this price?"
 msgstr ""
 
-#: investmenttracker/controllers/shareprices.py:247
 msgid "Delete"
 msgstr ""
 
-#: investmenttracker/controllers/shareprices.py:301
 msgid "Share Prices"
 msgstr ""
 
-#: investmenttracker/controllers/shareprices.py:303
 msgid "Displays share prices"
 msgstr ""
