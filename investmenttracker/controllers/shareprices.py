@@ -12,12 +12,14 @@ from PyQt5.QtWidgets import (
     QFormLayout,
     QLabel,
     QMessageBox,
+    QItemDelegate,
 )
 import PyQt5.QtCore
 from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QDate, Qt
 
 from .widgets.sharecombobox import ShareComboBox
+from .widgets.delegates import DateDelegate, ShareDelegate
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
 _ = gettext.gettext
@@ -40,7 +42,7 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         return len(self.columns)
 
     def rowCount(self, index):
-        return len(self.share_prices)
+        return len(self.share_prices) + 1
 
     def canFetchMore(self, index):
         return len(self.share_prices) < self.count_values
@@ -65,47 +67,63 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         self.endInsertRows()
 
     def data(self, index, role):
+        if not index.isValid():
+            return False
+
         col = index.column()
-        price = self.share_prices[index.row()]
         if role == PyQt5.QtCore.Qt.DisplayRole:
-            if col == 0:
-                return price.share.name
-            elif col == 1:
-                return price.id
-            elif col == 2:
-                return price.date.strftime("%Y-%m-%d")
-            elif col == 3:
-                return price.price
-            elif col == 4:
-                return price.currency
-            elif col == 5:
-                return price.source
+            # New item row
+            if index.row() == len(self.share_prices):
+                return QVariant()
+
+            price = self.share_prices[index.row()]
+            return [
+                price.share.name,
+                price.id,
+                price.date.strftime("%Y-%m-%d"),
+                price.price,
+                price.currency.short_name(),
+                price.source,
+                QVariant(),
+            ][col]
 
         if role == PyQt5.QtCore.Qt.EditRole:
-            if col == 2:
-                return price.date.strftime("%Y-%m-%d")
-            elif col == 3:
-                return price.price
-            elif col == 4:
-                return price.currency
-            elif col == 5:
-                return price.source
+            # New item row
+            if index.row() == len(self.share_prices):
+                return QVariant()
+
+            price = self.share_prices[index.row()]
+            return [
+                price.share.id,
+                None,
+                price.date,
+                price.price,
+                price.currency_id,
+                price.source,
+                None,
+            ][col]
 
         if role == PyQt5.QtCore.Qt.DecorationRole and col == 6:
-            # pixmap = QPixmap.fromImage(QImage("assets/images/delete.png"))
-            # pixmap = pixmap.scaled(25, 25)
-            # return QVariant(pixmap)
             return QVariant(QIcon("assets/images/delete.png"))
 
     def setData(self, index, value, role):
-        price = self.share_prices[index.row()]
         col = index.column()
         if role == Qt.EditRole:
             try:
-                if col == 2:
-                    price.date = datetime.datetime.strptime(value, "%Y-%m-%d")
+                # New item
+                if index.row() == len(self.share_prices):
+                    price = SharePriceDatabaseModel()
+                else:
+                    price = self.share_prices[index.row()]
+
+                if col == 0:
+                    price.share_id = value
+                elif col == 2:
+                    price.date = value
                 elif col == 3:
                     price.price = value
+                elif col == 4:
+                    price.currency_id = value
                 elif col == 5:
                     price.source = value
 
@@ -118,7 +136,7 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
                 return False
 
     def flags(self, index):
-        if index.column() in (0, 1, 4, 6):
+        if index.column() in (1, 6):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled
         else:
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
@@ -241,6 +259,9 @@ class SharePricesTableView(QTableView):
         self.model = SharePricesTableModel(self.database, self.columns)
         self.setModel(self.model)
         self.hideColumn(1)
+        self.setItemDelegateForColumn(0, ShareDelegate(self, self.database))
+        self.setItemDelegateForColumn(2, DateDelegate(self))
+        self.setItemDelegateForColumn(4, ShareDelegate(self, self.database))
 
         self.clicked.connect(self.on_table_clicked)
 
