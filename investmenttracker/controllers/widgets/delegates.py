@@ -1,10 +1,8 @@
-import datetime
-
 from PyQt5.QtWidgets import (
     QDateEdit,
     QItemDelegate,
 )
-from PyQt5.QtCore import QDate, Qt
+from PyQt5.QtCore import Qt
 
 from .sharecombobox import ShareComboBox
 
@@ -17,7 +15,9 @@ class DateDelegate(QItemDelegate):
 
     def setEditorData(self, editor, index):
         if isinstance(editor, QDateEdit):
-            editor.setDate(index.data(Qt.EditRole))
+            value = index.data(Qt.EditRole)
+            if value:
+                editor.setDate(value)
             return
         super().setEditorData(editor, index)
 
@@ -40,8 +40,10 @@ class ShareDelegate(QItemDelegate):
 
     def setEditorData(self, editor, index):
         if isinstance(editor, ShareComboBox):
-            combobox_index = editor.findData(index.data(Qt.EditRole))
-            editor.setCurrentIndex(combobox_index)
+            value = index.data(Qt.EditRole)
+            if value:
+                combobox_index = editor.findData(value)
+                editor.setCurrentIndex(combobox_index)
             return
         super().setEditorData(editor, index)
 

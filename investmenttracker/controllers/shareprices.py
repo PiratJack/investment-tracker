@@ -12,14 +12,15 @@ from PyQt5.QtWidgets import (
     QFormLayout,
     QLabel,
     QMessageBox,
-    QItemDelegate,
 )
 import PyQt5.QtCore
+import sqlalchemy.exc
 from PyQt5.QtCore import QVariant
 from PyQt5.QtCore import QDate, Qt
 
 from .widgets.sharecombobox import ShareComboBox
 from .widgets.delegates import DateDelegate, ShareDelegate
+import models.base
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
 _ = gettext.gettext
@@ -78,11 +79,11 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
 
             price = self.share_prices[index.row()]
             return [
-                price.share.name,
+                price.share.name if price.share else QVariant(),
                 price.id,
-                price.date.strftime("%Y-%m-%d"),
+                price.date.strftime("%Y-%m-%d") if price.date else QVariant(),
                 price.price,
-                price.currency.short_name(),
+                price.currency.short_name() if price.currency else QVariant(),
                 price.source,
                 QVariant(),
             ][col]
@@ -90,11 +91,23 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         if role == PyQt5.QtCore.Qt.EditRole:
             # New item row
             if index.row() == len(self.share_prices):
-                return QVariant()
+                price = SharePriceDatabaseModel()
+                self.share_prices.append(price)
+                self.count_values += 1
+                # This forces the correct type of value
+                return [
+                    0,
+                    None,
+                    datetime.datetime.today(),
+                    0,
+                    0,
+                    "",
+                    None,
+                ][col]
 
             price = self.share_prices[index.row()]
             return [
-                price.share.id,
+                price.share_id,
                 None,
                 price.date,
                 price.price,
@@ -103,27 +116,34 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
                 None,
             ][col]
 
-        if role == PyQt5.QtCore.Qt.DecorationRole and col == 6:
+        if (
+            role == PyQt5.QtCore.Qt.DecorationRole
+            and col == 6
+            and index.row() != len(self.share_prices)
+        ):
             return QVariant(QIcon("assets/images/delete.png"))
 
     def setData(self, index, value, role):
         col = index.column()
         if role == Qt.EditRole:
-            try:
-                # New item
-                if index.row() == len(self.share_prices):
-                    price = SharePriceDatabaseModel()
-                else:
-                    price = self.share_prices[index.row()]
+            price = self.share_prices[index.row()]
 
+            try:
                 if col == 0:
-                    price.share_id = value
+                    if value > 0:
+                        price.share_id = value
+                        price.share = self.database.share_get_by_id(value)
                 elif col == 2:
                     price.date = value
                 elif col == 3:
-                    price.price = value
+                    try:
+                        price.price = float(value)
+                    except ValueError:
+                        return False
                 elif col == 4:
-                    price.currency_id = value
+                    if value > 0:
+                        price.currency_id = value
+                        price.currency = self.database.share_get_by_id(value)
                 elif col == 5:
                     price.source = value
 
@@ -132,8 +152,9 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
                 self.dataChanged.emit(index, index, [PyQt5.QtCore.Qt.EditRole])
                 return True
 
-            except:
-                return False
+            except (sqlalchemy.exc.IntegrityError, models.base.ValidationException):
+                self.database.session.rollback()
+                return True
 
     def flags(self, index):
         if index.column() in (1, 6):
@@ -206,7 +227,8 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         )
 
         if messagebox == QMessageBox.Yes:
-            self.database.share_price_delete(price)
+            if price.id:
+                self.database.share_price_delete(price)
             self.beginRemoveRows(index, index.row(), index.row())
             self.set_filters()  # Reload the data
             self.endRemoveRows()

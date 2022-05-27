@@ -17,11 +17,10 @@ I haven't found any that matches all those requirements. Therefore, I decided to
 Done:
 - Database models exist for stocks, stock prices, transactions, accounts
 - Validations exist for transactions & accounts
-- UI to list and edit accounts, shares and share prices
+- UI to manage accounts, shares and share prices
 
 What is remaining:
-- Create UI to manage stock prices, transactions
-- Create UI to edit & add stock prices
+- Create UI to manage transactions
 - Create API to manage stocks, stock prices, transactions, accounts
 - Create calculation engine (% of variation given different parameters)
 - Create graphs
