@@ -28,12 +28,6 @@ class TransactionTypes(enum.Enum):
         "impact_asset": 1,
         "has_asset": True,
     }
-    asset_refund = {
-        "name": _("Asset refund"),
-        "impact_currency": 0,
-        "impact_asset": 1,
-        "has_asset": True,
-    }
     asset_sell = {
         "name": _("Asset sell"),
         "impact_currency": 1,
