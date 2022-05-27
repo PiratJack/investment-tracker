@@ -65,12 +65,12 @@ class TestShare(unittest.TestCase):
             "There are 6 shares in total",
         )
         self.assertEqual(
-            len(self.database.shares_get_all()),
+            len(self.database.shares_get()),
             5,
             "Only 5 shares are visible",
         )
         self.assertEqual(
-            len(self.database.shares_get_all_with_hidden()),
+            len(self.database.shares_get(with_hidden=True)),
             6,
             "There are 6 shares in total",
         )

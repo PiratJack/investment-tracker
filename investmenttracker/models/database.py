@@ -50,11 +50,11 @@ class Database:
     def shares_query(self):
         return self.session.query(share.Share)
 
-    def shares_get_all(self):
-        return self.session.query(share.Share).filter(share.Share.hidden == False).all()
-
-    def shares_get_all_with_hidden(self):
-        return self.session.query(share.Share).all()
+    def shares_get(self, with_hidden=False):
+        query = self.session.query(share.Share)
+        if not with_hidden:
+            query = query.filter(share.Share.hidden == False)
+        return query.all()
 
     def share_get_by_id(self, share_id):
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
