@@ -123,6 +123,9 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
         ):
             return QVariant(QIcon("assets/images/delete.png"))
 
+        if role == Qt.TextAlignmentRole:
+            return self.columns[index.column()]["alignment"]
+
     def setData(self, index, value, role):
         col = index.column()
         if role == Qt.EditRole:
