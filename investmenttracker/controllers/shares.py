@@ -259,11 +259,13 @@ class SharesTree(QTreeWidget):
                 self.parent_controller, item[1]
             )
             self.group_details.show_window()
+            del self.group_details
         elif item[0] == "share":
-            self.group_details = controllers.share.ShareController(
+            self.share_details = controllers.share.ShareController(
                 self.parent_controller, item[1]
             )
-            self.group_details.show_window()
+            self.share_details.show_window()
+            del self.share_details
 
 
 class SharesController:
