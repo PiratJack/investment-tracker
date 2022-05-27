@@ -44,6 +44,13 @@ class TestAccount(unittest.TestCase):
                     base_currency_id=5,
                     hidden=True,
                 ),
+                Account(
+                    id=3,
+                    name="Disabled account",
+                    code="54614",
+                    base_currency_id=5,
+                    enabled=False,
+                ),
                 Transaction(
                     account_id=1,
                     date=datetime.datetime(2020, 1, 1),
@@ -103,12 +110,22 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(
             len(self.database.accounts_get_all()),
             1,
-            "Only 1 account is visible",
+            "Only 1 account is visible & enabled",
         )
         self.assertEqual(
-            len(self.database.accounts_get_all_with_hidden()),
+            len(self.database.accounts_get(with_hidden=True)),
             2,
-            "There are be 2 accounts in total",
+            "There are 2 hidden or visible accounts",
+        )
+        self.assertEqual(
+            len(self.database.accounts_get(with_disabled=True)),
+            2,
+            "There are 2 non-hidden accounts",
+        )
+        self.assertEqual(
+            len(self.database.accounts_get(with_disabled=True, with_hidden=True)),
+            3,
+            "There are 3 accounts in total",
         )
 
         # Base currency

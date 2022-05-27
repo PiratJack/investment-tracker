@@ -16,6 +16,7 @@ from models.base import NoPriceException
 import controllers.account
 
 _ = gettext.gettext
+# TODO: Double-click on tree opens edit window
 
 
 class AccountsTree(QTreeWidget):
@@ -241,10 +242,7 @@ class AccountsController:
         return self.display_widget
 
     def reload_data(self):
-        if self.display_hidden:
-            self.accounts = self.database.accounts_get_all_with_hidden()
-        else:
-            self.accounts = self.database.accounts_get_all()
+        self.accounts = self.database.accounts_get(with_hidden=self.display_hidden)
         self.tree.clear()
         self.tree.fill_accounts(self.accounts)
 

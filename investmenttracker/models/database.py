@@ -27,11 +27,17 @@ class Database:
         return (
             self.session.query(account.Account)
             .filter(account.Account.hidden == False)
+            .filter(account.Account.enabled == True)
             .all()
         )
 
-    def accounts_get_all_with_hidden(self):
-        return self.session.query(account.Account).all()
+    def accounts_get(self, with_hidden=False, with_disabled=False):
+        query = self.session.query(account.Account)
+        if not with_hidden:
+            query = query.filter(account.Account.hidden == False)
+        if not with_disabled:
+            query = query.filter(account.Account.enabled == True)
+        return query.all()
 
     def accounts_get_by_id(self, account_id):
         return (
