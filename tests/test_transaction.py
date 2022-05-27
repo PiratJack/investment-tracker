@@ -36,6 +36,13 @@ class TestTransaction(unittest.TestCase):
                     base_currency_id=5,
                     enabled=True,
                 ),
+                Account(
+                    id=2,
+                    name="Secondary account",
+                    code="htrthr",
+                    base_currency_id=5,
+                    enabled=True,
+                ),
                 Transaction(
                     account_id=1,
                     date=datetime.datetime(2020, 1, 1),
@@ -69,6 +76,14 @@ class TestTransaction(unittest.TestCase):
                     type="asset_sell",
                     share_id=2,
                     quantity=10,
+                    unit_price=1,
+                ),
+                Transaction(
+                    account_id=2,
+                    date=datetime.datetime(2020, 4, 15),
+                    label="First investment",
+                    type="cash_entry",
+                    quantity=2500,
                     unit_price=1,
                 ),
             ]
@@ -120,6 +135,16 @@ class TestTransaction(unittest.TestCase):
             str(transaction),
             "Transaction ('asset_sell', '2020-04-15 00:00:00', '', '')",
             "Transaction representation is wrong",
+        )
+
+        # Database selects & filters
+        transactions = self.database.transaction_get_by_account_and_shares(
+            [2], {1: [3]}
+        )
+        self.assertEqual(
+            len(transactions),
+            2,
+            "Complex filter should yield 2 transactions",
         )
 
     def test_validations(self):

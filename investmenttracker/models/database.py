@@ -86,6 +86,28 @@ class Database:
         self.session.commit()
 
     # Transactions
+
+    # Get transactions that are in some accounts OR combination of accounts + shares
+    def transaction_get_by_account_and_shares(self, accounts, account_shares):
+        transactions = self.session.query(transaction.Transaction)
+
+        conditions = []
+        if accounts:
+            conditions.append(transaction.Transaction.account_id.in_(accounts))
+        if account_shares:
+            for account_id in account_shares:
+                shares = account_shares[account_id]
+                conditions.append(
+                    sqlalchemy.and_(
+                        transaction.Transaction.account_id == account_id,
+                        transaction.Transaction.share_id.in_(shares),
+                    )
+                )
+
+        transactions = transactions.filter(sqlalchemy.or_(False, *conditions))
+
+        return transactions.all()
+
     def transaction_delete(self, transaction):
         self.session.delete(transaction)
         self.session.commit()
