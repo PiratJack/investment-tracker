@@ -84,3 +84,8 @@ class Database:
     def share_price_delete(self, share_price):
         self.session.delete(share_price)
         self.session.commit()
+
+    # Transactions
+    def transaction_delete(self, transaction):
+        self.session.delete(transaction)
+        self.session.commit()

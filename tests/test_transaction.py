@@ -204,3 +204,17 @@ class TestTransaction(unittest.TestCase):
                 value,
                 test_name + " - exception.invalid_value is wrong",
             )
+
+    def test_delete(self):
+        account = self.database.accounts_get_by_id(1)
+        self.assertEqual(
+            len(account.transactions),
+            4,
+            "Account has 4 transactions",
+        )
+
+        self.database.transaction_delete(account.transactions[0])
+
+        self.assertEqual(
+            len(account.transactions), 3, "Account has 3 transactions after deletion"
+        )
