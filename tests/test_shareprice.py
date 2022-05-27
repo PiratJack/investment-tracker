@@ -33,42 +33,42 @@ class TestSharePrice(unittest.TestCase):
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),
                     price=458,
-                    currency="EUR",
+                    currency_id=5,
                     source="Test",
                 ),
                 SharePrice(
                     share_id=2,
                     date=datetime.datetime(2022, 4, 1),
                     price=550,
-                    currency="USD",
+                    currency_id=6,
                     source="Second test",
                 ),
                 SharePrice(
                     share_id=3,
                     date=datetime.datetime(2022, 1, 1),
                     price=100,
-                    currency="USD",
+                    currency_id=6,
                     source="Test gets",
                 ),
                 SharePrice(
                     share_id=3,
                     date=datetime.datetime(2022, 2, 1),
                     price=120,
-                    currency="USD",
+                    currency_id=6,
                     source="Test gets",
                 ),
                 SharePrice(
                     share_id=3,
                     date=datetime.datetime(2022, 3, 1),
                     price=130,
-                    currency="USD",
+                    currency_id=6,
                     source="Test gets",
                 ),
                 SharePrice(
                     share_id=3,
                     date=datetime.datetime(2022, 4, 1),
                     price=140,
-                    currency="USD",
+                    currency_id=6,
                     source="Test gets",
                 ),
             ]
@@ -133,7 +133,7 @@ class TestSharePrice(unittest.TestCase):
         share_price = SharePrice(
             share_id=1,
             date=datetime.datetime(2022, 4, 1),
-            currency="USD",
+            currency_id=6,
             source="Second test",
         )
         self.assertEqual(
@@ -159,12 +159,12 @@ class TestSharePrice(unittest.TestCase):
             share_id=1,
             date=datetime.datetime(2022, 4, 1),
             price=125.24,
-            currency="EUR",
+            currency_id=5,
             source="Test suite",
         )
 
         # Test mandatory fields
-        for field in ["share_id", "date", "price", "currency", "source"]:
+        for field in ["share_id", "date", "price", "currency_id", "source"]:
             for value in ["", None]:
                 test_name = "Share price must have a " + field + " that is not "
                 test_name += "None" if value == None else "empty"
@@ -209,6 +209,29 @@ class TestSharePrice(unittest.TestCase):
         self.assertEqual(
             cm.exception.invalid_value,
             "a" * 251,
+            test_name + " - exception.invalid_value is wrong",
+        )
+
+        # Can't have the share itself as base currency
+        share = self.database.share_get_by_id(2)
+        share_price = share.prices[0]
+        test_name = "Share Price currency can't be the share itself"
+        with self.assertRaises(ValidationException) as cm:
+            share_price.currency_id = share_price.share.id
+        self.assertEqual(type(cm.exception), ValidationException, test_name)
+        self.assertEqual(
+            cm.exception.item,
+            share_price,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "currency_id",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            share_price.share.id,
             test_name + " - exception.invalid_value is wrong",
         )
 

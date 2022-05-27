@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-26 21:50+0200\n"
+"POT-Creation-Date: 2022-05-27 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,30 +43,6 @@ msgstr ""
 
 #: investmenttracker/models/sharecode.py:45
 msgid "Max length for share code value is 250 characters"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:25
-msgid "Missing share price share ID"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:30
-msgid "Missing share price date"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:35
-msgid "Missing share price actual price"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:40
-msgid "Missing share price currency"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:45
-msgid "Missing share price source"
-msgstr ""
-
-#: investmenttracker/models/shareprice.py:48
-msgid "Max length for share price source is 250 characters"
 msgstr ""
 
 #: investmenttracker/models/account.py:35
@@ -210,6 +186,34 @@ msgstr ""
 msgid "Share base currency can't be itself"
 msgstr ""
 
+#: investmenttracker/models/shareprice.py:25
+msgid "Missing share price share ID"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:30
+msgid "Missing share price date"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:35
+msgid "Missing share price actual price"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:40
+msgid "Missing share price currency"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:43
+msgid "Share Price currency can't be the share itself"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:49
+msgid "Missing share price source"
+msgstr ""
+
+#: investmenttracker/models/shareprice.py:52
+msgid "Max length for share price source is 250 characters"
+msgstr ""
+
 #: investmenttracker/controllers/console.py:11
 msgid "Displays detailed information (for debug purpose)"
 msgstr ""
@@ -234,14 +238,6 @@ msgstr ""
 msgid "Analysis"
 msgstr ""
 
-#: investmenttracker/controllers/mainwindow.py:24
-msgid "Investment Tracker"
-msgstr ""
-
-#: investmenttracker/controllers/mainwindow.py:45
-msgid "My main toolbar"
-msgstr ""
-
 #: investmenttracker/controllers/accounts.py:24
 #: investmenttracker/controllers/share.py:14
 #: investmenttracker/controllers/sharegroup.py:14
@@ -251,8 +247,8 @@ msgid "Name"
 msgstr ""
 
 #: investmenttracker/controllers/accounts.py:29
+#: investmenttracker/controllers/shareprices.py:270
 #: investmenttracker/controllers/shares.py:32
-#: investmenttracker/controllers/shareprices.py:205
 msgid "ID"
 msgstr ""
 
@@ -304,23 +300,23 @@ msgstr ""
 msgid "Display hidden accounts?"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:18
+#: investmenttracker/controllers/widgets/sharecombobox.py:19
 msgid "All"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:20
+#: investmenttracker/controllers/widgets/sharecombobox.py:21
 msgid "Select a value"
 msgstr ""
 
-#: investmenttracker/controllers/widgets/sharecombobox.py:33
+#: investmenttracker/controllers/widgets/sharecombobox.py:34
 #: investmenttracker/controllers/shares.py:114
 msgid "Shares without group"
 msgstr ""
 
 #: investmenttracker/controllers/share.py:10
 #: investmenttracker/controllers/shareprice.py:14
-#: investmenttracker/controllers/shareprices.py:200
-#: investmenttracker/controllers/shareprices.py:300
+#: investmenttracker/controllers/shareprices.py:265
+#: investmenttracker/controllers/shareprices.py:368
 msgid "Share"
 msgstr ""
 
@@ -357,24 +353,24 @@ msgid "Share Price"
 msgstr ""
 
 #: investmenttracker/controllers/shareprice.py:19
-#: investmenttracker/controllers/shareprices.py:210
+#: investmenttracker/controllers/shareprices.py:275
 msgid "Date"
 msgstr ""
 
 #: investmenttracker/controllers/shareprice.py:23
+#: investmenttracker/controllers/shareprices.py:280
 #: investmenttracker/controllers/shares.py:42
-#: investmenttracker/controllers/shareprices.py:215
 msgid "Price"
 msgstr ""
 
 #: investmenttracker/controllers/shareprice.py:27
 #: investmenttracker/controllers/account.py:22
-#: investmenttracker/controllers/shareprices.py:220
+#: investmenttracker/controllers/shareprices.py:285
 msgid "Currency"
 msgstr ""
 
 #: investmenttracker/controllers/shareprice.py:32
-#: investmenttracker/controllers/shareprices.py:225
+#: investmenttracker/controllers/shareprices.py:290
 msgid "Source"
 msgstr ""
 
@@ -384,6 +380,34 @@ msgstr ""
 
 #: investmenttracker/controllers/account.py:26
 msgid "Active"
+msgstr ""
+
+#: investmenttracker/controllers/mainwindow.py:24
+msgid "Investment Tracker"
+msgstr ""
+
+#: investmenttracker/controllers/mainwindow.py:45
+msgid "My main toolbar"
+msgstr ""
+
+#: investmenttracker/controllers/shareprices.py:249
+msgid "Please confirm"
+msgstr ""
+
+#: investmenttracker/controllers/shareprices.py:250
+msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+#: investmenttracker/controllers/shareprices.py:295
+msgid "Delete"
+msgstr ""
+
+#: investmenttracker/controllers/shareprices.py:349
+msgid "Share Prices"
+msgstr ""
+
+#: investmenttracker/controllers/shareprices.py:351
+msgid "Displays share prices"
 msgstr ""
 
 #: investmenttracker/controllers/shares.py:47
@@ -408,24 +432,4 @@ msgstr ""
 
 #: investmenttracker/controllers/shares.py:280
 msgid "Display shares"
-msgstr ""
-
-#: investmenttracker/controllers/shareprices.py:184
-msgid "Please confirm"
-msgstr ""
-
-#: investmenttracker/controllers/shareprices.py:185
-msgid "Are you sure you want to delete this price?"
-msgstr ""
-
-#: investmenttracker/controllers/shareprices.py:230
-msgid "Delete"
-msgstr ""
-
-#: investmenttracker/controllers/shareprices.py:281
-msgid "Share Prices"
-msgstr ""
-
-#: investmenttracker/controllers/shareprices.py:283
-msgid "Displays share prices"
 msgstr ""

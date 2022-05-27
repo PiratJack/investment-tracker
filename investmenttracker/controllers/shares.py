@@ -90,7 +90,9 @@ class SharesTree(QTreeWidget):
                         share.name,
                         share.id,
                         share.main_code,
-                        str(share.last_price.price) + " " + share.last_price.currency,
+                        str(share.last_price.price)
+                        + " "
+                        + share.last_price.currency.main_code,
                         share.last_price.date,  # TODO: display date in system format
                         share.sync,
                         share.hidden,

@@ -29,7 +29,12 @@ class Share(Base):
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="share"
     )
-    prices = sqlalchemy.orm.relationship("SharePrice", back_populates="share")
+    prices = sqlalchemy.orm.relationship(
+        "SharePrice",
+        back_populates="share",
+        remote_side="[SharePrice.share_id]",
+        primaryjoin="SharePrice.share_id==Share.id",
+    )
 
     def __init__(self, **kwargs):
         if "sync" not in kwargs:

@@ -14,11 +14,13 @@ class SharePrice(Base):
     share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
     date = Column(Date, nullable=False)
     price = Column(Float, nullable=False)
-    currency = Column(
-        String(5), nullable=False
-    )  # TODO: replace with list of currencies
+    currency_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
     source = Column(String(250), nullable=False)
-    share = sqlalchemy.orm.relationship("Share", back_populates="prices")
+
+    share = sqlalchemy.orm.relationship(
+        "Share", back_populates="prices", foreign_keys=share_id
+    )
+    currency = sqlalchemy.orm.relationship("Share", foreign_keys=currency_id)
 
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
@@ -35,9 +37,13 @@ class SharePrice(Base):
         self.validate_missing_field(key, value, _("Missing share price actual price"))
         return value
 
-    @sqlalchemy.orm.validates("currency")
+    @sqlalchemy.orm.validates("currency_id")
     def validate_currency(self, key, value):
         self.validate_missing_field(key, value, _("Missing share price currency"))
+        if value is not None and value == self.share_id:
+            raise ValidationException(
+                _("Share Price currency can't be the share itself"), self, key, value
+            )
         return value
 
     @sqlalchemy.orm.validates("source")
@@ -61,7 +67,9 @@ class SharePrice(Base):
         output = [
             "Price (",
             self.share.name + " at " if self.share else "",
-            str(self.price) + " " + str(self.currency)
+            str(self.price)
+            + " "
+            + str(self.currency.main_code if self.currency.main_code else self.currency)
             if self.price and self.currency
             else "Unknown",
             " on " + str(self.date) if self.date else "",

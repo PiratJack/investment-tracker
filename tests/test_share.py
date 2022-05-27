@@ -38,14 +38,14 @@ class TestShare(unittest.TestCase):
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),
                     price=458,
-                    currency="EUR",
+                    currency_id=5,
                     source="Test",
                 ),
                 SharePrice(
                     share_id=2,
                     date=datetime.datetime(2022, 4, 1),
                     price=550,
-                    currency="USD",
+                    currency_id=6,
                     source="Second test",
                 ),
             ]
@@ -132,7 +132,9 @@ class TestShare(unittest.TestCase):
         # Last price exists
         last_price = self.database.share_get_by_id(2).last_price
         self.assertEqual(last_price.price, 550, "Last price should be 550 USD")
-        self.assertEqual(last_price.currency, "USD", "Last price should be 550 USD")
+        self.assertEqual(
+            last_price.currency.main_code, "USD", "Last price should be 550 USD"
+        )
         self.assertEqual(last_price.source, "Second test", "Last price is Second test")
 
     def test_validations(self):
