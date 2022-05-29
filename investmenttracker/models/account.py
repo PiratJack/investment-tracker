@@ -120,3 +120,30 @@ class Account(Base):
         output += "hidden" if self.hidden else "visible"
         output += ")"
         return output
+
+    def balance_as_of_transaction(self, transaction):
+        if type(transaction) == int:
+            try:
+                transaction = [i for i in self.transactions if i.id == transaction][0]
+            except IndexError:
+                raise ValueError("Transaction doesn't exist in that account")
+        elif transaction not in self.transactions:
+            raise ValueError("Transaction doesn't exist in that account")
+
+        cash_balance = sum(
+            t.type.value["impact_currency"] * t.quantity * t.unit_price
+            for t in self.transactions
+            if t.date < transaction.date
+            or (t.date == transaction.date and t.id <= transaction.id)
+        )
+        asset_balance = sum(
+            t.type.value["impact_asset"] * t.quantity
+            for t in self.transactions
+            if (
+                t.date < transaction.date
+                or (t.date == transaction.date and t.id <= transaction.id)
+            )
+            and t.share == transaction.share
+        )
+
+        return cash_balance, asset_balance

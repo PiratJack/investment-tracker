@@ -51,6 +51,13 @@ class TestAccount(unittest.TestCase):
                     base_currency_id=5,
                     enabled=False,
                 ),
+                Account(
+                    id=4,
+                    name="Account with lots of history",
+                    code="HIST",
+                    base_currency_id=5,
+                    enabled=True,
+                ),
                 Transaction(
                     account_id=1,
                     date=datetime.datetime(2020, 1, 1),
@@ -86,6 +93,50 @@ class TestAccount(unittest.TestCase):
                     quantity=10,
                     unit_price=1,
                 ),
+                Transaction(
+                    account_id=4,
+                    date=datetime.datetime(2020, 4, 1),
+                    label="First investment",
+                    type="cash_entry",
+                    quantity=10000,
+                    unit_price=1,
+                ),
+                Transaction(
+                    account_id=4,
+                    date=datetime.datetime(2020, 4, 1),
+                    label="Buy Accenture",
+                    type="asset_buy",
+                    share_id=2,
+                    quantity=10,
+                    unit_price=200,
+                ),
+                Transaction(
+                    account_id=4,
+                    date=datetime.datetime(2020, 4, 1),
+                    label="Buy HSBC",
+                    type="asset_buy",
+                    share_id=4,
+                    quantity=30,
+                    unit_price=100,
+                ),
+                Transaction(
+                    account_id=4,
+                    date=datetime.datetime(2020, 4, 10),
+                    label="Sell Accenture",
+                    type="asset_sell",
+                    share_id=2,
+                    quantity=5,
+                    unit_price=250,
+                ),
+                Transaction(
+                    account_id=4,
+                    date=datetime.datetime(2020, 4, 10),
+                    label="Buy HSBC again",
+                    type="asset_buy",
+                    share_id=4,
+                    quantity=20,
+                    unit_price=125,
+                ),
             ]
         )
         self.database.session.commit()
@@ -109,23 +160,23 @@ class TestAccount(unittest.TestCase):
         )
         self.assertEqual(
             len(self.database.accounts_get_all()),
-            1,
-            "Only 1 account is visible & enabled",
+            2,
+            "Only 2 accounts are visible & enabled",
         )
         self.assertEqual(
             len(self.database.accounts_get(with_hidden=True)),
-            2,
-            "There are 2 hidden or visible accounts",
+            3,
+            "There are 3 hidden or visible accounts",
         )
         self.assertEqual(
             len(self.database.accounts_get(with_disabled=True)),
-            2,
-            "There are 2 non-hidden accounts",
+            3,
+            "There are 3 non-hidden accounts",
         )
         self.assertEqual(
             len(self.database.accounts_get(with_disabled=True, with_hidden=True)),
-            3,
-            "There are 3 accounts in total",
+            4,
+            "There are 4 accounts in total",
         )
 
         # Base currency
@@ -179,6 +230,39 @@ class TestAccount(unittest.TestCase):
         # Total value
         total_value = self.database.accounts_get_all()[0].total_value
         self.assertEqual(total_value, 0, "INVALID TEST")
+
+        # Asset & cash balance per transaction
+        account = self.database.accounts_get_by_id(4)
+        transaction = account.transactions[1]
+        balance = account.balance_as_of_transaction(transaction)
+        self.assertEqual(
+            balance, (8000, 10), "Cash/asset balance of transaction is wrong"
+        )
+
+        balance = account.balance_as_of_transaction(8)
+        self.assertEqual(
+            balance, (6250, 5), "Cash/asset balance of transaction is wrong"
+        )
+        # Transaction doesn't exist
+        self.assertRaises(
+            ValueError,
+            lambda _: account.balance_as_of_transaction(8257),
+            "This transaction doesn't exist",
+        )
+
+        # Transaction is from another account
+        self.assertRaises(
+            ValueError,
+            lambda _: account.balance_as_of_transaction(1),
+            "This transaction is for another account",
+        )
+
+        account2 = self.database.accounts_get_by_id(1)
+        self.assertRaises(
+            ValueError,
+            lambda _: account.balance_as_of_transaction(account2.transactions[0]),
+            "This transaction is for another account",
+        )
 
     def test_validations(self):
         account = Account(
