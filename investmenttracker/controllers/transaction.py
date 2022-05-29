@@ -61,7 +61,7 @@ class TransactionController(EditController):
             self.fields["account_id"]["default"] = self.item.account_id
             self.fields["date"]["default"] = self.item.date
             self.fields["label"]["default"] = self.item.label
-            self.fields["type"]["default"] = self.item.type.value["name"]
+            self.fields["type"]["default"] = self.item.type.name
             self.fields["quantity"]["default"] = self.item.quantity
             self.fields["share_id"]["default"] = self.item.share_id
             self.fields["unit_price"]["default"] = self.item.unit_price
