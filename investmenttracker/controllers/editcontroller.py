@@ -53,10 +53,9 @@ class EditController:
                     for val in field["possible_values"]:
                         field["widget"].addItem(*val)
                 if "default" in field:
-                    if type(field["default"]) == int:
-                        field["widget"].setCurrentIndex(field["default"])
-                    else:
-                        field["widget"].setCurrentText(field["default"])
+                    field["widget"].setCurrentIndex(
+                        field["widget"].findData(field["default"])
+                    )
 
             elif field["type"] == "checkbox":
                 field["widget"] = QtWidgets.QCheckBox()
