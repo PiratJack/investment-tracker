@@ -3,7 +3,6 @@ import PyQt5
 import sys
 import os
 
-import controllers.console
 import controllers.mainwindow
 import models.database
 
@@ -12,7 +11,7 @@ DATABASE_FILE = "data.sqlite"
 LOCALE_FOLDER = "./locale"
 STYLESHEET_FILE = "./assets/style/app.css"
 
-# Setup translation (before import, otherwise it fails)
+# Setup translation
 gettext.bindtextdomain("messages", LOCALE_FOLDER)
 gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 
