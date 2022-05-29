@@ -24,9 +24,9 @@ class ShareGroupController(EditController):
         self.group_id = int(group_id)
         if group_id:
             self.item = self.database.share_group_get_by_id(group_id)
-            self.fields["name"]["default"] = self.item.name
         else:
             self.item = models.sharegroup.ShareGroup()
+        self.fields["name"]["default"] = self.item.name
 
     def close(self):
         self.window.close()

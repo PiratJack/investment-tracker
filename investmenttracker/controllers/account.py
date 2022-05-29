@@ -40,15 +40,15 @@ class AccountController(EditController):
         self.account_id = int(account_id)
         if account_id:
             self.item = self.database.accounts_get_by_id(account_id)
-            self.fields["name"]["default"] = self.item.name
-            self.fields["code"]["default"] = self.item.code
-            self.fields["base_currency_id"]["default"] = (
-                self.item.base_currency.id if self.item.base_currency else 0
-            )
-            self.fields["enabled"]["default"] = self.item.enabled
         else:
             self.item = models.account.Account()
-            self.fields["enabled"]["default"] = True
+
+        self.fields["name"]["default"] = self.item.name
+        self.fields["code"]["default"] = self.item.code
+        self.fields["base_currency_id"]["default"] = (
+            self.item.base_currency.id if self.item.base_currency else 0
+        )
+        self.fields["enabled"]["default"] = self.item.enabled
 
     def close(self):
         self.window.close()
