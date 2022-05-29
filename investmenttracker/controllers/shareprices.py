@@ -342,7 +342,7 @@ class SharePricesController:
         self.field_date.setDate(default_date)
         width = self.field_date.sizeHint().width()
         self.field_date.dateChanged.connect(self.on_select_date)
-        self.field_date.setFixedWidth(width * 2)
+        self.field_date.setMinimumWidth(width * 2)
 
         # Display table
         self.table = SharePricesTableView(self)
