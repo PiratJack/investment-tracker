@@ -210,6 +210,7 @@ class AccountsTree(QTreeWidget):
 class AccountsController:
     name = "Accounts"
     display_hidden = False
+    display_disabled = False
 
     def __init__(self, parent_window):
         self.parent_window = parent_window
@@ -233,20 +234,31 @@ class AccountsController:
         self.tree.fill_accounts(self.accounts)
         self.display_widget.layout.addWidget(self.tree)
 
-        self.display_hidden_widget = QCheckBox(_("Display hidden accounts?"))
-        self.display_hidden_widget.stateChanged.connect(self.on_click_display_hidden)
-        self.display_widget.layout.addWidget(self.display_hidden_widget)
+        self.checkbox_hidden = QCheckBox(_("Display hidden accounts?"))
+        self.checkbox_hidden.stateChanged.connect(self.on_click_checkbox_hidden)
+        self.display_widget.layout.addWidget(self.checkbox_hidden)
+
+        self.checkbox_disabled = QCheckBox(_("Display disabled accounts?"))
+        self.checkbox_disabled.stateChanged.connect(self.on_click_checkbox_disabled)
+        self.display_widget.layout.addWidget(self.checkbox_disabled)
 
         self.parent_window.setCentralWidget(self.display_widget)
 
         return self.display_widget
 
     def reload_data(self):
-        self.accounts = self.database.accounts_get(with_hidden=self.display_hidden)
+        self.accounts = self.database.accounts_get(
+            with_hidden=self.display_hidden, with_disabled=self.display_disabled
+        )
         self.tree.clear()
         self.tree.fill_accounts(self.accounts)
 
-    def on_click_display_hidden(self):
-        self.display_hidden = self.display_hidden_widget.isChecked()
+    def on_click_checkbox_hidden(self):
+        self.display_hidden = self.checkbox_hidden.isChecked()
         self.reload_data()
-        self.tree.setFocus()
+        self.checkbox_hidden.clearFocus()
+
+    def on_click_checkbox_disabled(self):
+        self.display_disabled = self.checkbox_disabled.isChecked()
+        self.reload_data()
+        self.checkbox_disabled.clearFocus()
