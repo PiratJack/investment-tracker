@@ -19,16 +19,41 @@ msgstr ""
 msgid "Max length for share code value is 250 characters"
 msgstr ""
 
-msgid "Missing account name"
+#, python-brace-format
+msgid "No price available for share {name} ({main_code})"
 msgstr ""
 
-msgid "Max length for account name is 250 characters"
+msgid "Max length for share main code is 250 characters"
 msgstr ""
 
-msgid "Max length for account code is 250 characters"
+msgid "Missing share name"
 msgstr ""
 
-msgid "Missing account base currency"
+msgid "Max length for share name is 250 characters"
+msgstr ""
+
+msgid "Share base currency can't be itself"
+msgstr ""
+
+msgid "Missing share price share ID"
+msgstr ""
+
+msgid "Share Price currency can't be the share itself"
+msgstr ""
+
+msgid "Missing share price date"
+msgstr ""
+
+msgid "Missing share price actual price"
+msgstr ""
+
+msgid "Missing share price currency"
+msgstr ""
+
+msgid "Missing share price source"
+msgstr ""
+
+msgid "Max length for share price source is 250 characters"
 msgstr ""
 
 msgid "Arbitrage - Buy"
@@ -38,9 +63,6 @@ msgid "Arbitrage - Sell"
 msgstr ""
 
 msgid "Asset buy / subscription"
-msgstr ""
-
-msgid "Asset refund"
 msgstr ""
 
 msgid "Asset sell"
@@ -109,98 +131,22 @@ msgstr ""
 msgid "Missing transaction unit price"
 msgstr ""
 
-#, python-brace-format
-msgid "No price available for share {name} ({main_code})"
+msgid "Missing account name"
 msgstr ""
 
-msgid "Max length for share main code is 250 characters"
+msgid "Max length for account name is 250 characters"
 msgstr ""
 
-msgid "Missing share name"
+msgid "Max length for account code is 250 characters"
 msgstr ""
 
-msgid "Max length for share name is 250 characters"
-msgstr ""
-
-msgid "Share base currency can't be itself"
-msgstr ""
-
-msgid "Missing share price share ID"
-msgstr ""
-
-msgid "Share Price currency can't be the share itself"
-msgstr ""
-
-msgid "Missing share price date"
-msgstr ""
-
-msgid "Missing share price actual price"
-msgstr ""
-
-msgid "Missing share price currency"
-msgstr ""
-
-msgid "Missing share price source"
-msgstr ""
-
-msgid "Max length for share price source is 250 characters"
+msgid "Missing account base currency"
 msgstr ""
 
 msgid "Displays detailed information (for debug purpose)"
 msgstr ""
 
 msgid "Displays additional information (for end users)"
-msgstr ""
-
-msgid "Transactions"
-msgstr ""
-
-msgid "Display transactions"
-msgstr ""
-
-msgid "Graphs"
-msgstr ""
-
-msgid "Analysis"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "Code"
-msgstr ""
-
-msgid "Quantity"
-msgstr ""
-
-msgid "Value"
-msgstr ""
-
-msgid "As of date"
-msgstr ""
-
-msgid "Total invested"
-msgstr ""
-
-msgid "Edit"
-msgstr ""
-
-msgid "Unknown"
-msgstr ""
-
-msgid "Add new account"
-msgstr ""
-
-msgid "Accounts"
-msgstr ""
-
-msgid "Display your accounts"
-msgstr ""
-
-msgid "Display hidden accounts?"
 msgstr ""
 
 msgid "All"
@@ -213,6 +159,9 @@ msgid "Shares without group"
 msgstr ""
 
 msgid "Share"
+msgstr ""
+
+msgid "Name"
 msgstr ""
 
 msgid "Main code"
@@ -233,37 +182,31 @@ msgstr ""
 msgid "Group"
 msgstr ""
 
-msgid "Share Price"
+msgid "Account"
 msgstr ""
 
-msgid "Date"
-msgstr ""
-
-msgid "Price"
+msgid "Code"
 msgstr ""
 
 msgid "Currency"
 msgstr ""
 
-msgid "Source"
-msgstr ""
-
-msgid "Account"
-msgstr ""
-
 msgid "Active"
 msgstr ""
 
-msgid "Investment Tracker"
+msgid "ID"
 msgstr ""
 
-msgid "My main toolbar"
+msgid "Price"
 msgstr ""
 
 msgid "Price date"
 msgstr ""
 
 msgid "Hidden?"
+msgstr ""
+
+msgid "Edit"
 msgstr ""
 
 msgid "Add new group"
@@ -278,10 +221,25 @@ msgstr ""
 msgid "Display shares"
 msgstr ""
 
+msgid "Display hidden accounts?"
+msgstr ""
+
+msgid "Investment Tracker"
+msgstr ""
+
+msgid "My main toolbar"
+msgstr ""
+
 msgid "Please confirm"
 msgstr ""
 
 msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Source"
 msgstr ""
 
 msgid "Delete"
@@ -291,4 +249,70 @@ msgid "Share Prices"
 msgstr ""
 
 msgid "Displays share prices"
+msgstr ""
+
+msgid "Quantity"
+msgstr ""
+
+msgid "Value"
+msgstr ""
+
+msgid "As of date"
+msgstr ""
+
+msgid "Total invested"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Add new account"
+msgstr ""
+
+msgid "Accounts"
+msgstr ""
+
+msgid "Display your accounts"
+msgstr ""
+
+msgid "Display disabled accounts?"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Are you sure you want to delete this transaction?"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Asset delta"
+msgstr ""
+
+msgid "Rate"
+msgstr ""
+
+msgid "Currency delta"
+msgstr ""
+
+msgid "Cash balance"
+msgstr ""
+
+msgid "Asset balance"
+msgstr ""
+
+msgid "Transactions"
+msgstr ""
+
+msgid "Display transactions"
+msgstr ""
+
+msgid "Graphs"
+msgstr ""
+
+msgid "Display graphs"
+msgstr ""
+
+msgid "Display disabled shares?"
 msgstr ""
