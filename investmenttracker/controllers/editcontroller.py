@@ -1,20 +1,8 @@
 import gettext
 import datetime
 
-from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QDialogButtonBox,
-    QGroupBox,
-    QFormLayout,
-    QLineEdit,
-    QDateEdit,
-    QLabel,
-    QCheckBox,
-    QComboBox,
-    QDialog,
-)
-import PyQt5.QtGui
-from PyQt5.QtCore import QDate, Qt
+from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import Qt
 
 from models.base import ValidationException
 from .widgets.sharecombobox import ShareComboBox
@@ -34,11 +22,11 @@ class EditController:
             self.window.close()
             self.window = None
 
-        self.window = QDialog(self.parent_controller.parent_window)
+        self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
         self.window.setModal(True)
 
         # Display content
-        self.window.layout = QVBoxLayout()
+        self.window.layout = QtWidgets.QVBoxLayout()
         self.window.setWindowTitle(self.name)
         self.window.setLayout(self.window.layout)
 
@@ -48,23 +36,23 @@ class EditController:
         # TODO: Center the dialog compared to its parent
 
         # Create the form
-        form_group = QGroupBox("")
-        self.form_layout = QFormLayout()
+        form_group = QtWidgets.QGroupBox("")
+        self.form_layout = QtWidgets.QFormLayout()
         form_group.setLayout(self.form_layout)
         self.window.layout.addWidget(form_group)
 
         # Create the fields
         for field_id in self.fields:
             field = self.fields[field_id]
-            label = QLabel(_(field["label"]))
+            label = QtWidgets.QLabel(_(field["label"]))
 
             # Create the field widget
             if field["type"] == "text":
-                field["widget"] = QLineEdit()
+                field["widget"] = QtWidgets.QLineEdit()
                 field["widget"].setText(field.get("default", ""))
 
             elif field["type"] == "list":
-                field["widget"] = QComboBox()
+                field["widget"] = QtWidgets.QComboBox()
                 if "possible_values" in field:
                     field["widget"].addItem("", 0)
                     for val in field["possible_values"]:
@@ -76,19 +64,19 @@ class EditController:
                         field["widget"].setCurrentText(field["default"])
 
             elif field["type"] == "checkbox":
-                field["widget"] = QCheckBox()
+                field["widget"] = QtWidgets.QCheckBox()
                 field["widget"].setChecked(field.get("default", False))
 
             elif field["type"] == "date":
-                field["widget"] = QDateEdit()
+                field["widget"] = QtWidgets.QtCore.QDateEdit()
                 try:
-                    field["widget"].setDate(QDate.fromString(field["default"]))
+                    field["widget"].setDate(QtCore.QDate.fromString(field["default"]))
                 except:
-                    field["widget"].setDate(QDate.currentDate())
+                    field["widget"].setDate(QtCore.QDate.currentDate())
 
             elif field["type"] == "float":
-                field["widget"] = QLineEdit()
-                field["widget"].setValidator(PyQt5.QtGui.QDoubleValidator)
+                field["widget"] = QtWidgets.QLineEdit()
+                field["widget"].setValidator(QtGui.QDoubleValidator)
                 field["widget"].setText(field.get("default", ""))
 
             elif field["type"] == "sharelist":
@@ -111,8 +99,8 @@ class EditController:
             self.form_layout.addRow(label, field["widget"])
 
         # Create the validation buttons
-        buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        buttonBox = QDialogButtonBox(buttons)
+        buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        buttonBox = QtWidgets.QDialogButtonBox(buttons)
         buttonBox.accepted.connect(self.save)
         buttonBox.rejected.connect(self.close)
 
@@ -142,7 +130,7 @@ class EditController:
                 elif self.fields[field_id]["type"] == "date":
                     value = field_widget.date
 
-                    if type(value) == PyQt5.QtCore.QDate:
+                    if type(value) == QtCore.QDate:
                         value = datetime.datetime.fromisoformat(
                             value.toString(Qt.ISODate)
                         )
@@ -165,7 +153,7 @@ class EditController:
                 field_widget.setProperty("class", "validation_error")
                 field_widget.style().polish(field_widget)
 
-                error_widget = QLabel(e.message)
+                error_widget = QtWidgets.QLabel(e.message)
                 self.error_widgets.append(error_widget)
                 field_row = self.form_layout.getWidgetPosition(field_widget)
                 self.form_layout.insertRow(field_row[0] + 1, "", error_widget)

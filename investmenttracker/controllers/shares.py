@@ -1,16 +1,7 @@
 import gettext
 
-from PyQt5.QtGui import QIcon, QBrush, QColor
-from PyQt5.QtWidgets import (
-    QAction,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QPushButton,
-    QWidget,
-    QVBoxLayout,
-    QCheckBox,
-)
-import PyQt5.QtCore
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import Qt
 
 from models.base import NoPriceException
 import models.share
@@ -19,49 +10,50 @@ import controllers.sharegroup
 import controllers.share
 
 _ = gettext.gettext
+# TODO: Double-click on tree opens edit window
 
 
-class SharesTree(QTreeWidget):
+class SharesTree(QtWidgets.QTreeWidget):
     columns = [
         {
             "name": _("Name"),
             "size": 0.4,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("ID"),
             "size": 0,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Main code"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Price"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Price date"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Get prices online?"),
             "size": 100,
-            "alignment": PyQt5.QtCore.Qt.AlignCenter,
+            "alignment": Qt.AlignCenter,
         },
         {
             "name": _("Hidden?"),
             "size": 100,
-            "alignment": PyQt5.QtCore.Qt.AlignCenter,
+            "alignment": Qt.AlignCenter,
         },
         {
             "name": _("Edit"),
             "size": 50,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
     ]
 
@@ -152,7 +144,7 @@ class SharesTree(QTreeWidget):
         self.hideColumn(1)
 
     def resizeEvent(self, event):
-        PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
 
     def set_column_sizes(self, event):
@@ -167,7 +159,9 @@ class SharesTree(QTreeWidget):
                 self.setColumnWidth(i, self.columns[i]["size"])
 
     def add_group(self, name, group_id):
-        group_widget = QTreeWidgetItem([name, str(group_id), "", "", "", "", "", ""])
+        group_widget = QtWidgets.QTreeWidgetItem(
+            [name, str(group_id), "", "", "", "", "", ""]
+        )
         self.addTopLevelItem(group_widget)
 
         for i in range(len(self.columns)):
@@ -175,8 +169,8 @@ class SharesTree(QTreeWidget):
 
         # Existing group that can be changed
         if group_id > 0:
-            action_button = QPushButton()
-            action_button.setIcon(QIcon("assets/images/modify.png"))
+            action_button = QtWidgets.QPushButton()
+            action_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
             action_button.setProperty("class", "imagebutton")
             action_button.clicked.connect(
                 lambda _, name=("group", group_id): self.on_click_edit_button(name)
@@ -192,11 +186,11 @@ class SharesTree(QTreeWidget):
         # Add new group
         if group_id == 0:
             # Apply style
-            group_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
-            group_widget.setIcon(0, QIcon("assets/images/add.png"))
+            group_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
+            group_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
 
             # Add Create buttons
-            create_button = QPushButton()
+            create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
             create_button.clicked.connect(
                 lambda _, name=("group", 0): self.on_click_edit_button(name)
@@ -206,10 +200,8 @@ class SharesTree(QTreeWidget):
         return group_widget
 
     def add_share(self, data, parent_widget=None):
-        share_widget = QTreeWidgetItem([str(field) for field in data])
-        share_widget.setFlags(
-            share_widget.flags() & ~PyQt5.QtCore.Qt.ItemIsUserCheckable
-        )
+        share_widget = QtWidgets.QTreeWidgetItem([str(field) for field in data])
+        share_widget.setFlags(share_widget.flags() & ~Qt.ItemIsUserCheckable)
         if parent_widget:
             parent_widget.addChild(share_widget)
         else:
@@ -219,7 +211,7 @@ class SharesTree(QTreeWidget):
             if type(field) != bool:
                 continue
 
-            val = PyQt5.QtCore.Qt.Checked if field else PyQt5.QtCore.Qt.Unchecked
+            val = Qt.Checked if field else Qt.Unchecked
             share_widget.setCheckState(col, val)
             share_widget.setText(col, "")
 
@@ -228,8 +220,8 @@ class SharesTree(QTreeWidget):
 
         if data[1] > 0:
             # Add share edit button
-            edit_button = QPushButton()
-            edit_button.setIcon(QIcon("assets/images/modify.png"))
+            edit_button = QtWidgets.QPushButton()
+            edit_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
             edit_button.setProperty("class", "imagebutton")
             edit_button.clicked.connect(
                 lambda _, name=("share", data[1]): self.on_click_edit_button(name)
@@ -240,11 +232,11 @@ class SharesTree(QTreeWidget):
             font = share_widget.font(0)
             font.setItalic(True)
             share_widget.setFont(0, font)
-            share_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
-            share_widget.setIcon(0, QIcon("assets/images/add.png"))
+            share_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
+            share_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
 
             # Add Create buttons
-            create_button = QPushButton()
+            create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
             create_button.clicked.connect(
                 lambda _, name=("share", 0): self.on_click_edit_button(name)
@@ -278,23 +270,23 @@ class SharesController:
         self.groups = self.database.share_groups_get_all()
 
     def get_toolbar_button(self):
-        button = QAction(
-            QIcon("assets/images/shares.png"), _("Shares"), self.parent_window
+        button = QtWidgets.QAction(
+            QtGui.QIcon("assets/images/shares.png"), _("Shares"), self.parent_window
         )
         button.setStatusTip(_("Display shares"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
         return button
 
     def get_display_widget(self):
-        self.display_widget = QWidget()
-        self.display_widget.layout = QVBoxLayout()
+        self.display_widget = QtWidgets.QWidget()
+        self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
         self.tree = SharesTree(self)
         self.display_widget.layout.addWidget(self.tree)
         self.reload_data()
 
-        self.display_hidden_widget = QCheckBox(_("Display hidden accounts?"))
+        self.display_hidden_widget = QtWidgets.QCheckBox(_("Display hidden accounts?"))
         self.display_hidden_widget.stateChanged.connect(self.on_click_display_hidden)
         self.display_widget.layout.addWidget(self.display_hidden_widget)
 

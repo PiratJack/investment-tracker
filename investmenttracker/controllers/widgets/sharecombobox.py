@@ -1,15 +1,13 @@
 import gettext
 
-from PyQt5.QtWidgets import (
-    QComboBox,
-)
+from PyQt5 import QtWidgets
 
 import models.share
 
 _ = gettext.gettext
 
 
-class ShareComboBox(QComboBox):
+class ShareComboBox(QtWidgets.QComboBox):
     def __init__(self, database, parent=None, include_choice_all=0):
         super().__init__(parent)
         self.database = database

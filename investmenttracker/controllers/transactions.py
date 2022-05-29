@@ -1,25 +1,12 @@
 import gettext
 
-from PyQt5.QtGui import QIcon, QBrush, QColor
-from PyQt5.QtWidgets import (
-    QAction,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QCheckBox,
-    QAbstractItemView,
-    QTableView,
-    QMessageBox,
-)
-import PyQt5.QtCore
-from PyQt5.QtCore import QVariant, Qt
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import Qt
 
 _ = gettext.gettext
 
 
-class AccountsSharesTree(QTreeWidget):
+class AccountsSharesTree(QtWidgets.QTreeWidget):
     columns = [
         {
             "name": _("Name"),
@@ -45,7 +32,7 @@ class AccountsSharesTree(QTreeWidget):
 
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([_(col["name"]) for col in self.columns])
-        self.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
     def fill_tree(self, accounts):
@@ -70,7 +57,7 @@ class AccountsSharesTree(QTreeWidget):
         self.hideColumn(2)
 
     def resizeEvent(self, event):
-        PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
 
     def set_column_sizes(self, event):
@@ -84,7 +71,9 @@ class AccountsSharesTree(QTreeWidget):
                 self.setColumnWidth(i, self.columns[i]["size"])
 
     def add_account(self, account):
-        account_item = QTreeWidgetItem([account.name, "account", str(account.id)])
+        account_item = QtWidgets.QTreeWidgetItem(
+            [account.name, "account", str(account.id)]
+        )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
         for i in range(len(self.columns)):
             account_item.setTextAlignment(i, self.columns[i]["alignment"])
@@ -95,12 +84,12 @@ class AccountsSharesTree(QTreeWidget):
             account_item.setFont(0, font)
 
         if account.hidden:
-            account_item.setForeground(0, QBrush(QColor("#A0A0A0")))
+            account_item.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
 
         return account_item
 
     def add_share(self, share, parent_item=None):
-        share_item = QTreeWidgetItem(
+        share_item = QtWidgets.QTreeWidgetItem(
             [
                 share.name,
                 "share",
@@ -140,7 +129,7 @@ class AccountsSharesTree(QTreeWidget):
         self.parent_controller.on_change_selection(selected_accounts, selected_shares)
 
 
-class TransactionsTableModel(PyQt5.QtCore.QAbstractTableModel):
+class TransactionsTableModel(QtCore.QAbstractTableModel):
     def __init__(self, database, columns):
         super().__init__()
         self.columns = columns
@@ -181,22 +170,22 @@ class TransactionsTableModel(PyQt5.QtCore.QAbstractTableModel):
                 currency_total,  # Total in currency
                 transaction.account.balance_as_of_transaction(transaction)[0],
                 transaction.account.balance_as_of_transaction(transaction)[1],
-                QVariant(),
+                QtCore.QVariant(),
             ][col]
 
         if role == Qt.DecorationRole and col == len(self.columns) - 1:
-            return QVariant(QIcon("assets/images/delete.png"))
+            return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
 
     def headerData(self, column, orientation, role):
         if role != Qt.DisplayRole:
-            return QVariant()
+            return QtCore.QVariant()
 
         if orientation == Qt.Horizontal:
-            return PyQt5.QtCore.QVariant(_(self.columns[column]["name"]))
-        return QVariant()
+            return QtCore.QVariant(_(self.columns[column]["name"]))
+        return QtCore.QVariant()
 
     def set_filters(self, selected_accounts=None, selected_shares=None):
         self.transactions = self.database.transaction_get_by_account_and_shares(
@@ -209,15 +198,15 @@ class TransactionsTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def on_click_delete_button(self, index):
         transaction = self.transactions[index.row()]
-        messagebox = QMessageBox.critical(
+        messagebox = QtWidgets.QMessageBox.critical(
             self.parent(),
             _("Please confirm"),
             _("Are you sure you want to delete this transaction?"),
-            buttons=QMessageBox.Yes | QMessageBox.No,
-            defaultButton=QMessageBox.No,
+            buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            defaultButton=QtWidgets.QMessageBox.No,
         )
 
-        if messagebox == QMessageBox.Yes:
+        if messagebox == QtWidgets.QMessageBox.Yes:
             if transaction.id:
                 self.database.transaction_delete(transaction)
             self.beginRemoveRows(index, index.row(), index.row())
@@ -225,7 +214,7 @@ class TransactionsTableModel(PyQt5.QtCore.QAbstractTableModel):
             self.endRemoveRows()
 
 
-class TransactionsTableView(QTableView):
+class TransactionsTableView(QtWidgets.QTableView):
     columns = [
         {
             "name": _("Account"),
@@ -287,9 +276,6 @@ class TransactionsTableView(QTableView):
         self.model = TransactionsTableModel(self.database, self.columns)
         self.setModel(self.model)
         self.hideColumn(1)
-        # self.setItemDelegateForColumn(0, ShareDelegate(self, self.database))
-        # self.setItemDelegateForColumn(2, DateDelegate(self))
-        # self.setItemDelegateForColumn(4, ShareDelegate(self, self.database))
 
         self.clicked.connect(self.on_table_clicked)
 
@@ -299,7 +285,7 @@ class TransactionsTableView(QTableView):
         self.viewport().update()
 
     def resizeEvent(self, event):
-        PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
 
     def set_column_sizes(self, event):
@@ -326,8 +312,8 @@ class TransactionsController:
         self.database = parent_window.database
 
     def get_toolbar_button(self):
-        button = QAction(
-            QIcon("assets/images/transactions.png"),
+        button = QtWidgets.QAction(
+            QtGui.QIcon("assets/images/transactions.png"),
             _("Transactions"),
             self.parent_window,
         )
@@ -336,34 +322,38 @@ class TransactionsController:
         return button
 
     def get_display_widget(self):
-        self.display_widget = QWidget()
-        self.display_widget.layout = QHBoxLayout()
+        self.display_widget = QtWidgets.QWidget()
+        self.display_widget.layout = QtWidgets.QHBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
         self.parent_window.setCentralWidget(self.display_widget)
 
-        self.left_column = QWidget()
-        self.left_column.layout = QVBoxLayout()
+        self.left_column = QtWidgets.QWidget()
+        self.left_column.layout = QtWidgets.QVBoxLayout()
         self.left_column.setLayout(self.left_column.layout)
         self.display_widget.layout.addWidget(self.left_column, 1)
 
         self.tree = AccountsSharesTree(self)
         self.left_column.layout.addWidget(self.tree)
 
-        self.checkbox_hidden_accounts = QCheckBox(_("Display hidden accounts?"))
+        self.checkbox_hidden_accounts = QtWidgets.QCheckBox(
+            _("Display hidden accounts?")
+        )
         self.checkbox_hidden_accounts.stateChanged.connect(
             self.on_click_hidden_accounts
         )
         self.left_column.layout.addWidget(self.checkbox_hidden_accounts)
 
-        self.checkbox_disabled_accounts = QCheckBox(_("Display disabled accounts?"))
+        self.checkbox_disabled_accounts = QtWidgets.QCheckBox(
+            _("Display disabled accounts?")
+        )
         self.checkbox_disabled_accounts.stateChanged.connect(
             self.on_click_disabled_accounts
         )
         self.left_column.layout.addWidget(self.checkbox_disabled_accounts)
 
-        self.right_column = QWidget()
-        self.right_column.layout = QVBoxLayout()
+        self.right_column = QtWidgets.QWidget()
+        self.right_column.layout = QtWidgets.QVBoxLayout()
         self.right_column.setLayout(self.right_column.layout)
         self.display_widget.layout.addWidget(self.right_column, 4)
 

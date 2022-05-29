@@ -1,16 +1,7 @@
 import gettext
 
-from PyQt5.QtGui import QIcon, QBrush, QColor
-from PyQt5.QtWidgets import (
-    QAction,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QPushButton,
-    QWidget,
-    QVBoxLayout,
-    QCheckBox,
-)
-import PyQt5.QtCore
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import Qt
 
 from models.base import NoPriceException
 import controllers.account
@@ -19,47 +10,47 @@ _ = gettext.gettext
 # TODO: Double-click on tree opens edit window
 
 
-class AccountsTree(QTreeWidget):
+class AccountsTree(QtWidgets.QTreeWidget):
     columns = [
         {
             "name": _("Name"),
             "size": 0.4,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("ID"),
             "size": 0,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Code"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Quantity"),
             "size": 0.1,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Value"),
             "size": 0.1,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("As of date"),
             "size": 0.1,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Total invested"),
             "size": 0.1,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Edit"),
             "size": 50,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
     ]
 
@@ -78,7 +69,7 @@ class AccountsTree(QTreeWidget):
 
         # Fill in the data
         for account in accounts:
-            account_widget = QTreeWidgetItem(
+            account_widget = QtWidgets.QTreeWidgetItem(
                 [
                     account.name,
                     str(account.id),
@@ -102,7 +93,7 @@ class AccountsTree(QTreeWidget):
                 font = account_widget.font(0)
                 font.setItalic(True)
                 account_widget.setFont(0, font)
-                account_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
+                account_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
 
             # Add held shares
             children = []
@@ -136,7 +127,7 @@ class AccountsTree(QTreeWidget):
                 children.append(child)
 
             for child in children:
-                child_widget = QTreeWidgetItem(child)
+                child_widget = QtWidgets.QTreeWidgetItem(child)
                 for i in range(len(self.columns)):
                     child_widget.setTextAlignment(i, self.columns[i]["alignment"])
                 account_widget.addChild(child_widget)
@@ -144,7 +135,7 @@ class AccountsTree(QTreeWidget):
             tree_items.append(account_widget)
 
         # Add new account
-        new_account_widget = QTreeWidgetItem(
+        new_account_widget = QtWidgets.QTreeWidgetItem(
             [
                 _("Add new account"),
                 "0",
@@ -159,8 +150,8 @@ class AccountsTree(QTreeWidget):
         font = new_account_widget.font(0)
         font.setItalic(True)
         new_account_widget.setFont(0, font)
-        new_account_widget.setForeground(0, QBrush(QColor("#A0A0A0")))
-        new_account_widget.setIcon(0, QIcon("assets/images/add.png"))
+        new_account_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
+        new_account_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
         tree_items.append(new_account_widget)
 
         # Put everything in the tree
@@ -172,8 +163,8 @@ class AccountsTree(QTreeWidget):
             tree_item = tree_items[i]
             account_id = account.id
 
-            edit_button = QPushButton()
-            edit_button.setIcon(QIcon("assets/images/modify.png"))
+            edit_button = QtWidgets.QPushButton()
+            edit_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
             edit_button.setProperty("class", "imagebutton")
             edit_button.clicked.connect(
                 lambda _, name=account_id: self.on_click_edit_button(name)
@@ -181,13 +172,13 @@ class AccountsTree(QTreeWidget):
 
             self.setItemWidget(tree_item, self.column_edit_button, edit_button)
 
-        create_button = QPushButton()
+        create_button = QtWidgets.QPushButton()
         create_button.setProperty("class", "imagebutton align_left")
         create_button.clicked.connect(lambda _, name=0: self.on_click_edit_button(name))
         self.setItemWidget(new_account_widget, 0, create_button)
 
     def resizeEvent(self, event):
-        PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
 
     def set_column_sizes(self, event):
@@ -218,27 +209,27 @@ class AccountsController:
         self.accounts = self.database.accounts_get_all()
 
     def get_toolbar_button(self):
-        button = QAction(
-            QIcon("assets/images/accounts.png"), _("Accounts"), self.parent_window
+        button = QtWidgets.QAction(
+            QtGui.QIcon("assets/images/accounts.png"), _("Accounts"), self.parent_window
         )
         button.setStatusTip(_("Display your accounts"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
         return button
 
     def get_display_widget(self):
-        self.display_widget = QWidget()
-        self.display_widget.layout = QVBoxLayout()
+        self.display_widget = QtWidgets.QWidget()
+        self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
         self.tree = AccountsTree(self)
         self.tree.fill_accounts(self.accounts)
         self.display_widget.layout.addWidget(self.tree)
 
-        self.checkbox_hidden = QCheckBox(_("Display hidden accounts?"))
+        self.checkbox_hidden = QtWidgets.QCheckBox(_("Display hidden accounts?"))
         self.checkbox_hidden.stateChanged.connect(self.on_click_checkbox_hidden)
         self.display_widget.layout.addWidget(self.checkbox_hidden)
 
-        self.checkbox_disabled = QCheckBox(_("Display disabled accounts?"))
+        self.checkbox_disabled = QtWidgets.QCheckBox(_("Display disabled accounts?"))
         self.checkbox_disabled.stateChanged.connect(self.on_click_checkbox_disabled)
         self.display_widget.layout.addWidget(self.checkbox_disabled)
 

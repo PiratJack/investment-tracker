@@ -1,22 +1,9 @@
 import gettext
 import datetime
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (
-    QAction,
-    QWidget,
-    QTableView,
-    QDateEdit,
-    QVBoxLayout,
-    QGroupBox,
-    QFormLayout,
-    QLabel,
-    QMessageBox,
-)
-import PyQt5.QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import Qt
 import sqlalchemy.exc
-from PyQt5.QtCore import QVariant
-from PyQt5.QtCore import QDate, Qt
 
 from .widgets.sharecombobox import ShareComboBox
 from .widgets.delegates import DateDelegate, ShareDelegate
@@ -26,7 +13,7 @@ from models.shareprice import SharePrice as SharePriceDatabaseModel
 _ = gettext.gettext
 
 
-class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
+class SharePricesTableModel(QtCore.QAbstractTableModel):
     # Will load values 20 by 20
     row_batch_count = 20
 
@@ -60,7 +47,7 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
 
         # Update table
         self.beginInsertRows(
-            PyQt5.QtCore.QModelIndex(),
+            QtCore.QModelIndex(),
             len(self.share_prices),
             len(self.share_prices) + items_to_fetch - 1,
         )
@@ -72,23 +59,23 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
             return False
 
         col = index.column()
-        if role == PyQt5.QtCore.Qt.DisplayRole:
+        if role == Qt.DisplayRole:
             # New item row
             if index.row() == len(self.share_prices):
-                return QVariant()
+                return QtCore.QVariant()
 
             price = self.share_prices[index.row()]
             return [
-                price.share.name if price.share else QVariant(),
+                price.share.name if price.share else QtCore.QVariant(),
                 price.id,
-                price.date.strftime("%Y-%m-%d") if price.date else QVariant(),
+                price.date.strftime("%Y-%m-%d") if price.date else QtCore.QVariant(),
                 price.price,
-                price.currency.short_name() if price.currency else QVariant(),
+                price.currency.short_name() if price.currency else QtCore.QVariant(),
                 price.source,
-                QVariant(),
+                QtCore.QVariant(),
             ][col]
 
-        if role == PyQt5.QtCore.Qt.EditRole:
+        if role == Qt.EditRole:
             # New item row
             if index.row() == len(self.share_prices):
                 price = SharePriceDatabaseModel()
@@ -117,11 +104,11 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
             ][col]
 
         if (
-            role == PyQt5.QtCore.Qt.DecorationRole
+            role == Qt.DecorationRole
             and col == 6
             and index.row() != len(self.share_prices)
         ):
-            return QVariant(QIcon("assets/images/delete.png"))
+            return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
@@ -152,7 +139,7 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
 
                 self.database.session.add(price)
                 self.database.session.commit()
-                self.dataChanged.emit(index, index, [PyQt5.QtCore.Qt.EditRole])
+                self.dataChanged.emit(index, index, [Qt.EditRole])
                 return True
 
             except (sqlalchemy.exc.IntegrityError, models.base.ValidationException):
@@ -166,12 +153,12 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     def headerData(self, column, orientation, role):
-        if role != PyQt5.QtCore.Qt.DisplayRole:
-            return QVariant()
+        if role != Qt.DisplayRole:
+            return QtCore.QVariant()
 
-        if orientation == PyQt5.QtCore.Qt.Horizontal:
-            return PyQt5.QtCore.QVariant(_(self.columns[column]["name"]))
-        return QVariant()
+        if orientation == Qt.Horizontal:
+            return QtCore.QVariant(_(self.columns[column]["name"]))
+        return QtCore.QVariant()
 
     # Value -1 resets the filters
     def set_filters(self, share=None, date=None):
@@ -194,7 +181,7 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
 
         if date:
             # Convert to datetime.datetime object
-            if type(date) == PyQt5.QtCore.QDate:
+            if type(date) == QtCore.QDate:
                 self.date = datetime.datetime.fromisoformat(date.toString(Qt.ISODate))
             elif type(date) == datetime.datetime:
                 self.date = date
@@ -221,15 +208,15 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def on_click_delete_button(self, index):
         price = self.share_prices[index.row()]
-        messagebox = QMessageBox.critical(
+        messagebox = QtWidgets.QMessageBox.critical(
             self.parent(),
             _("Please confirm"),
             _("Are you sure you want to delete this price?"),
-            buttons=QMessageBox.Yes | QMessageBox.No,
-            defaultButton=QMessageBox.No,
+            buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            defaultButton=QtWidgets.QMessageBox.No,
         )
 
-        if messagebox == QMessageBox.Yes:
+        if messagebox == QtWidgets.QMessageBox.Yes:
             if price.id:
                 self.database.share_price_delete(price)
             self.beginRemoveRows(index, index.row(), index.row())
@@ -237,42 +224,42 @@ class SharePricesTableModel(PyQt5.QtCore.QAbstractTableModel):
             self.endRemoveRows()
 
 
-class SharePricesTableView(QTableView):
+class SharePricesTableView(QtWidgets.QTableView):
     columns = [
         {
             "name": _("Share"),
             "size": 0.3,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("ID"),
             "size": 0,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Date"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Price"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignRight,
+            "alignment": Qt.AlignRight,
         },
         {
             "name": _("Currency"),
             "size": 0.1,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Source"),
             "size": 0.2,
-            "alignment": PyQt5.QtCore.Qt.AlignLeft,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Delete"),
             "size": 80,
-            "alignment": PyQt5.QtCore.Qt.AlignCenter,
+            "alignment": Qt.AlignCenter,
         },
     ]
 
@@ -296,7 +283,7 @@ class SharePricesTableView(QTableView):
         self.viewport().update()
 
     def resizeEvent(self, event):
-        PyQt5.QtWidgets.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
 
     def set_column_sizes(self, event):
@@ -323,33 +310,35 @@ class SharePricesController:
         self.database = parent_window.database
 
     def get_toolbar_button(self):
-        button = QAction(
-            QIcon("assets/images/money.png"), _("Share Prices"), self.parent_window
+        button = QtWidgets.QAction(
+            QtGui.QIcon("assets/images/money.png"),
+            _("Share Prices"),
+            self.parent_window,
         )
         button.setStatusTip(_("Displays share prices"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
         return button
 
     def get_display_widget(self):
-        self.display_widget = QWidget()
-        self.display_widget.layout = QVBoxLayout()
+        self.display_widget = QtWidgets.QWidget()
+        self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
         # Create the group of fields at the top
-        form_group = QGroupBox("")
-        self.form_layout = QFormLayout()
+        form_group = QtWidgets.QGroupBox("")
+        self.form_layout = QtWidgets.QFormLayout()
         form_group.setLayout(self.form_layout)
         self.display_widget.layout.addWidget(form_group)
 
         # Add Share field
         self.field_share = ShareComboBox(self.database, include_choice_all=True)
-        self.form_layout.addRow(QLabel(_("Share")), self.field_share)
+        self.form_layout.addRow(QtWidgets.QLabel(_("Share")), self.field_share)
         self.field_share.currentIndexChanged.connect(self.on_select_share)
 
         # Add Date field
-        self.field_date = QDateEdit()
-        self.form_layout.addRow(QLabel("Date"), self.field_date)
-        default_date = QDate.currentDate().addMonths(-1)
+        self.field_date = QtWidgets.QDateEdit()
+        self.form_layout.addRow(QtWidgets.QLabel("Date"), self.field_date)
+        default_date = QtCore.QDate.currentDate().addMonths(-1)
         self.field_date.setDate(default_date)
         width = self.field_date.sizeHint().width()
         self.field_date.dateChanged.connect(self.on_select_date)
