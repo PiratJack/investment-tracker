@@ -58,16 +58,15 @@ class TransactionController(EditController):
         ]
         if transaction_id:
             self.item = self.database.transaction_get_by_id(transaction_id)
-            self.fields["account_id"]["default"] = self.item.account_id
-            self.fields["date"]["default"] = self.item.date
-            self.fields["label"]["default"] = self.item.label
-            self.fields["type"]["default"] = self.item.type.name
-            self.fields["quantity"]["default"] = self.item.quantity
-            self.fields["share_id"]["default"] = self.item.share_id
-            self.fields["unit_price"]["default"] = self.item.unit_price
-
         else:
             self.item = models.transaction.Transaction()
+        self.fields["account_id"]["default"] = self.item.account_id
+        self.fields["date"]["default"] = self.item.date
+        self.fields["label"]["default"] = self.item.label
+        self.fields["type"]["default"] = self.item.type.name
+        self.fields["quantity"]["default"] = self.item.quantity
+        self.fields["share_id"]["default"] = self.item.share_id
+        self.fields["unit_price"]["default"] = self.item.unit_price
 
     def close(self):
         self.window.close()
