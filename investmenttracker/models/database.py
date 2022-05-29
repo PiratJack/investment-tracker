@@ -78,6 +78,12 @@ class Database:
         self.session.commit()
 
     # Transactions
+    def transaction_get_by_id(self, transaction_id):
+        return (
+            self.session.query(transaction.Transaction)
+            .filter(transaction.Transaction.id == transaction_id)
+            .one()
+        )
 
     # Get transactions that are in some accounts OR combination of accounts + shares
     def transaction_get_by_account_and_shares(self, accounts, account_shares):

@@ -96,7 +96,15 @@ class TestTransaction(unittest.TestCase):
         os.remove(DATABASE_FILE)
 
     def test_gets(self):
-        # Database selects & filters
+        # Direct select
+        transaction = self.database.transaction_get_by_id(1)
+        self.assertEqual(
+            transaction.label,
+            "First investment",
+            "Transaction has the wrong label",
+        )
+
+        # Select through account
         account = self.database.accounts_get_by_id(1)
         self.assertEqual(
             len(account.transactions),
