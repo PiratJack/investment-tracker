@@ -30,11 +30,6 @@ class EditController:
         self.window.setWindowTitle(self.name)
         self.window.setLayout(self.window.layout)
 
-        # Size & Move to center
-        self.window.setMinimumSize(300, 200)
-        self.window.resize(500, 300)
-        # TODO: Center the dialog compared to its parent
-
         # Create the form
         form_group = QtWidgets.QGroupBox("")
         self.form_layout = QtWidgets.QFormLayout()
@@ -68,16 +63,22 @@ class EditController:
                 field["widget"].setChecked(field.get("default", False))
 
             elif field["type"] == "date":
-                field["widget"] = QtWidgets.QtCore.QDateEdit()
+                field["widget"] = QtWidgets.QDateEdit()
+                width = field["widget"].sizeHint().width()
+                field["widget"].setMinimumWidth(width * 2)
+
                 try:
                     field["widget"].setDate(QtCore.QDate.fromString(field["default"]))
                 except:
-                    field["widget"].setDate(QtCore.QDate.currentDate())
+                    try:
+                        field["widget"].setDate(QtCore.QDate(field["default"]))
+                    except:
+                        field["widget"].setDate(QtCore.QDate.currentDate())
 
             elif field["type"] == "float":
                 field["widget"] = QtWidgets.QLineEdit()
-                field["widget"].setValidator(QtGui.QDoubleValidator)
-                field["widget"].setText(field.get("default", ""))
+                field["widget"].setValidator(QtGui.QDoubleValidator())
+                field["widget"].setText(str(field.get("default", "")))
 
             elif field["type"] == "sharelist":
                 include_choice_all = field.get("include_all_choice", False)
@@ -105,6 +106,10 @@ class EditController:
         buttonBox.rejected.connect(self.close)
 
         self.window.layout.addWidget(buttonBox)
+        # Size & Move to center
+        self.window.setMinimumSize(300, 200)
+        self.window.resize(self.window.layout.sizeHint())
+        # TODO: Center the dialog compared to its parent
 
         self.window.exec()
 
@@ -134,6 +139,10 @@ class EditController:
                         value = datetime.datetime.fromisoformat(
                             value.toString(Qt.ISODate)
                         )
+                    elif callable(value):
+                        value = datetime.datetime.fromisoformat(
+                            value().toString(Qt.ISODate)
+                        )
                     elif type(value) == datetime.datetime:
                         value = value
                     elif type(value) == str:
@@ -143,7 +152,10 @@ class EditController:
                     else:
                         value = ""
                 elif self.fields[field_id]["type"] == "float":
-                    value = float(field_widget.text())
+                    if field_widget.text() == "":
+                        value = 0
+                    else:
+                        value = float(field_widget.text())
 
                 setattr(self.item, field_id, value)
 
