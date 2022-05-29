@@ -159,7 +159,7 @@ class TestAccount(unittest.TestCase):
             "There should be 1 account with ID 1",
         )
         self.assertEqual(
-            len(self.database.accounts_get_all()),
+            len(self.database.accounts_get()),
             2,
             "Only 2 accounts are visible & enabled",
         )
@@ -211,24 +211,24 @@ class TestAccount(unittest.TestCase):
     def test_attributes(self):
         # Account balance
         self.assertEqual(
-            self.database.accounts_get_all()[0].balance,
+            self.database.accounts_get()[0].balance,
             3010,
             "Account balance should be 3010",
         )
 
         # Shares held
-        shares = self.database.accounts_get_all()[0].shares
+        shares = self.database.accounts_get()[0].shares
         self.assertEqual(shares[2], 40, "Account should have 40 NYSE:ACN")
         self.assertEqual(shares[3], 10, "Account should have 10 NASDAQ:WDAY")
 
         # Total invested
-        total_invested = self.database.accounts_get_all()[0].total_invested
+        total_invested = self.database.accounts_get()[0].total_invested
         self.assertEqual(
             total_invested, 10000, "Total invested in account should be 10k"
         )
 
         # Total value
-        total_value = self.database.accounts_get_all()[0].total_value
+        total_value = self.database.accounts_get()[0].total_value
         self.assertEqual(total_value, 0, "INVALID TEST")
 
         # Asset & cash balance per transaction

@@ -206,7 +206,7 @@ class AccountsController:
     def __init__(self, parent_window):
         self.parent_window = parent_window
         self.database = parent_window.database
-        self.accounts = self.database.accounts_get_all()
+        self.accounts = self.database.accounts_get()
 
     def get_toolbar_button(self):
         button = QtWidgets.QAction(

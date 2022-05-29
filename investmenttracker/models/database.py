@@ -23,14 +23,6 @@ class Database:
         Base.metadata.create_all(self.engine)
 
     # Accounts
-    def accounts_get_all(self):
-        return (
-            self.session.query(account.Account)
-            .filter(account.Account.hidden == False)
-            .filter(account.Account.enabled == True)
-            .all()
-        )
-
     def accounts_get(self, with_hidden=False, with_disabled=False):
         query = self.session.query(account.Account)
         if not with_hidden:
