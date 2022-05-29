@@ -3,6 +3,8 @@ import gettext
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 
+import controllers.transaction
+
 _ = gettext.gettext
 
 
@@ -24,6 +26,8 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
             "alignment": Qt.AlignRight,
         },
     ]
+    selected_accounts = []
+    selected_shares = {}
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -107,26 +111,56 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
         return share_item
 
     def on_select_item(self):
+        self.parent_controller.on_change_selection(*self.get_selected_items())
+
+    def store_item_selection(self):
+        self.selected_accounts, self.selected_shares = self.get_selected_items()
+
+    def get_selected_items(self):
         role = Qt.DisplayRole
         selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()
         ]
 
         share_accounts = set(
-            i.parent().data(2, role)
+            int(i.parent().data(2, role))
             for i in self.selectedItems()
-            if i.parent() and i.parent().data(2, role) not in selected_accounts
+            if i.parent() and i.parent().data(2, role) not in self.selected_accounts
         )
         selected_shares = {
             account_id: [
                 int(i.data(2, role))
                 for i in self.selectedItems()
-                if i.parent() and i.parent().data(2, role) == account_id
+                if i.parent() and i.parent().data(2, role) == str(account_id)
             ]
             for account_id in share_accounts
         }
 
-        self.parent_controller.on_change_selection(selected_accounts, selected_shares)
+        return (selected_accounts, selected_shares)
+
+    def restore_item_selection(self):
+        role = Qt.DisplayRole
+        # Restore selected accounts
+        for account_id in self.selected_accounts:
+            items = self.findItems(str(account_id), Qt.MatchExactly, 2)
+            for item in items:
+                item.setSelected(True)
+
+        # Restore selected shares
+        for account_id, shares_ids in self.selected_shares.items():
+            share_items = [
+                i
+                for share_id in shares_ids
+                for i in self.findItems(
+                    str(share_id), Qt.MatchExactly | Qt.MatchRecursive, 2
+                )
+                if i.data(1, role) == "share"
+                and i.parent()
+                and i.parent().data(2, role) == str(account_id)
+            ]
+
+            for share_item in share_items:
+                share_item.setSelected(True)
 
 
 class TransactionsTableModel(QtCore.QAbstractTableModel):
@@ -164,15 +198,20 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.account.name,
                 transaction.id,
                 str(transaction.date),
+                transaction.type.value["name"],
                 transaction.label,
                 asset_total,
+                transaction.share.short_name() if transaction.share else "",
+                transaction.account.balance_as_of_transaction(transaction)[1],
                 transaction.unit_price if transaction.unit_price != 1 else "",
                 currency_total,  # Total in currency
                 transaction.account.balance_as_of_transaction(transaction)[0],
-                transaction.account.balance_as_of_transaction(transaction)[1],
+                QtCore.QVariant(),
                 QtCore.QVariant(),
             ][col]
 
+        if role == Qt.DecorationRole and col == len(self.columns) - 2:
+            return QtCore.QVariant(QtGui.QIcon("assets/images/modify.png"))
         if role == Qt.DecorationRole and col == len(self.columns) - 1:
             return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
@@ -192,33 +231,15 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
             selected_accounts, selected_shares
         )
 
-    def on_table_clicked(self, index):
-        if index.column() == len(self.columns) - 1:
-            self.on_click_delete_button(index)
-
-    def on_click_delete_button(self, index):
-        transaction = self.transactions[index.row()]
-        messagebox = QtWidgets.QMessageBox.critical(
-            self.parent(),
-            _("Please confirm"),
-            _("Are you sure you want to delete this transaction?"),
-            buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-            defaultButton=QtWidgets.QMessageBox.No,
-        )
-
-        if messagebox == QtWidgets.QMessageBox.Yes:
-            if transaction.id:
-                self.database.transaction_delete(transaction)
-            self.beginRemoveRows(index, index.row(), index.row())
-            self.set_filters()  # Reload the data
-            self.endRemoveRows()
+    def get_transaction(self, index):
+        return self.transactions[index.row()]
 
 
 class TransactionsTableView(QtWidgets.QTableView):
     columns = [
         {
             "name": _("Account"),
-            "size": 0.2,
+            "size": 0.1,
             "alignment": Qt.AlignLeft,
         },
         {
@@ -232,23 +253,38 @@ class TransactionsTableView(QtWidgets.QTableView):
             "alignment": Qt.AlignLeft,
         },
         {
+            "name": _("Type"),
+            "size": 0.15,
+            "alignment": Qt.AlignLeft,
+        },
+        {
             "name": _("Label"),
             "size": 0.2,
             "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Asset delta"),
+            "size": 0.05,
+            "alignment": Qt.AlignRight,
+        },
+        {
+            "name": _("Share"),
+            "size": 0.1,
+            "alignment": Qt.AlignRight,
+        },
+        {
+            "name": _("Asset balance"),
             "size": 0.1,
             "alignment": Qt.AlignRight,
         },
         {
             "name": _("Rate"),
-            "size": 0.1,
+            "size": 0.05,
             "alignment": Qt.AlignRight,
         },
         {
             "name": _("Currency delta"),
-            "size": 0.1,
+            "size": 0.05,
             "alignment": Qt.AlignRight,
         },
         {
@@ -257,9 +293,9 @@ class TransactionsTableView(QtWidgets.QTableView):
             "alignment": Qt.AlignRight,
         },
         {
-            "name": _("Asset balance"),
-            "size": 0.1,
-            "alignment": Qt.AlignRight,
+            "name": _("Edit"),
+            "size": 80,
+            "alignment": Qt.AlignCenter,
         },
         {
             "name": _("Delete"),
@@ -299,7 +335,34 @@ class TransactionsTableView(QtWidgets.QTableView):
                 self.setColumnWidth(i, self.columns[i]["size"])
 
     def on_table_clicked(self, index):
-        self.model.on_table_clicked(index)
+        transaction = self.model.get_transaction(index)
+        # Edit button
+        if index.column() == len(self.columns) - 2:
+            self.parent_controller.store_tree_item_selection()
+
+            self.transaction_details = controllers.transaction.TransactionController(
+                self.parent_controller, transaction.id
+            )
+            self.transaction_details.show_window()
+
+            self.parent_controller.restore_tree_item_selection()
+
+        # Delete button
+        elif index.column() == len(self.columns) - 1:
+            messagebox = QtWidgets.QMessageBox.critical(
+                self.parent(),
+                _("Please confirm"),
+                _("Are you sure you want to delete this transaction?"),
+                buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                defaultButton=QtWidgets.QMessageBox.No,
+            )
+
+            if messagebox == QtWidgets.QMessageBox.Yes:
+                if transaction.id:
+                    self.database.transaction_delete(transaction)
+                self.beginRemoveRows(index, index.row(), index.row())
+                self.set_filters()  # Reload the data
+                self.endRemoveRows()
 
 
 class TransactionsController:
@@ -386,3 +449,9 @@ class TransactionsController:
 
     def on_change_selection(self, selected_accounts, selected_shares):
         self.table.set_filters(selected_accounts, selected_shares)
+
+    def store_tree_item_selection(self):
+        self.tree.store_item_selection()
+
+    def restore_tree_item_selection(self):
+        self.tree.restore_item_selection()

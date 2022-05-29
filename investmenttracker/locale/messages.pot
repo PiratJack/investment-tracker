@@ -194,61 +194,10 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-msgid "Investment Tracker"
-msgstr ""
-
-msgid "My main toolbar"
-msgstr ""
-
-msgid "Please confirm"
-msgstr ""
-
-msgid "Are you sure you want to delete this price?"
-msgstr ""
-
 msgid "ID"
 msgstr ""
 
-msgid "Date"
-msgstr ""
-
 msgid "Price"
-msgstr ""
-
-msgid "Source"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Share Prices"
-msgstr ""
-
-msgid "Displays share prices"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Accounts"
-msgstr ""
-
-msgid "Shares"
-msgstr ""
-
-msgid "Graphs"
-msgstr ""
-
-msgid "Display graphs"
-msgstr ""
-
-msgid "Display hidden accounts?"
-msgstr ""
-
-msgid "Display disabled accounts?"
-msgstr ""
-
-msgid "Display disabled shares?"
 msgstr ""
 
 msgid "Price date"
@@ -266,34 +215,31 @@ msgstr ""
 msgid "Add new share"
 msgstr ""
 
+msgid "Shares"
+msgstr ""
+
 msgid "Display shares"
 msgstr ""
 
-msgid "Are you sure you want to delete this transaction?"
+msgid "Display hidden accounts?"
 msgstr ""
 
-msgid "Label"
+msgid "Type"
 msgstr ""
 
-msgid "Asset delta"
+msgid "Accounts"
 msgstr ""
 
-msgid "Rate"
+msgid "Graphs"
 msgstr ""
 
-msgid "Currency delta"
+msgid "Display graphs"
 msgstr ""
 
-msgid "Cash balance"
+msgid "Display disabled accounts?"
 msgstr ""
 
-msgid "Asset balance"
-msgstr ""
-
-msgid "Transactions"
-msgstr ""
-
-msgid "Display transactions"
+msgid "Display disabled shares?"
 msgstr ""
 
 msgid "Quantity"
@@ -315,4 +261,61 @@ msgid "Add new account"
 msgstr ""
 
 msgid "Display your accounts"
+msgstr ""
+
+msgid "Investment Tracker"
+msgstr ""
+
+msgid "My main toolbar"
+msgstr ""
+
+msgid "Please confirm"
+msgstr ""
+
+msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Share Prices"
+msgstr ""
+
+msgid "Displays share prices"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Asset delta"
+msgstr ""
+
+msgid "Asset balance"
+msgstr ""
+
+msgid "Rate"
+msgstr ""
+
+msgid "Currency delta"
+msgstr ""
+
+msgid "Cash balance"
+msgstr ""
+
+msgid "Are you sure you want to delete this transaction?"
+msgstr ""
+
+msgid "Transactions"
+msgstr ""
+
+msgid "Display transactions"
+msgstr ""
+
+msgid "Transaction"
 msgstr ""
