@@ -74,10 +74,16 @@ class EditController:
                     except:
                         field["widget"].setDate(QtCore.QDate.currentDate())
 
-            elif field["type"] == "float":
-                field["widget"] = QtWidgets.QLineEdit()
-                field["widget"].setValidator(QtGui.QDoubleValidator())
-                field["widget"].setText(str(field.get("default", "")))
+            elif field["type"][-5:] == "float":
+                field["widget"] = QtWidgets.QDoubleSpinBox()
+
+                field["widget"].setDecimals(6)
+
+                if field["type"] == "positivefloat":
+                    field["widget"].setMinimum(0)
+                field["widget"].setMaximum(10**10)
+
+                field["widget"].setValue(field.get("default", 0))
 
             elif field["type"] == "sharelist":
                 include_choice_all = field.get("include_all_choice", False)
@@ -150,11 +156,8 @@ class EditController:
                         value = datetime.datetime.fromtimestamp(value)
                     else:
                         value = ""
-                elif self.fields[field_id]["type"] == "float":
-                    if field_widget.text() == "":
-                        value = 0
-                    else:
-                        value = float(field_widget.text())
+                elif self.fields[field_id]["type"][-5:] == "float":
+                    value = field_widget.value()
 
                 setattr(self.item, field_id, value)
 
