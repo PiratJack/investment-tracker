@@ -1,4 +1,7 @@
 import gettext
+import datetime
+
+from PyQt5.QtCore import Qt
 
 import models.transaction
 from controllers.editcontroller import EditController
@@ -28,7 +31,7 @@ class TransactionController(EditController):
         },
         "quantity": {
             "label": _("Asset delta"),
-            "type": "float",
+            "type": "positivefloat",
         },
         "share_id": {
             "label": _("Share"),
@@ -36,11 +39,15 @@ class TransactionController(EditController):
         },
         "unit_price": {
             "label": _("Rate"),
-            "type": "float",
+            "type": "positivefloat",
+        },
+        "known_unit_price": {
+            "label": _("Known rate"),
+            "type": "list",
         },
         "currency_delta": {
             "label": _("Currency delta"),
-            "type": "float",
+            "type": "positivefloat",
         },
     }
 
@@ -67,6 +74,126 @@ class TransactionController(EditController):
         self.fields["quantity"]["default"] = self.item.quantity
         self.fields["share_id"]["default"] = self.item.share_id
         self.fields["unit_price"]["default"] = self.item.unit_price
+
+        # Add triggers (hide/show fields, calculations, ...)
+        self.fields["type"]["onchange"] = self.on_change_type
+        self.fields["quantity"]["onchange"] = self.on_change_quantity_or_unit_price
+        self.fields["unit_price"]["onchange"] = self.on_change_quantity_or_unit_price
+        self.fields["currency_delta"]["onchange"] = self.on_change_currency_delta
+
+        self.fields["date"]["onchange"] = self.on_change_share_or_date
+        self.fields["share_id"]["onchange"] = self.on_change_share_or_date
+        self.fields["known_unit_price"]["onchange"] = self.on_change_known_unit_price
+
+    def on_change_type(self):
+        value = self.fields["type"]["widget"].currentData()
+        for field_id in (
+            "quantity",
+            "share_id",
+            "unit_price",
+            "known_unit_price",
+            "currency_delta",
+        ):
+            self.fields[field_id]["widget"].hide()
+            self.form_layout.labelForField(self.fields[field_id]["widget"]).hide()
+
+        transaction_type = [
+            v for v in models.transaction.TransactionTypes if v.name == value
+        ]
+        if transaction_type:
+            transaction_type = transaction_type[0].value
+            if transaction_type["impact_asset"]:
+                for field_id in ("quantity", "share_id"):
+                    self.fields[field_id]["widget"].show()
+                    self.form_layout.labelForField(
+                        self.fields[field_id]["widget"]
+                    ).show()
+
+            if transaction_type["impact_currency"]:
+                for field_id in ("currency_delta",):
+                    self.fields[field_id]["widget"].show()
+                    self.form_layout.labelForField(
+                        self.fields[field_id]["widget"]
+                    ).show()
+
+            if transaction_type["impact_asset"] and transaction_type["impact_currency"]:
+                for field_id in ("unit_price", "known_unit_price"):
+                    self.fields[field_id]["widget"].show()
+                    self.form_layout.labelForField(
+                        self.fields[field_id]["widget"]
+                    ).show()
+
+    def on_change_quantity_or_unit_price(self):
+        total = self.get_quantity() * self.get_unit_price()
+        self.fields["currency_delta"]["widget"].setValue(total)
+
+    def on_change_currency_delta(self):
+        try:
+            unit_price = self.get_currency_delta() / self.get_quantity()
+            self.fields["unit_price"]["widget"].setValue(unit_price)
+        except:
+            pass
+
+    def on_change_share_or_date(self):
+        date = datetime.datetime.fromisoformat(
+            self.fields["date"]["widget"].date().toString(Qt.ISODate)
+        )
+
+        # Get share
+        share_id = self.fields["share_id"]["widget"].currentData()
+        if share_id == 0:
+            return
+
+        # Get account (for base currency)
+        account_id = self.fields["account_id"]["widget"].currentData()
+        if account_id == 0:
+            return
+        account = self.database.accounts_get_by_id(account_id)
+        currency = account.base_currency
+        if not currency:
+            return
+
+        prices = self.database.share_price_get(
+            share=share_id, currency=currency, date=date
+        )
+        prices = sorted(prices, key=lambda price: price.date, reverse=True)
+
+        self.fields["known_unit_price"]["widget"].clear()
+        self.fields["known_unit_price"]["widget"].addItem("", -1)
+        for price in prices:
+            self.fields["known_unit_price"]["widget"].addItem(price.short_name(), price)
+
+    def on_change_known_unit_price(self):
+        chosen_price = self.fields["known_unit_price"]["widget"].currentData()
+        if chosen_price and not type(chosen_price) == int:
+            self.fields["unit_price"]["widget"].setValue(chosen_price.price)
+
+    def get_quantity(self):
+        return self.fields["quantity"]["widget"].value()
+
+    def get_unit_price(self):
+        return self.fields["unit_price"]["widget"].value()
+
+    def get_currency_delta(self):
+        return self.fields["currency_delta"]["widget"].value()
+
+    def save(self):
+        value = self.fields["type"]["widget"].currentData()
+        transaction_type = [
+            v for v in models.transaction.TransactionTypes if v.name == value
+        ]
+        if transaction_type:
+            transaction_type = transaction_type[0].value
+            if (
+                not transaction_type["impact_asset"]
+                and transaction_type["impact_currency"]
+            ):
+                self.fields["quantity"]["widget"].setValue(
+                    self.fields["currency_delta"]["widget"].value()
+                )
+                self.fields["unit_price"]["widget"].setValue(1)
+
+        super().save()
 
     def close(self):
         self.window.close()

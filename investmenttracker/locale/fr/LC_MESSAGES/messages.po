@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-05-29 17:45+0200\n"
+"PO-Revision-Date: 2022-06-19 20:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -50,26 +50,17 @@ msgstr "La longueur maximale du nom de l'acion est de 250 caractères"
 msgid "Share base currency can't be itself"
 msgstr "Une action ne peut avoir elle-même comme monnaie de base"
 
-msgid "Missing share price share ID"
-msgstr "Valeur manquante: ID du titre sur le prix"
+msgid "Missing account name"
+msgstr "Nom du compte manquant"
 
-msgid "Share Price currency can't be the share itself"
-msgstr "Une valeur ne peut avoir l'action elle-même comme monnaie"
+msgid "Max length for account name is 250 characters"
+msgstr "La longueur maximale du nom du compte est de 250 caractères"
 
-msgid "Missing share price date"
-msgstr "Valeur manquante: date du prix"
+msgid "Max length for account code is 250 characters"
+msgstr "La longueur maximale du code du compte est de 250 caractères"
 
-msgid "Missing share price actual price"
-msgstr "Valeur manquante: prix unitaire du titre"
-
-msgid "Missing share price currency"
-msgstr "Valeur manquante: monnaie du prix"
-
-msgid "Missing share price source"
-msgstr "Valeur manquante: source du prix"
-
-msgid "Max length for share price source is 250 characters"
-msgstr "La longueur maximale de la source du prix est de 250 caractères"
+msgid "Missing account base currency"
+msgstr "Monnaie du compte manquante"
 
 msgid "Arbitrage - Buy"
 msgstr "Arbitrage - Achat"
@@ -146,17 +137,26 @@ msgstr "Quantité manquante pour la transaction"
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
 
-msgid "Missing account name"
-msgstr "Nom du compte manquant"
+msgid "Missing share price share ID"
+msgstr "Valeur manquante: ID du titre sur le prix"
 
-msgid "Max length for account name is 250 characters"
-msgstr "La longueur maximale du nom du compte est de 250 caractères"
+msgid "Share Price currency can't be the share itself"
+msgstr "Une valeur ne peut avoir l'action elle-même comme monnaie"
 
-msgid "Max length for account code is 250 characters"
-msgstr "La longueur maximale du code du compte est de 250 caractères"
+msgid "Missing share price date"
+msgstr "Valeur manquante: date du prix"
 
-msgid "Missing account base currency"
-msgstr "Monnaie du compte manquante"
+msgid "Missing share price actual price"
+msgstr "Valeur manquante: prix unitaire du titre"
+
+msgid "Missing share price currency"
+msgstr "Valeur manquante: monnaie du prix"
+
+msgid "Missing share price source"
+msgstr "Valeur manquante: source du prix"
+
+msgid "Max length for share price source is 250 characters"
+msgstr "La longueur maximale de la source du prix est de 250 caractères"
 
 msgid "Displays detailed information (for debug purpose)"
 msgstr "Afficher plus de détails (debug)"
@@ -173,77 +173,20 @@ msgstr "Choisir une valeur"
 msgid "Shares without group"
 msgstr "Titres non groupés"
 
-msgid "Share"
-msgstr "Titre"
-
 msgid "Name"
 msgstr "Nom"
-
-msgid "Main code"
-msgstr "Code principal"
-
-msgid "Get prices online?"
-msgstr "Récupérer les valeurs?"
-
-msgid "Enabled"
-msgstr "Activé"
-
-msgid "Base currency"
-msgstr "Monnaie de base"
-
-msgid "Hidden"
-msgstr "Masqué"
-
-msgid "Group"
-msgstr "Groupe"
-
-msgid "Account"
-msgstr "Compte"
-
-msgid "Code"
-msgstr "Code"
-
-msgid "Currency"
-msgstr "Monnaie"
-
-msgid "Active"
-msgstr "Actif"
-
-msgid "ID"
-msgstr "ID"
-
-msgid "Price"
-msgstr "Prix"
-
-msgid "Price date"
-msgstr "Date de valeur"
-
-msgid "Hidden?"
-msgstr "Masqué?"
-
-msgid "Edit"
-msgstr "Modifier"
-
-msgid "Add new group"
-msgstr "Ajouter un nouveau groupe"
-
-msgid "Add new share"
-msgstr "Ajouter un nouveau titre"
-
-msgid "Shares"
-msgstr "Titres"
-
-msgid "Display shares"
-msgstr "Afficher les titres"
-
-msgid "Display hidden accounts?"
-msgstr "Afficher les comptes masqués?"
 
 msgid "Type"
 msgstr "Type"
 
+msgid "ID"
+msgstr "ID"
+
 msgid "Accounts"
 msgstr "Comptes"
+
+msgid "Shares"
+msgstr "Titres"
 
 msgid "Graphs"
 msgstr "Graphes"
@@ -251,11 +194,17 @@ msgstr "Graphes"
 msgid "Display graphs"
 msgstr "Afficher les graphiques"
 
+msgid "Display hidden accounts?"
+msgstr "Afficher les comptes masqués?"
+
 msgid "Display disabled accounts?"
 msgstr "Afficher les comptes désactivés?"
 
 msgid "Display disabled shares?"
 msgstr "Afficher les titres désactivés?"
+
+msgid "Code"
+msgstr "Code"
 
 msgid "Quantity"
 msgstr "Quantité"
@@ -268,6 +217,9 @@ msgstr "A date"
 
 msgid "Total invested"
 msgstr "Total investi"
+
+msgid "Edit"
+msgstr "Modifier"
 
 msgid "Unknown"
 msgstr "Inconnu"
@@ -284,32 +236,20 @@ msgstr "Suivi boursier"
 msgid "My main toolbar"
 msgstr "Barre des tâches"
 
-msgid "Please confirm"
-msgstr "Veuillez confirmer"
-
-msgid "Are you sure you want to delete this price?"
-msgstr "Êtes vous sûr de vouloir supprimer cette valeur?"
+msgid "Account"
+msgstr "Compte"
 
 msgid "Date"
 msgstr "Date"
-
-msgid "Source"
-msgstr "Source"
-
-msgid "Delete"
-msgstr "Supprimer"
-
-msgid "Share Prices"
-msgstr "Valeur des titres"
-
-msgid "Displays share prices"
-msgstr "Afficher les valeurs"
 
 msgid "Label"
 msgstr "Libellé"
 
 msgid "Asset delta"
 msgstr "# Titres"
+
+msgid "Share"
+msgstr "Titre"
 
 msgid "Asset balance"
 msgstr "Solde (titres)"
@@ -323,6 +263,12 @@ msgstr "# Espèces"
 msgid "Cash balance"
 msgstr "Solde (espèces)"
 
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Please confirm"
+msgstr "Veuillez confirmer"
+
 msgid "Are you sure you want to delete this transaction?"
 msgstr "Êtes vous sûr de vouloir supprimer cette transaction?"
 
@@ -332,8 +278,71 @@ msgstr "Transactions"
 msgid "Display transactions"
 msgstr "Afficher les transactions"
 
+msgid "Currency"
+msgstr "Monnaie"
+
+msgid "Active"
+msgstr "Actif"
+
+msgid "Hidden"
+msgstr "Masqué"
+
+msgid "Main code"
+msgstr "Code principal"
+
+msgid "Get prices online?"
+msgstr "Récupérer les valeurs?"
+
+msgid "Enabled"
+msgstr "Activé"
+
+msgid "Base currency"
+msgstr "Monnaie de base"
+
+msgid "Group"
+msgstr "Groupe"
+
+msgid "Price"
+msgstr "Prix"
+
+msgid "Price date"
+msgstr "Date de valeur"
+
+msgid "Hidden?"
+msgstr "Masqué?"
+
+msgid "Add new group"
+msgstr "Ajouter un nouveau groupe"
+
+msgid "Add new share"
+msgstr "Ajouter un nouveau titre"
+
+msgid "Display shares"
+msgstr "Afficher les titres"
+
+msgid "Display hidden shares?"
+msgstr "Afficher les titres masqués?"
+
+msgid "Add a share price"
+msgstr "Ajouter une valeur"
+
+msgid "Are you sure you want to delete this price?"
+msgstr "Êtes vous sûr de vouloir supprimer cette valeur?"
+
+msgid "Source"
+msgstr "Source"
+
+msgid "Share Prices"
+msgstr "Valeur des titres"
+
+msgid "Displays share prices"
+msgstr "Afficher les valeurs"
+
 msgid "Transaction"
 msgstr "Transaction"
+
+msgid "Known rate"
+msgstr ""
 
 #~ msgid "type"
 #~ msgstr "Type"
