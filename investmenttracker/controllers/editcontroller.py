@@ -115,7 +115,10 @@ class EditController:
                 if "onchange" in field:
                     field["widget"].currentIndexChanged.connect(field["onchange"])
 
-            # Add to layout
+            # Expand horizontally + Add to layout
+            field["widget"].setSizePolicy(
+                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+            )
             self.form_layout.addRow(label, field["widget"])
 
         # Trigger onchange events to ensure consistency
