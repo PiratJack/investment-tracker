@@ -286,7 +286,7 @@ class SharesController:
         self.display_widget.layout.addWidget(self.tree)
         self.reload_data()
 
-        self.display_hidden_widget = QtWidgets.QCheckBox(_("Display hidden accounts?"))
+        self.display_hidden_widget = QtWidgets.QCheckBox(_("Display hidden shares?"))
         self.display_hidden_widget.stateChanged.connect(self.on_click_display_hidden)
         self.display_widget.layout.addWidget(self.display_hidden_widget)
 
