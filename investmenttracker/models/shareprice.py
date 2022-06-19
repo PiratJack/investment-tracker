@@ -80,3 +80,14 @@ class SharePrice(Base):
             ")",
         ]
         return "".join(output)
+
+    def short_name(self):
+        output = [
+            str(self.price)
+            + " "
+            + str(self.currency.main_code if self.currency.main_code else self.currency)
+            if self.price and self.currency
+            else "Unknown",
+            " on " + str(self.date) if self.date else "",
+        ]
+        return "".join(output)

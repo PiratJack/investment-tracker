@@ -122,12 +122,73 @@ class TestSharePrice(unittest.TestCase):
             "Share Accenture has 2 prices",
         )
 
+        # Get from complex query
+        share_prices = self.database.share_price_get(
+            share=2, currency=5, date=datetime.datetime(2022, 1, 5)
+        )
+        self.assertEqual(
+            len(share_prices),
+            1,
+            "Share Accenture has 1 price in USD 14 days prior to January 5th, 2022",
+        )
+        share_prices = self.database.share_price_get(
+            share=2, currency=5, date=datetime.datetime(2022, 4, 5)
+        )
+        self.assertEqual(
+            len(share_prices),
+            0,
+            "Share Accenture has 0 price in USD 14 days prior to April 5th, 2022",
+        )
+        share_prices = self.database.share_price_get(
+            share=2, currency=5, date=datetime.datetime(2021, 12, 15)
+        )
+        self.assertEqual(
+            len(share_prices),
+            0,
+            "Share Accenture has 0 price in USD 14 days prior to December 15th, 2021",
+        )
+        share_prices = self.database.share_price_get(share=2, currency=5)
+        self.assertEqual(
+            len(share_prices),
+            1,
+            "Share Accenture has 1 price in USD (no date filter)",
+        )
+        share_prices = self.database.share_price_get(share=2, currency=6)
+        self.assertEqual(
+            len(share_prices),
+            1,
+            "Share Accenture has 1 price in EUR (no date filter)",
+        )
+
+        usd_currency = self.database.share_get_by_id(5)
+        share_prices = self.database.share_price_get(share=2, currency=usd_currency)
+        self.assertEqual(
+            len(share_prices),
+            1,
+            "Share Accenture has 1 price in USD (no date filter)",
+        )
+
+        accenture_share = self.database.share_get_by_id(2)
+        share_prices = self.database.share_price_get(
+            share=accenture_share, currency=usd_currency
+        )
+        self.assertEqual(
+            len(share_prices),
+            1,
+            "Share Accenture has 1 price in USD (no date filter)",
+        )
+
         # String representation
         share_price = self.database.share_price_get_by_id(1)
         self.assertEqual(
             str(share_price),
             "Price (Accenture at 458.0 EUR on 2022-01-01)",
             "Share price representation is wrong",
+        )
+        self.assertEqual(
+            share_price.short_name(),
+            "458.0 EUR on 2022-01-01",
+            "Share price short name is wrong",
         )
 
         share_price = SharePrice(
@@ -141,17 +202,26 @@ class TestSharePrice(unittest.TestCase):
             "Price (Unknown on 2022-04-01 00:00:00)",
             "Share price representation is wrong",
         )
+        self.assertEqual(
+            share_price.short_name(),
+            "Unknown on 2022-04-01 00:00:00",
+            "Share price short name is wrong",
+        )
 
         share_price = SharePrice(
             share_id=1,
             price=125,
             source="Second test",
         )
-
         self.assertEqual(
             str(share_price),
             "Price (Unknown)",
             "Share price representation is wrong",
+        )
+        self.assertEqual(
+            share_price.short_name(),
+            "Unknown",
+            "Share price short name is wrong",
         )
 
     def test_validations(self):

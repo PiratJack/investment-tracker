@@ -1,4 +1,5 @@
 import sqlalchemy
+import datetime
 
 from . import account
 from . import share
@@ -72,6 +73,28 @@ class Database:
             .filter(shareprice.SharePrice.id == share_price_id)
             .one()
         )
+
+    # The date filter will look for values within 2 weeks before
+    # date expects a datetime.datetime object
+    def share_price_get(self, share=None, currency=None, date=None):
+        query = self.session.query(shareprice.SharePrice)
+        if share:
+            if type(share) == int:
+                query = query.filter(shareprice.SharePrice.share_id == share)
+            else:
+                query = query.filter(shareprice.SharePrice.share == share)
+        if currency:
+            if type(currency) == int:
+                query = query.filter(shareprice.SharePrice.currency_id == currency)
+            else:
+                query = query.filter(shareprice.SharePrice.currency == currency)
+        if date:
+            two_weeks = datetime.timedelta(days=-14)
+            start_date = (date + two_weeks).date()
+            end_date = date.date()
+            query = query.filter(shareprice.SharePrice.date >= start_date)
+            query = query.filter(shareprice.SharePrice.date <= end_date)
+        return query.all()
 
     def share_price_delete(self, share_price):
         self.session.delete(share_price)
