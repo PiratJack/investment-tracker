@@ -62,6 +62,8 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         if role == Qt.DisplayRole:
             # New item row
             if index.row() == len(self.share_prices):
+                if index.column() == 0:
+                    return _("Add a share price")
                 return QtCore.QVariant()
 
             price = self.share_prices[index.row()]
