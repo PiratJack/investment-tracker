@@ -45,6 +45,8 @@ class EditController:
             if field["type"] == "text":
                 field["widget"] = QtWidgets.QLineEdit()
                 field["widget"].setText(field.get("default", ""))
+                if "onchange" in field:
+                    field["widget"].textChanged.connect(field["onchange"])
 
             elif field["type"] == "list":
                 field["widget"] = QtWidgets.QComboBox()
@@ -56,10 +58,14 @@ class EditController:
                     field["widget"].setCurrentIndex(
                         field["widget"].findData(field["default"])
                     )
+                if "onchange" in field:
+                    field["widget"].currentIndexChanged.connect(field["onchange"])
 
             elif field["type"] == "checkbox":
                 field["widget"] = QtWidgets.QCheckBox()
                 field["widget"].setChecked(field.get("default", False))
+                if "onchange" in field:
+                    field["widget"].stateChanged.connect(field["onchange"])
 
             elif field["type"] == "date":
                 field["widget"] = QtWidgets.QDateEdit()
@@ -74,6 +80,9 @@ class EditController:
                     except:
                         field["widget"].setDate(QtCore.QDate.currentDate())
 
+                if "onchange" in field:
+                    field["widget"].dateChanged.connect(field["onchange"])
+
             elif field["type"][-5:] == "float":
                 field["widget"] = QtWidgets.QDoubleSpinBox()
 
@@ -84,6 +93,9 @@ class EditController:
                 field["widget"].setMaximum(10**10)
 
                 field["widget"].setValue(field.get("default", 0))
+
+                if "onchange" in field:
+                    field["widget"].valueChanged.connect(field["onchange"])
 
             elif field["type"] == "sharelist":
                 include_choice_all = field.get("include_all_choice", False)
@@ -100,9 +112,17 @@ class EditController:
                 if "excluded" in field:
                     index = field["widget"].findData(field["excluded"])
                     field["widget"].removeItem(index)
+                if "onchange" in field:
+                    field["widget"].currentIndexChanged.connect(field["onchange"])
 
             # Add to layout
             self.form_layout.addRow(label, field["widget"])
+
+        # Trigger onchange events to ensure consistency
+        for field_id in self.fields:
+            field = self.fields[field_id]
+            if "onchange" in field:
+                field["onchange"]()
 
         # Create the validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
