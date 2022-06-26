@@ -50,18 +50,6 @@ msgstr "La longueur maximale du nom de l'acion est de 250 caractères"
 msgid "Share base currency can't be itself"
 msgstr "Une action ne peut avoir elle-même comme monnaie de base"
 
-msgid "Missing account name"
-msgstr "Nom du compte manquant"
-
-msgid "Max length for account name is 250 characters"
-msgstr "La longueur maximale du nom du compte est de 250 caractères"
-
-msgid "Max length for account code is 250 characters"
-msgstr "La longueur maximale du code du compte est de 250 caractères"
-
-msgid "Missing account base currency"
-msgstr "Monnaie du compte manquante"
-
 msgid "Missing share price share ID"
 msgstr "Valeur manquante: ID du titre sur le prix"
 
@@ -82,6 +70,18 @@ msgstr "Valeur manquante: source du prix"
 
 msgid "Max length for share price source is 250 characters"
 msgstr "La longueur maximale de la source du prix est de 250 caractères"
+
+msgid "Missing account name"
+msgstr "Nom du compte manquant"
+
+msgid "Max length for account name is 250 characters"
+msgstr "La longueur maximale du nom du compte est de 250 caractères"
+
+msgid "Max length for account code is 250 characters"
+msgstr "La longueur maximale du code du compte est de 250 caractères"
+
+msgid "Missing account base currency"
+msgstr "Monnaie du compte manquante"
 
 msgid "Arbitrage - Buy"
 msgstr "Arbitrage - Achat"

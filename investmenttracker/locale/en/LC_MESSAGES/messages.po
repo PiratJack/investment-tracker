@@ -48,18 +48,6 @@ msgstr ""
 msgid "Share base currency can't be itself"
 msgstr ""
 
-msgid "Missing account name"
-msgstr ""
-
-msgid "Max length for account name is 250 characters"
-msgstr ""
-
-msgid "Max length for account code is 250 characters"
-msgstr ""
-
-msgid "Missing account base currency"
-msgstr ""
-
 msgid "Missing share price share ID"
 msgstr ""
 
@@ -79,6 +67,18 @@ msgid "Missing share price source"
 msgstr ""
 
 msgid "Max length for share price source is 250 characters"
+msgstr ""
+
+msgid "Missing account name"
+msgstr ""
+
+msgid "Max length for account name is 250 characters"
+msgstr ""
+
+msgid "Max length for account code is 250 characters"
+msgstr ""
+
+msgid "Missing account base currency"
 msgstr ""
 
 msgid "Arbitrage - Buy"
