@@ -174,6 +174,8 @@ class EditController:
         if not has_new_warnings:
             self.item.ignore_warnings = True
 
+        self.on_validate()
+
         return has_error or has_new_warnings
 
     def add_error_field(self, message, error_field, is_warning=False):
@@ -206,15 +208,15 @@ class EditController:
             value = field_widget.date
 
             if type(value) == QtCore.QDate:
-                value = datetime.datetime.fromisoformat(value.toString(Qt.ISODate))
+                value = datetime.date.fromisoformat(value.toString(Qt.ISODate))
             elif callable(value):
-                value = datetime.datetime.fromisoformat(value().toString(Qt.ISODate))
-            elif type(value) == datetime.datetime:
+                value = datetime.date.fromisoformat(value().toString(Qt.ISODate))
+            elif type(value) == datetime.date:
                 value = value
             elif type(value) == str:
-                value = datetime.datetime.fromisoformat(value)
+                value = datetime.date.fromisoformat(value)
             elif type(value) == int:
-                value = datetime.datetime.fromtimestamp(value)
+                value = datetime.date.fromtimestamp(value)
             else:
                 value = ""
         elif self.fields[field_id]["type"][-5:] == "float":
