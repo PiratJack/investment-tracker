@@ -178,7 +178,6 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         return len(self.transactions) + 1
 
     def data(self, index, role):
-        # TODO: Sort the data by date, descending. Or allow sorting by headers
         if not index.isValid():
             return False
 
@@ -387,6 +386,7 @@ class TransactionsTableView(QtWidgets.QTableView):
                     self.set_filters()  # Reload the data
                     self.model.endRemoveRows()
 
+        self.parent_controller.reload_data()
         self.parent_controller.restore_tree_item_selection()
 
 
