@@ -1,7 +1,7 @@
 import gettext
 import datetime
 
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 
 from models.base import ValidationException, ValidationWarningException
@@ -147,38 +147,22 @@ class EditController:
     def validate_data(self):
         # Clear previous errors
         has_error = False
-        for error_widget in self.error_widgets:
-            self.form_layout.removeRow(error_widget)
-        self.error_widgets = []
+        has_new_warnings = False
+        self.clear_errors()
 
         # Apply user entry
-        has_new_warnings = False
         for field_id in self.fields:
             try:
                 field_widget = self.fields[field_id]["widget"]
 
                 self.set_value(field_id)
-
-                field_widget.setProperty("class", "")
-                field_widget.style().polish(field_widget)
             except ValidationException as e:
-                error_widget = QtWidgets.QLabel(e.message)
-                error_widget.setProperty("class", "validation_error")
-                error_widget.style().polish(field_widget)
-                self.error_widgets.append(error_widget)
-
-                field_row = self.form_layout.getWidgetPosition(field_widget)
-                self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
+                self.add_error_field(e.message, field_widget)
 
                 has_error = True
             except ValidationWarningException as e:
-                error_widget = QtWidgets.QLabel(e.message)
-                error_widget.setProperty("class", "validation_warning")
-                error_widget.style().polish(field_widget)
-                self.error_widgets.append(error_widget)
+                self.add_error_field(e.message, field_widget, True)
 
-                field_row = self.form_layout.getWidgetPosition(field_widget)
-                self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
                 if field_id not in self.seen_warnings:
                     has_new_warnings = True
                     self.seen_warnings.append(field_id)
@@ -191,6 +175,22 @@ class EditController:
             self.item.ignore_warnings = True
 
         return has_error or has_new_warnings
+
+    def add_error_field(self, message, error_field, is_warning=False):
+        error_widget = QtWidgets.QLabel(message)
+        if is_warning:
+            error_widget.setProperty("class", "validation_warning")
+        else:
+            error_widget.setProperty("class", "validation_error")
+        self.error_widgets.append(error_widget)
+
+        field_row = self.form_layout.getWidgetPosition(error_field)
+        self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
+
+    def clear_errors(self):
+        for error_widget in self.error_widgets:
+            self.form_layout.removeRow(error_widget)
+        self.error_widgets = []
 
     def set_value(self, field_id):
         field_widget = self.fields[field_id]["widget"]
