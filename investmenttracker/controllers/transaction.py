@@ -65,16 +65,21 @@ class TransactionController(EditController):
         ]
         if transaction_id:
             self.item = self.database.transaction_get_by_id(transaction_id)
-            self.fields["account_id"]["default"] = self.item.account_id
-            self.fields["date"]["default"] = self.item.date
-            self.fields["label"]["default"] = self.item.label
-            if self.item.type:
-                self.fields["type"]["default"] = self.item.type.name
-            self.fields["share_id"]["default"] = self.item.share_id
-            self.fields["unit_price"]["default"] = self.item.unit_price
 
         else:
             self.item = models.transaction.Transaction()
+        self.fields["account_id"]["default"] = self.item.account_id
+        self.fields["date"]["default"] = self.item.date
+        self.fields["label"]["default"] = self.item.label
+        if self.item.type:
+            self.fields["type"]["default"] = self.item.type.name
+        self.fields["share_id"]["default"] = self.item.share_id
+        self.fields["unit_price"]["default"] = self.item.unit_price
+
+        for field_id in self.fields:
+            if self.fields[field_id].get("default", 0) == None:
+                del self.fields[field_id]["default"]
+
         if self.item.quantity:
             self.fields["quantity"]["default"] = self.item.quantity
 
@@ -185,6 +190,17 @@ class TransactionController(EditController):
             self.fields["unit_price"]["widget"].setValue(chosen_price.price)
 
         self.on_change_any_value()
+
+    def on_validate(self):
+        if not self.item.account:
+            account = self.database.accounts_get_by_id(self.item.account_id)
+        else:
+            account = self.item.account
+        balance = account.balance_before_staged_transaction(self.item)
+        print(balance)
+        if balance[0] < 0 or balance[1] < 0:
+            return False
+        return True
 
     def get_quantity(self):
         return self.fields["quantity"]["widget"].value()
