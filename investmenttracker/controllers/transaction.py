@@ -4,6 +4,7 @@ import datetime
 from PyQt5.QtCore import Qt
 
 import models.transaction
+from models.base import ValidationWarningException
 from controllers.editcontroller import EditController
 
 _ = gettext.gettext
@@ -65,23 +66,24 @@ class TransactionController(EditController):
         ]
         if transaction_id:
             self.item = self.database.transaction_get_by_id(transaction_id)
-
         else:
             self.item = models.transaction.Transaction()
+
         self.fields["account_id"]["default"] = self.item.account_id
         self.fields["date"]["default"] = self.item.date
         self.fields["label"]["default"] = self.item.label
         if self.item.type:
             self.fields["type"]["default"] = self.item.type.name
+        else:
+            if "default" in self.fields["type"]:
+                del self.fields["type"]["default"]
+        self.fields["quantity"]["default"] = self.item.quantity
         self.fields["share_id"]["default"] = self.item.share_id
         self.fields["unit_price"]["default"] = self.item.unit_price
 
         for field_id in self.fields:
             if self.fields[field_id].get("default", 0) == None:
                 del self.fields[field_id]["default"]
-
-        if self.item.quantity:
-            self.fields["quantity"]["default"] = self.item.quantity
 
         # Add triggers (hide/show fields, calculations, ...)
         self.fields["account_id"]["onchange"] = self.on_change_any_value
@@ -191,16 +193,24 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
-    def on_validate(self):
+    def on_validation_end(self):
         if not self.item.account:
             account = self.database.accounts_get_by_id(self.item.account_id)
         else:
             account = self.item.account
         balance = account.balance_before_staged_transaction(self.item)
-        print(balance)
-        if balance[0] < 0 or balance[1] < 0:
-            return False
-        return True
+
+        transaction_type = models.transaction.TransactionTypes[self.item.type]
+        if transaction_type.value["impact_currency"] == -1:
+            if balance[0] - self.item.quantity * self.item.unit_price < 0:
+                raise ValidationWarningException(
+                    "Cash balance negative", self.item, "quantity", self.item.quantity
+                )
+        if transaction_type.value["impact_asset"] == -1:
+            if balance[1] - self.item.quantity < 0:
+                raise ValidationWarningException(
+                    "Asset balance negative", self.item, "quantity", self.item.quantity
+                )
 
     def get_quantity(self):
         return self.fields["quantity"]["widget"].value()
