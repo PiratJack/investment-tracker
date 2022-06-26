@@ -4,5 +4,11 @@ QPushButton.imagebutton {
 }
 
 .validation_error {
-    background-color: #f6989d;
+    color: red;
+    font-style: italic;
+}
+
+.validation_warning {
+    color: orange;
+    font-style: italic;
 }

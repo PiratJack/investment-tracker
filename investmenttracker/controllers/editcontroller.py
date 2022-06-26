@@ -4,7 +4,7 @@ import datetime
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 
-from models.base import ValidationException
+from models.base import ValidationException, ValidationWarningException
 from .widgets.sharecombobox import ShareComboBox
 
 
@@ -15,6 +15,7 @@ class EditController:
     name = ""
     fields = {}
     error_widgets = []
+    seen_warnings = []
 
     def show_window(self):
         # Discard previous ones
@@ -139,6 +140,8 @@ class EditController:
         self.window.resize(self.window.layout.sizeHint())
         # TODO: Center the dialog compared to its parent
 
+        self.seen_warnings = []
+
         self.window.exec()
 
     def validate_data(self):
@@ -149,54 +152,75 @@ class EditController:
         self.error_widgets = []
 
         # Apply user entry
+        has_new_warnings = False
         for field_id in self.fields:
             try:
                 field_widget = self.fields[field_id]["widget"]
-                if self.fields[field_id]["type"] == "text":
-                    value = field_widget.text()
-                elif self.fields[field_id]["type"] in ("list", "sharelist"):
-                    value = field_widget.currentData()
-                    if value == 0:
-                        value = None
-                elif self.fields[field_id]["type"] == "checkbox":
-                    value = field_widget.isChecked()
-                elif self.fields[field_id]["type"] == "date":
-                    value = field_widget.date
 
-                    if type(value) == QtCore.QDate:
-                        value = datetime.datetime.fromisoformat(
-                            value.toString(Qt.ISODate)
-                        )
-                    elif callable(value):
-                        value = datetime.datetime.fromisoformat(
-                            value().toString(Qt.ISODate)
-                        )
-                    elif type(value) == datetime.datetime:
-                        value = value
-                    elif type(value) == str:
-                        value = datetime.datetime.fromisoformat(value)
-                    elif type(value) == int:
-                        value = datetime.datetime.fromtimestamp(value)
-                    else:
-                        value = ""
-                elif self.fields[field_id]["type"][-5:] == "float":
-                    value = field_widget.value()
-
-                setattr(self.item, field_id, value)
+                self.set_value(field_id)
 
                 field_widget.setProperty("class", "")
                 field_widget.style().polish(field_widget)
             except ValidationException as e:
-                field_widget.setProperty("class", "validation_error")
-                field_widget.style().polish(field_widget)
-
                 error_widget = QtWidgets.QLabel(e.message)
+                error_widget.setProperty("class", "validation_error")
+                error_widget.style().polish(field_widget)
                 self.error_widgets.append(error_widget)
+
                 field_row = self.form_layout.getWidgetPosition(field_widget)
                 self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
-                has_error = True
 
-        return has_error
+                has_error = True
+            except ValidationWarningException as e:
+                error_widget = QtWidgets.QLabel(e.message)
+                error_widget.setProperty("class", "validation_warning")
+                error_widget.style().polish(field_widget)
+                self.error_widgets.append(error_widget)
+
+                field_row = self.form_layout.getWidgetPosition(field_widget)
+                self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
+                if field_id not in self.seen_warnings:
+                    has_new_warnings = True
+                    self.seen_warnings.append(field_id)
+                else:
+                    self.item.ignore_warnings = True
+                    self.set_value(field_id)
+                    self.item.ignore_warnings = False
+
+        if not has_new_warnings:
+            self.item.ignore_warnings = True
+
+        return has_error or has_new_warnings
+
+    def set_value(self, field_id):
+        field_widget = self.fields[field_id]["widget"]
+        if self.fields[field_id]["type"] == "text":
+            value = field_widget.text()
+        elif self.fields[field_id]["type"] in ("list", "sharelist"):
+            value = field_widget.currentData()
+            if value == 0:
+                value = None
+        elif self.fields[field_id]["type"] == "checkbox":
+            value = field_widget.isChecked()
+        elif self.fields[field_id]["type"] == "date":
+            value = field_widget.date
+
+            if type(value) == QtCore.QDate:
+                value = datetime.datetime.fromisoformat(value.toString(Qt.ISODate))
+            elif callable(value):
+                value = datetime.datetime.fromisoformat(value().toString(Qt.ISODate))
+            elif type(value) == datetime.datetime:
+                value = value
+            elif type(value) == str:
+                value = datetime.datetime.fromisoformat(value)
+            elif type(value) == int:
+                value = datetime.datetime.fromtimestamp(value)
+            else:
+                value = ""
+        elif self.fields[field_id]["type"][-5:] == "float":
+            value = field_widget.value()
+
+        setattr(self.item, field_id, value)
 
     def save(self):
         has_error = self.validate_data()

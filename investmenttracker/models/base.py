@@ -16,3 +16,12 @@ class ValidationException(Exception):
         self.item = item
         self.key = key
         self.invalid_value = invalid_value
+
+
+class ValidationWarningException(Exception):
+    def __init__(self, message, item, key, invalid_value):
+        super().__init__(message)
+        self.message = message
+        self.item = item
+        self.key = key
+        self.invalid_value = invalid_value
