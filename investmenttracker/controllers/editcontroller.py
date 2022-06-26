@@ -171,10 +171,25 @@ class EditController:
                     self.set_value(field_id)
                     self.item.ignore_warnings = False
 
-        if not has_new_warnings:
-            self.item.ignore_warnings = True
+        if not has_error:
+            try:
+                self.on_validation_end()
+            except AttributeError:
+                pass
+            except ValidationException as e:
+                self.add_error_field(e.message, field_widget)
 
-        self.on_validate()
+                has_error = True
+            except ValidationWarningException as e:
+                self.add_error_field(e.message, field_widget, True)
+
+                if field_id not in self.seen_warnings:
+                    has_new_warnings = True
+                    self.seen_warnings.append(field_id)
+                else:
+                    self.item.ignore_warnings = True
+                    self.set_value(field_id)
+                    self.item.ignore_warnings = False
 
         return has_error or has_new_warnings
 
