@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-06-19 20:19+0200\n"
+"PO-Revision-Date: 2022-06-26 15:38+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.1\n"
 
 msgid "Missing share group name"
 msgstr "Valeur manquante: nom du groupe"
@@ -61,6 +61,27 @@ msgstr "La longueur maximale du code du compte est de 250 caractères"
 
 msgid "Missing account base currency"
 msgstr "Monnaie du compte manquante"
+
+msgid "Missing share price share ID"
+msgstr "Valeur manquante: ID du titre sur le prix"
+
+msgid "Share Price currency can't be the share itself"
+msgstr "Une valeur ne peut avoir l'action elle-même comme monnaie"
+
+msgid "Missing share price date"
+msgstr "Valeur manquante: date du prix"
+
+msgid "Missing share price actual price"
+msgstr "Valeur manquante: prix unitaire du titre"
+
+msgid "Missing share price currency"
+msgstr "Valeur manquante: monnaie du prix"
+
+msgid "Missing share price source"
+msgstr "Valeur manquante: source du prix"
+
+msgid "Max length for share price source is 250 characters"
+msgstr "La longueur maximale de la source du prix est de 250 caractères"
 
 msgid "Arbitrage - Buy"
 msgstr "Arbitrage - Achat"
@@ -136,27 +157,6 @@ msgstr "Quantité manquante pour la transaction"
 
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
-
-msgid "Missing share price share ID"
-msgstr "Valeur manquante: ID du titre sur le prix"
-
-msgid "Share Price currency can't be the share itself"
-msgstr "Une valeur ne peut avoir l'action elle-même comme monnaie"
-
-msgid "Missing share price date"
-msgstr "Valeur manquante: date du prix"
-
-msgid "Missing share price actual price"
-msgstr "Valeur manquante: prix unitaire du titre"
-
-msgid "Missing share price currency"
-msgstr "Valeur manquante: monnaie du prix"
-
-msgid "Missing share price source"
-msgstr "Valeur manquante: source du prix"
-
-msgid "Max length for share price source is 250 characters"
-msgstr "La longueur maximale de la source du prix est de 250 caractères"
 
 msgid "Displays detailed information (for debug purpose)"
 msgstr "Afficher plus de détails (debug)"
@@ -239,45 +239,6 @@ msgstr "Barre des tâches"
 msgid "Account"
 msgstr "Compte"
 
-msgid "Date"
-msgstr "Date"
-
-msgid "Label"
-msgstr "Libellé"
-
-msgid "Asset delta"
-msgstr "# Titres"
-
-msgid "Share"
-msgstr "Titre"
-
-msgid "Asset balance"
-msgstr "Solde (titres)"
-
-msgid "Rate"
-msgstr "Taux"
-
-msgid "Currency delta"
-msgstr "# Espèces"
-
-msgid "Cash balance"
-msgstr "Solde (espèces)"
-
-msgid "Delete"
-msgstr "Supprimer"
-
-msgid "Please confirm"
-msgstr "Veuillez confirmer"
-
-msgid "Are you sure you want to delete this transaction?"
-msgstr "Êtes vous sûr de vouloir supprimer cette transaction?"
-
-msgid "Transactions"
-msgstr "Transactions"
-
-msgid "Display transactions"
-msgstr "Afficher les transactions"
-
 msgid "Currency"
 msgstr "Monnaie"
 
@@ -286,6 +247,9 @@ msgstr "Actif"
 
 msgid "Hidden"
 msgstr "Masqué"
+
+msgid "Share"
+msgstr "Titre"
 
 msgid "Main code"
 msgstr "Code principal"
@@ -326,11 +290,20 @@ msgstr "Afficher les titres masqués?"
 msgid "Add a share price"
 msgstr "Ajouter une valeur"
 
+msgid "Please confirm"
+msgstr "Veuillez confirmer"
+
 msgid "Are you sure you want to delete this price?"
 msgstr "Êtes vous sûr de vouloir supprimer cette valeur?"
 
+msgid "Date"
+msgstr "Date"
+
 msgid "Source"
 msgstr "Source"
+
+msgid "Delete"
+msgstr "Supprimer"
 
 msgid "Share Prices"
 msgstr "Valeur des titres"
@@ -338,11 +311,41 @@ msgstr "Valeur des titres"
 msgid "Displays share prices"
 msgstr "Afficher les valeurs"
 
+msgid "Add a transaction"
+msgstr "Ajouter une transaction"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Asset delta"
+msgstr "# Titres"
+
+msgid "Asset balance"
+msgstr "Solde (titres)"
+
+msgid "Rate"
+msgstr "Taux"
+
+msgid "Currency delta"
+msgstr "# Espèces"
+
+msgid "Cash balance"
+msgstr "Solde (espèces)"
+
+msgid "Are you sure you want to delete this transaction?"
+msgstr "Êtes vous sûr de vouloir supprimer cette transaction?"
+
+msgid "Transactions"
+msgstr "Transactions"
+
+msgid "Display transactions"
+msgstr "Afficher les transactions"
+
 msgid "Transaction"
 msgstr "Transaction"
 
 msgid "Known rate"
-msgstr ""
+msgstr "Taux connu"
 
 #~ msgid "type"
 #~ msgstr "Type"

@@ -4,7 +4,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Date, Enum
 
-from .base import Base, ValidationException
+from .base import Base, ValidationException, ValidationWarningException
 
 _ = gettext.gettext
 
@@ -122,6 +122,8 @@ class Transaction(Base):
     account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
     account = sqlalchemy.orm.relationship("Account", back_populates="transactions")
 
+    ignore_warnings = False
+
     @sqlalchemy.orm.validates("label")
     def validate_label(self, key, value):
         if len(value) > 250:
@@ -149,16 +151,32 @@ class Transaction(Base):
     @sqlalchemy.orm.validates("account_id")
     def validate_account_id(self, key, value):
         self.validate_missing_field(key, value, _("Missing transaction account"))
+        if value == 0:
+            raise ValidationException(
+                "This transaction has no impact", self, key, value
+            )
         return value
 
     @sqlalchemy.orm.validates("quantity")
     def validate_quantity(self, key, value):
         self.validate_missing_field(key, value, _("Missing transaction quantity"))
+        if value == 0:
+            raise ValidationException(
+                "This transaction has no impact", self, key, value
+            )
         return value
 
     @sqlalchemy.orm.validates("unit_price")
     def validate_unit_price(self, key, value):
         self.validate_missing_field(key, value, _("Missing transaction unit price"))
+        return value
+
+    @sqlalchemy.orm.validates("share_id")
+    def validate_share_id(self, key, value):
+        if self.type:
+            type_value = TransactionTypes[self.type].value
+            if type_value["impact_asset"] and (value == -1 or value == 0):
+                raise ValidationException("Missing transaction share", self, key, value)
         return value
 
     def validate_missing_field(self, key, value, message):

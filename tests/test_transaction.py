@@ -191,9 +191,17 @@ class TestTransaction(unittest.TestCase):
             test_name + " - exception.invalid_value is wrong",
         )
 
-        # Test mandatory fields
-        for field in ["type", "account_id", "quantity", "unit_price"]:
-            for value in ["", None]:
+        # Test forbidden values
+        forbidden_values = {
+            "type": ["", None, 0, -1],
+            "account_id": ["", None, 0],
+            "quantity": ["", None, 0],
+            "unit_price": ["", None],
+            "share_id": [-1, 0],
+        }
+
+        for field in forbidden_values:
+            for value in forbidden_values[field]:
                 test_name = "Transaction must have a " + field + " that is not "
                 test_name += "None" if value == None else "empty"
                 with self.assertRaises(ValidationException) as cm:
