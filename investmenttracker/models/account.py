@@ -121,7 +121,7 @@ class Account(Base):
         output += ")"
         return output
 
-    def balance_as_of_transaction(self, transaction):
+    def balance_after_transaction(self, transaction):
         if type(transaction) == int:
             try:
                 transaction = [i for i in self.transactions if i.id == transaction][0]
@@ -144,6 +144,24 @@ class Account(Base):
                 or (t.date == transaction.date and t.id <= transaction.id)
             )
             and t.share == transaction.share
+        )
+
+        return cash_balance, asset_balance
+
+    def balance_before_staged_transaction(self, transaction):
+        cash_balance = sum(
+            t.type.value["impact_currency"] * t.quantity * t.unit_price
+            for t in self.transactions
+            if t.date < transaction.date
+            or (t.date == transaction.date and t.id != transaction.id)
+        )
+        asset_balance = sum(
+            t.type.value["impact_asset"] * t.quantity
+            for t in self.transactions
+            if t.id != transaction.id
+            and t.type.value["impact_asset"]
+            and t.date <= transaction.date
+            and t.share.id == transaction.share_id
         )
 
         return cash_balance, asset_balance

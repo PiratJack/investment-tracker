@@ -60,7 +60,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=1,
-                    date=datetime.datetime(2020, 1, 1),
+                    date=datetime.date(2020, 1, 1),
                     label="First investment",
                     type="cash_entry",
                     quantity=10000,
@@ -68,7 +68,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=1,
-                    date=datetime.datetime(2020, 1, 5),
+                    date=datetime.date(2020, 1, 5),
                     label="Buy ACN",
                     type="asset_buy",
                     share_id=2,
@@ -77,7 +77,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=1,
-                    date=datetime.datetime(2020, 1, 25),
+                    date=datetime.date(2020, 1, 25),
                     label="Buy Workday",
                     type="asset_buy",
                     share_id=3,
@@ -86,7 +86,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=1,
-                    date=datetime.datetime(2020, 4, 15),
+                    date=datetime.date(2020, 4, 15),
                     label="Sell ACN",
                     type="asset_sell",
                     share_id=2,
@@ -95,7 +95,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=4,
-                    date=datetime.datetime(2020, 4, 1),
+                    date=datetime.date(2020, 4, 1),
                     label="First investment",
                     type="cash_entry",
                     quantity=10000,
@@ -103,7 +103,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=4,
-                    date=datetime.datetime(2020, 4, 1),
+                    date=datetime.date(2020, 4, 1),
                     label="Buy Accenture",
                     type="asset_buy",
                     share_id=2,
@@ -112,7 +112,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=4,
-                    date=datetime.datetime(2020, 4, 1),
+                    date=datetime.date(2020, 4, 1),
                     label="Buy HSBC",
                     type="asset_buy",
                     share_id=4,
@@ -121,7 +121,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=4,
-                    date=datetime.datetime(2020, 4, 10),
+                    date=datetime.date(2020, 4, 10),
                     label="Sell Accenture",
                     type="asset_sell",
                     share_id=2,
@@ -130,7 +130,7 @@ class TestAccount(unittest.TestCase):
                 ),
                 Transaction(
                     account_id=4,
-                    date=datetime.datetime(2020, 4, 10),
+                    date=datetime.date(2020, 4, 10),
                     label="Buy HSBC again",
                     type="asset_buy",
                     share_id=4,
@@ -208,6 +208,62 @@ class TestAccount(unittest.TestCase):
             "Account representation is wrong",
         )
 
+        # Get balance
+        account = self.database.accounts_get_by_id(2)
+        transaction = Transaction(
+            account_id=2,
+            date=datetime.date(2020, 4, 10),
+            label="Initial cash transfer",
+            type="cash_entry",
+            quantity=1500,
+            unit_price=1,
+        )
+        balance = account.balance_before_staged_transaction(transaction)
+        self.assertEqual(
+            balance[0],
+            0,
+            "Initial cash balance is wrong",
+        )
+        self.assertEqual(
+            balance[1],
+            0,
+            "Initial asset balance is wrong",
+        )
+        self.database.session.add(transaction)
+        self.database.session.commit()
+
+        transaction = Transaction(
+            account_id=2,
+            date=datetime.date(2020, 4, 15),
+            label="Buy HSBC",
+            type="asset_buy",
+            share_id=4,
+            quantity=10,
+            unit_price=10,
+        )
+        self.database.session.add(transaction)
+        self.database.session.commit()
+        transaction = Transaction(
+            account_id=2,
+            date=datetime.date(2020, 4, 25),
+            label="Sell HSBC",
+            type="asset_sell",
+            share_id=4,
+            quantity=5,
+            unit_price=100,
+        )
+        balance = account.balance_before_staged_transaction(transaction)
+        self.assertEqual(
+            balance[0],
+            1400,
+            "Cash balance after first transaction is wrong",
+        )
+        self.assertEqual(
+            balance[1],
+            10,
+            "Asset balance after first transaction is wrong",
+        )
+
     def test_attributes(self):
         # Account balance
         self.assertEqual(
@@ -234,33 +290,33 @@ class TestAccount(unittest.TestCase):
         # Asset & cash balance per transaction
         account = self.database.accounts_get_by_id(4)
         transaction = account.transactions[1]
-        balance = account.balance_as_of_transaction(transaction)
+        balance = account.balance_after_transaction(transaction)
         self.assertEqual(
             balance, (8000, 10), "Cash/asset balance of transaction is wrong"
         )
 
-        balance = account.balance_as_of_transaction(8)
+        balance = account.balance_after_transaction(8)
         self.assertEqual(
             balance, (6250, 5), "Cash/asset balance of transaction is wrong"
         )
         # Transaction doesn't exist
         self.assertRaises(
             ValueError,
-            lambda _: account.balance_as_of_transaction(8257),
+            lambda _: account.balance_after_transaction(8257),
             "This transaction doesn't exist",
         )
 
         # Transaction is from another account
         self.assertRaises(
             ValueError,
-            lambda _: account.balance_as_of_transaction(1),
+            lambda _: account.balance_after_transaction(1),
             "This transaction is for another account",
         )
 
         account2 = self.database.accounts_get_by_id(1)
         self.assertRaises(
             ValueError,
-            lambda _: account.balance_as_of_transaction(account2.transactions[0]),
+            lambda _: account.balance_after_transaction(account2.transactions[0]),
             "This transaction is for another account",
         )
 
