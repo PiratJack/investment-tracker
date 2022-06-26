@@ -175,14 +175,21 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         return len(self.columns)
 
     def rowCount(self, index):
-        return len(self.transactions)
+        return len(self.transactions) + 1
 
     def data(self, index, role):
+        # TODO: Sort the data by date, descending. Or allow sorting by headers
         if not index.isValid():
             return False
 
         col = index.column()
         if role == Qt.DisplayRole:
+            # New item row
+            if index.row() == len(self.transactions):
+                if index.column() == 0:
+                    return _("Add a transaction")
+                return QtCore.QVariant()
+
             transaction = self.transactions[index.row()]
             currency_total = (
                 transaction.quantity
@@ -210,9 +217,17 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 QtCore.QVariant(),
             ][col]
 
-        if role == Qt.DecorationRole and col == len(self.columns) - 2:
+        if (
+            role == Qt.DecorationRole
+            and col == len(self.columns) - 2
+            and index.row() != len(self.transactions)
+        ):
             return QtCore.QVariant(QtGui.QIcon("assets/images/modify.png"))
-        if role == Qt.DecorationRole and col == len(self.columns) - 1:
+        if (
+            role == Qt.DecorationRole
+            and col == len(self.columns) - 1
+            and index.row() != len(self.transactions)
+        ):
             return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
         if role == Qt.TextAlignmentRole:
@@ -315,7 +330,7 @@ class TransactionsTableView(QtWidgets.QTableView):
 
         self.clicked.connect(self.on_table_clicked)
 
-    def set_filters(self, selected_accounts, selected_shares):
+    def set_filters(self, selected_accounts=None, selected_shares=None):
         self.model.set_filters(selected_accounts, selected_shares)
         self.model.layoutChanged.emit()
         self.viewport().update()
@@ -335,34 +350,43 @@ class TransactionsTableView(QtWidgets.QTableView):
                 self.setColumnWidth(i, self.columns[i]["size"])
 
     def on_table_clicked(self, index):
-        transaction = self.model.get_transaction(index)
-        # Edit button
-        if index.column() == len(self.columns) - 2:
-            self.parent_controller.store_tree_item_selection()
-
+        self.parent_controller.store_tree_item_selection()
+        # New transaction
+        if index.row() == len(self.model.transactions):
             self.transaction_details = controllers.transaction.TransactionController(
-                self.parent_controller, transaction.id
+                self.parent_controller
             )
             self.transaction_details.show_window()
 
-            self.parent_controller.restore_tree_item_selection()
+        else:
+            transaction = self.model.get_transaction(index)
+            # Edit button
+            if index.column() == len(self.columns) - 2:
+                self.transaction_details = (
+                    controllers.transaction.TransactionController(
+                        self.parent_controller, transaction.id
+                    )
+                )
+                self.transaction_details.show_window()
 
-        # Delete button
-        elif index.column() == len(self.columns) - 1:
-            messagebox = QtWidgets.QMessageBox.critical(
-                self.parent(),
-                _("Please confirm"),
-                _("Are you sure you want to delete this transaction?"),
-                buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                defaultButton=QtWidgets.QMessageBox.No,
-            )
+            # Delete button
+            elif index.column() == len(self.columns) - 1:
+                messagebox = QtWidgets.QMessageBox.critical(
+                    self.parent(),
+                    _("Please confirm"),
+                    _("Are you sure you want to delete this transaction?"),
+                    buttons=QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                    defaultButton=QtWidgets.QMessageBox.No,
+                )
 
-            if messagebox == QtWidgets.QMessageBox.Yes:
-                if transaction.id:
-                    self.database.transaction_delete(transaction)
-                self.beginRemoveRows(index, index.row(), index.row())
-                self.set_filters()  # Reload the data
-                self.endRemoveRows()
+                if messagebox == QtWidgets.QMessageBox.Yes:
+                    if transaction.id:
+                        self.database.transaction_delete(transaction)
+                    self.model.beginRemoveRows(index, index.row(), index.row())
+                    self.set_filters()  # Reload the data
+                    self.model.endRemoveRows()
+
+        self.parent_controller.restore_tree_item_selection()
 
 
 class TransactionsController:
@@ -455,3 +479,4 @@ class TransactionsController:
 
     def restore_tree_item_selection(self):
         self.tree.restore_item_selection()
+        self.table.set_filters(self.tree.selected_accounts, self.tree.selected_shares)
