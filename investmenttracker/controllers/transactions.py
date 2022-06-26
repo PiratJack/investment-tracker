@@ -209,10 +209,10 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.label,
                 asset_total,
                 transaction.share.short_name() if transaction.share else "",
-                transaction.account.balance_as_of_transaction(transaction)[1],
+                transaction.account.balance_after_transaction(transaction)[1],
                 transaction.unit_price if transaction.unit_price != 1 else "",
                 currency_total,  # Total in currency
-                transaction.account.balance_as_of_transaction(transaction)[0],
+                transaction.account.balance_after_transaction(transaction)[0],
                 QtCore.QVariant(),
                 QtCore.QVariant(),
             ][col]
@@ -245,6 +245,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         self.transactions = self.database.transaction_get_by_account_and_shares(
             selected_accounts, selected_shares
         )
+        self.transactions = sorted(self.transactions, key=lambda t: (t.date, t.id))
 
     def get_transaction(self, index):
         return self.transactions[index.row()]
