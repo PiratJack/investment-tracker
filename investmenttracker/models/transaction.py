@@ -4,7 +4,7 @@ import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Date, Enum
 
-from .base import Base, ValidationException, ValidationWarningException
+from .base import Base, ValidationException
 
 _ = gettext.gettext
 
