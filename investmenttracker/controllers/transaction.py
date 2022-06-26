@@ -79,6 +79,8 @@ class TransactionController(EditController):
             self.fields["quantity"]["default"] = self.item.quantity
 
         # Add triggers (hide/show fields, calculations, ...)
+        self.fields["account_id"]["onchange"] = self.on_change_any_value
+        self.fields["share_id"]["onchange"] = self.on_change_any_value
         self.fields["type"]["onchange"] = self.on_change_type
         self.fields["quantity"]["onchange"] = self.on_change_quantity_or_unit_price
         self.fields["unit_price"]["onchange"] = self.on_change_quantity_or_unit_price
@@ -87,6 +89,9 @@ class TransactionController(EditController):
         self.fields["date"]["onchange"] = self.on_change_share_or_date
         self.fields["share_id"]["onchange"] = self.on_change_share_or_date
         self.fields["known_unit_price"]["onchange"] = self.on_change_known_unit_price
+
+    def on_change_any_value(self):
+        self.clear_errors()
 
     def on_change_type(self):
         value = self.fields["type"]["widget"].currentData()
@@ -126,9 +131,13 @@ class TransactionController(EditController):
                         self.fields[field_id]["widget"]
                     ).show()
 
+        self.on_change_any_value()
+
     def on_change_quantity_or_unit_price(self):
         total = self.get_quantity() * self.get_unit_price()
         self.fields["currency_delta"]["widget"].setValue(total)
+
+        self.on_change_any_value()
 
     def on_change_currency_delta(self):
         try:
@@ -136,6 +145,8 @@ class TransactionController(EditController):
             self.fields["unit_price"]["widget"].setValue(unit_price)
         except:
             pass
+
+        self.on_change_any_value()
 
     def on_change_share_or_date(self):
         date = datetime.datetime.fromisoformat(
@@ -166,10 +177,14 @@ class TransactionController(EditController):
         for price in prices:
             self.fields["known_unit_price"]["widget"].addItem(price.short_name(), price)
 
+        self.on_change_any_value()
+
     def on_change_known_unit_price(self):
         chosen_price = self.fields["known_unit_price"]["widget"].currentData()
         if chosen_price and not type(chosen_price) == int:
             self.fields["unit_price"]["widget"].setValue(chosen_price.price)
+
+        self.on_change_any_value()
 
     def get_quantity(self):
         return self.fields["quantity"]["widget"].value()
