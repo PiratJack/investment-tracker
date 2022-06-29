@@ -272,7 +272,6 @@ class SharePricesTableView(QtWidgets.QTableView):
 
         self.model = SharePricesTableModel(self.database, self.columns)
         self.setModel(self.model)
-        self.hideColumn(1)
         self.setItemDelegateForColumn(0, ShareDelegate(self, self.database))
         self.setItemDelegateForColumn(2, DateDelegate(self))
         self.setItemDelegateForColumn(4, ShareDelegate(self, self.database))
@@ -293,7 +292,9 @@ class SharePricesTableView(QtWidgets.QTableView):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] < 1:
+            if self.columns[i]["size"] == 0:
+                self.hideColumn(i)
+            elif self.columns[i]["size"] < 1:
                 self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])

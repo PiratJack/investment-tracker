@@ -56,10 +56,6 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
                 share = self.database.share_get_by_id(share_id)
                 account_item.addChild(self.add_share(share, account_item))
 
-        # Hide technical columns
-        self.hideColumn(1)
-        self.hideColumn(2)
-
     def resizeEvent(self, event):
         QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
@@ -69,7 +65,9 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] < 1:
+            if self.columns[i]["size"] == 0:
+                self.hideColumn(i)
+            elif self.columns[i]["size"] < 1:
                 self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])
@@ -118,16 +116,17 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
 
     def get_selected_items(self):
         role = Qt.DisplayRole
-        selected_accounts = [
+        self.selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()
         ]
 
         share_accounts = set(
             int(i.parent().data(2, role))
             for i in self.selectedItems()
-            if i.parent() and i.parent().data(2, role) not in self.selected_accounts
+            if i.parent()
+            and int(i.parent().data(2, role)) not in self.selected_accounts
         )
-        selected_shares = {
+        self.selected_shares = {
             account_id: [
                 int(i.data(2, role))
                 for i in self.selectedItems()
@@ -136,7 +135,7 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
             for account_id in share_accounts
         }
 
-        return (selected_accounts, selected_shares)
+        return (self.selected_accounts, self.selected_shares)
 
     def restore_item_selection(self):
         role = Qt.DisplayRole
@@ -326,7 +325,6 @@ class TransactionsTableView(QtWidgets.QTableView):
 
         self.model = TransactionsTableModel(self.database, self.columns)
         self.setModel(self.model)
-        self.hideColumn(1)
 
         self.clicked.connect(self.on_table_clicked)
 
@@ -344,7 +342,9 @@ class TransactionsTableView(QtWidgets.QTableView):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] < 1:
+            if self.columns[i]["size"] == 0:
+                self.hideColumn(i)
+            elif self.columns[i]["size"] < 1:
                 self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])

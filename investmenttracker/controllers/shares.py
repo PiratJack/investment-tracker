@@ -140,9 +140,6 @@ class SharesTree(QtWidgets.QTreeWidget):
         share_data = [_("Add new share"), 0, "", "", "", "", "", ""]
         self.add_share(share_data)
 
-        # Overall elements
-        self.hideColumn(1)
-
     def resizeEvent(self, event):
         QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes(event)
@@ -153,7 +150,9 @@ class SharesTree(QtWidgets.QTreeWidget):
         )
 
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] < 1:
+            if self.columns[i]["size"] == 0:
+                self.hideColumn(i)
+            elif self.columns[i]["size"] < 1:
                 self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])

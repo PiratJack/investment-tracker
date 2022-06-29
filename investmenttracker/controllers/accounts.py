@@ -156,7 +156,6 @@ class AccountsTree(QtWidgets.QTreeWidget):
 
         # Put everything in the tree
         self.insertTopLevelItems(0, tree_items)
-        self.hideColumn(1)
 
         # Add Edit buttons
         for i, account in enumerate(accounts):
@@ -186,7 +185,9 @@ class AccountsTree(QtWidgets.QTreeWidget):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] < 1:
+            if self.columns[i]["size"] == 0:
+                self.hideColumn(i)
+            elif self.columns[i]["size"] < 1:
                 self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
             else:
                 self.setColumnWidth(i, self.columns[i]["size"])
