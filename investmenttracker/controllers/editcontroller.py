@@ -138,7 +138,6 @@ class EditController:
         # Size & Move to center
         self.window.setMinimumSize(300, 200)
         self.window.resize(self.window.layout.sizeHint())
-        # TODO: Center the dialog compared to its parent
 
         self.seen_warnings = []
 
