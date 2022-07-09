@@ -156,12 +156,6 @@ msgstr ""
 msgid "Missing transaction unit price"
 msgstr ""
 
-msgid "Displays detailed information (for debug purpose)"
-msgstr ""
-
-msgid "Displays additional information (for end users)"
-msgstr ""
-
 msgid "All"
 msgstr ""
 
@@ -171,70 +165,19 @@ msgstr ""
 msgid "Shares without group"
 msgstr ""
 
-msgid "Name"
+msgid "Displays detailed information (for debug purpose)"
 msgstr ""
 
-msgid "Type"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "Accounts"
-msgstr ""
-
-msgid "Shares"
-msgstr ""
-
-msgid "Graphs"
-msgstr ""
-
-msgid "Display graphs"
-msgstr ""
-
-msgid "Display hidden accounts?"
-msgstr ""
-
-msgid "Display disabled accounts?"
-msgstr ""
-
-msgid "Display disabled shares?"
-msgstr ""
-
-msgid "Code"
-msgstr ""
-
-msgid "Quantity"
-msgstr ""
-
-msgid "Value"
-msgstr ""
-
-msgid "As of date"
-msgstr ""
-
-msgid "Total invested"
-msgstr ""
-
-msgid "Edit"
-msgstr ""
-
-msgid "Unknown"
-msgstr ""
-
-msgid "Add new account"
-msgstr ""
-
-msgid "Display your accounts"
-msgstr ""
-
-msgid "Investment Tracker"
-msgstr ""
-
-msgid "My main toolbar"
+msgid "Displays additional information (for end users)"
 msgstr ""
 
 msgid "Account"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Code"
 msgstr ""
 
 msgid "Currency"
@@ -264,6 +207,48 @@ msgstr ""
 msgid "Group"
 msgstr ""
 
+msgid "Investment Tracker"
+msgstr ""
+
+msgid "My main toolbar"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "Quantity"
+msgstr ""
+
+msgid "Value"
+msgstr ""
+
+msgid "As of date"
+msgstr ""
+
+msgid "Total invested"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Add new account"
+msgstr ""
+
+msgid "Accounts"
+msgstr ""
+
+msgid "Display your accounts"
+msgstr ""
+
+msgid "Display hidden accounts?"
+msgstr ""
+
+msgid "Display disabled accounts?"
+msgstr ""
+
 msgid "Price"
 msgstr ""
 
@@ -279,55 +264,52 @@ msgstr ""
 msgid "Add new share"
 msgstr ""
 
+msgid "Shares"
+msgstr ""
+
 msgid "Display shares"
 msgstr ""
 
 msgid "Display hidden shares?"
 msgstr ""
 
-msgid "Add a share price"
-msgstr ""
-
-msgid "Please confirm"
-msgstr ""
-
-msgid "Are you sure you want to delete this price?"
+msgid "Transaction"
 msgstr ""
 
 msgid "Date"
 msgstr ""
 
-msgid "Source"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Share Prices"
-msgstr ""
-
-msgid "Displays share prices"
-msgstr ""
-
-msgid "Add a transaction"
-msgstr ""
-
 msgid "Label"
+msgstr ""
+
+msgid "Type"
 msgstr ""
 
 msgid "Asset delta"
 msgstr ""
 
-msgid "Asset balance"
+msgid "Rate"
 msgstr ""
 
-msgid "Rate"
+msgid "Known rate"
 msgstr ""
 
 msgid "Currency delta"
 msgstr ""
 
+msgid "Add a transaction"
+msgstr ""
+
+msgid "Asset balance"
+msgstr ""
+
 msgid "Cash balance"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Please confirm"
 msgstr ""
 
 msgid "Are you sure you want to delete this transaction?"
@@ -339,8 +321,26 @@ msgstr ""
 msgid "Display transactions"
 msgstr ""
 
-msgid "Transaction"
+msgid "Graphs"
 msgstr ""
 
-msgid "Known rate"
+msgid "Display graphs"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "Add a share price"
+msgstr ""
+
+msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Share Prices"
+msgstr ""
+
+msgid "Displays share prices"
 msgstr ""

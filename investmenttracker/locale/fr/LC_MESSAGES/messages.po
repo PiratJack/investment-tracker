@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-06-26 15:38+0200\n"
+"PO-Revision-Date: 2022-07-09 22:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -158,12 +158,6 @@ msgstr "Quantité manquante pour la transaction"
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
 
-msgid "Displays detailed information (for debug purpose)"
-msgstr "Afficher plus de détails (debug)"
-
-msgid "Displays additional information (for end users)"
-msgstr "Afficher plus de détails (utilisateurs finaux)"
-
 msgid "All"
 msgstr "Toutes"
 
@@ -173,71 +167,20 @@ msgstr "Choisir une valeur"
 msgid "Shares without group"
 msgstr "Titres non groupés"
 
-msgid "Name"
-msgstr "Nom"
+msgid "Displays detailed information (for debug purpose)"
+msgstr "Afficher plus de détails (debug)"
 
-msgid "Type"
-msgstr "Type"
-
-msgid "ID"
-msgstr "ID"
-
-msgid "Accounts"
-msgstr "Comptes"
-
-msgid "Shares"
-msgstr "Titres"
-
-msgid "Graphs"
-msgstr "Graphes"
-
-msgid "Display graphs"
-msgstr "Afficher les graphiques"
-
-msgid "Display hidden accounts?"
-msgstr "Afficher les comptes masqués?"
-
-msgid "Display disabled accounts?"
-msgstr "Afficher les comptes désactivés?"
-
-msgid "Display disabled shares?"
-msgstr "Afficher les titres désactivés?"
-
-msgid "Code"
-msgstr "Code"
-
-msgid "Quantity"
-msgstr "Quantité"
-
-msgid "Value"
-msgstr "Valeur"
-
-msgid "As of date"
-msgstr "A date"
-
-msgid "Total invested"
-msgstr "Total investi"
-
-msgid "Edit"
-msgstr "Modifier"
-
-msgid "Unknown"
-msgstr "Inconnu"
-
-msgid "Add new account"
-msgstr "Ajouter un nouveau compte"
-
-msgid "Display your accounts"
-msgstr "Afficher vos comptes"
-
-msgid "Investment Tracker"
-msgstr "Suivi boursier"
-
-msgid "My main toolbar"
-msgstr "Barre des tâches"
+msgid "Displays additional information (for end users)"
+msgstr "Afficher plus de détails (utilisateurs finaux)"
 
 msgid "Account"
 msgstr "Compte"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Code"
+msgstr "Code"
 
 msgid "Currency"
 msgstr "Monnaie"
@@ -266,6 +209,48 @@ msgstr "Monnaie de base"
 msgid "Group"
 msgstr "Groupe"
 
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+msgid "My main toolbar"
+msgstr "Barre des tâches"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Quantity"
+msgstr "Quantité"
+
+msgid "Value"
+msgstr "Valeur"
+
+msgid "As of date"
+msgstr "A date"
+
+msgid "Total invested"
+msgstr "Total investi"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Unknown"
+msgstr "Inconnu"
+
+msgid "Add new account"
+msgstr "Ajouter un nouveau compte"
+
+msgid "Accounts"
+msgstr "Comptes"
+
+msgid "Display your accounts"
+msgstr "Afficher vos comptes"
+
+msgid "Display hidden accounts?"
+msgstr "Afficher les comptes masqués?"
+
+msgid "Display disabled accounts?"
+msgstr "Afficher les comptes désactivés?"
+
 msgid "Price"
 msgstr "Prix"
 
@@ -281,56 +266,53 @@ msgstr "Ajouter un nouveau groupe"
 msgid "Add new share"
 msgstr "Ajouter un nouveau titre"
 
+msgid "Shares"
+msgstr "Titres"
+
 msgid "Display shares"
 msgstr "Afficher les titres"
 
 msgid "Display hidden shares?"
 msgstr "Afficher les titres masqués?"
 
-msgid "Add a share price"
-msgstr "Ajouter une valeur"
-
-msgid "Please confirm"
-msgstr "Veuillez confirmer"
-
-msgid "Are you sure you want to delete this price?"
-msgstr "Êtes vous sûr de vouloir supprimer cette valeur?"
+msgid "Transaction"
+msgstr "Transaction"
 
 msgid "Date"
 msgstr "Date"
 
-msgid "Source"
-msgstr "Source"
-
-msgid "Delete"
-msgstr "Supprimer"
-
-msgid "Share Prices"
-msgstr "Valeur des titres"
-
-msgid "Displays share prices"
-msgstr "Afficher les valeurs"
-
-msgid "Add a transaction"
-msgstr "Ajouter une transaction"
-
 msgid "Label"
 msgstr "Libellé"
+
+msgid "Type"
+msgstr "Type"
 
 msgid "Asset delta"
 msgstr "# Titres"
 
-msgid "Asset balance"
-msgstr "Solde (titres)"
-
 msgid "Rate"
 msgstr "Taux"
+
+msgid "Known rate"
+msgstr "Taux connu"
 
 msgid "Currency delta"
 msgstr "# Espèces"
 
+msgid "Add a transaction"
+msgstr "Ajouter une transaction"
+
+msgid "Asset balance"
+msgstr "Solde (titres)"
+
 msgid "Cash balance"
 msgstr "Solde (espèces)"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Please confirm"
+msgstr "Veuillez confirmer"
 
 msgid "Are you sure you want to delete this transaction?"
 msgstr "Êtes vous sûr de vouloir supprimer cette transaction?"
@@ -341,11 +323,32 @@ msgstr "Transactions"
 msgid "Display transactions"
 msgstr "Afficher les transactions"
 
-msgid "Transaction"
-msgstr "Transaction"
+msgid "Graphs"
+msgstr "Graphes"
 
-msgid "Known rate"
-msgstr "Taux connu"
+msgid "Display graphs"
+msgstr "Afficher les graphiques"
+
+msgid "Period"
+msgstr "Période"
+
+msgid "Add a share price"
+msgstr "Ajouter une valeur"
+
+msgid "Are you sure you want to delete this price?"
+msgstr "Êtes vous sûr de vouloir supprimer cette valeur?"
+
+msgid "Source"
+msgstr "Source"
+
+msgid "Share Prices"
+msgstr "Valeur des titres"
+
+msgid "Displays share prices"
+msgstr "Afficher les valeurs"
+
+#~ msgid "Display disabled shares?"
+#~ msgstr "Afficher les titres désactivés?"
 
 #~ msgid "type"
 #~ msgstr "Type"

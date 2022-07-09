@@ -5,6 +5,7 @@ import controllers.accounts
 import controllers.shares
 import controllers.shareprices
 import controllers.transactions
+import controllers.graphs
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -17,7 +18,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "Shares": controllers.shares.SharesController(self),
             "Share Prices": controllers.shareprices.SharePricesController(self),
             "Transactions": controllers.transactions.TransactionsController(self),
-            # TODO: Add windows for Graphs
+            "Graphs": controllers.graphs.GraphsController(self),
         }
 
         self.setMinimumSize(800, 600)
