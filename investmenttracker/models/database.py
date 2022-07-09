@@ -75,8 +75,10 @@ class Database:
         )
 
     # The date filter will look for values within 2 weeks before
-    # date expects a datetime.datetime object
-    def share_price_get(self, share=None, currency=None, date=None):
+    # start_date and end_date expect a datetime.date object
+    def share_price_get(
+        self, share=None, currency=None, start_date=None, end_date=None
+    ):
         query = self.session.query(shareprice.SharePrice)
         if share:
             if type(share) == int:
@@ -88,11 +90,12 @@ class Database:
                 query = query.filter(shareprice.SharePrice.currency_id == currency)
             else:
                 query = query.filter(shareprice.SharePrice.currency == currency)
-        if date:
+        if start_date:
             two_weeks = datetime.timedelta(days=-14)
-            start_date = (date + two_weeks).date()
-            end_date = date.date()
-            query = query.filter(shareprice.SharePrice.date >= start_date)
+            actual_start_date = start_date + two_weeks
+            if not end_date:
+                end_date = start_date
+            query = query.filter(shareprice.SharePrice.date >= actual_start_date)
             query = query.filter(shareprice.SharePrice.date <= end_date)
         return query.all()
 

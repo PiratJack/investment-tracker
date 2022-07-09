@@ -124,7 +124,7 @@ class TestSharePrice(unittest.TestCase):
 
         # Get from complex query
         share_prices = self.database.share_price_get(
-            share=2, currency=5, date=datetime.datetime(2022, 1, 5)
+            share=2, currency=5, start_date=datetime.datetime(2022, 1, 5)
         )
         self.assertEqual(
             len(share_prices),
@@ -132,7 +132,7 @@ class TestSharePrice(unittest.TestCase):
             "Share Accenture has 1 price in USD 14 days prior to January 5th, 2022",
         )
         share_prices = self.database.share_price_get(
-            share=2, currency=5, date=datetime.datetime(2022, 4, 5)
+            share=2, currency=5, start_date=datetime.datetime(2022, 4, 5)
         )
         self.assertEqual(
             len(share_prices),
@@ -140,7 +140,7 @@ class TestSharePrice(unittest.TestCase):
             "Share Accenture has 0 price in USD 14 days prior to April 5th, 2022",
         )
         share_prices = self.database.share_price_get(
-            share=2, currency=5, date=datetime.datetime(2021, 12, 15)
+            share=2, currency=5, start_date=datetime.datetime(2021, 12, 15)
         )
         self.assertEqual(
             len(share_prices),

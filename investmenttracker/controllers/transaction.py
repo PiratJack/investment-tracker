@@ -53,7 +53,7 @@ class TransactionController(EditController):
     }
 
     error_widgets = []
-
+    # TODO: change size when additional fields are displayed
     def __init__(self, parent_controller, transaction_id=0):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -175,7 +175,7 @@ class TransactionController(EditController):
             return
 
         prices = self.database.share_price_get(
-            share=share_id, currency=currency, date=date
+            share=share_id, currency=currency, start_date=date
         )
         prices = sorted(prices, key=lambda price: price.date, reverse=True)
 
