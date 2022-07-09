@@ -283,12 +283,12 @@ class TransactionsTableView(QtWidgets.QTableView):
         },
         {
             "name": _("Share"),
-            "size": 0.1,
+            "size": 0.15,
             "alignment": Qt.AlignRight,
         },
         {
             "name": _("Asset balance"),
-            "size": 0.1,
+            "size": 0.05,
             "alignment": Qt.AlignRight,
         },
         {
