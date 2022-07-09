@@ -359,6 +359,10 @@ class TransactionsTableView(QtWidgets.QTableView):
             self.transaction_details.show_window()
 
         else:
+            # Clicked on random column
+            if index.column() < len(self.columns) - 2:
+                return
+
             transaction = self.model.get_transaction(index)
             # Edit button
             if index.column() == len(self.columns) - 2:
@@ -386,7 +390,7 @@ class TransactionsTableView(QtWidgets.QTableView):
                     self.set_filters()  # Reload the data
                     self.model.endRemoveRows()
 
-        self.parent_controller.reload_data()
+        # self.parent_controller.reload_data()
         self.parent_controller.restore_tree_item_selection()
 
 
@@ -448,28 +452,30 @@ class TransactionsController:
         self.table = TransactionsTableView(self)
         self.right_column.layout.addWidget(self.table)
 
-        self.reload_data()
+        self.reload_data(True)
         return self.display_widget
 
-    def reload_data(self):
-        self.accounts = self.database.accounts_get(
-            with_hidden=self.display_hidden_accounts,
-            with_disabled=self.display_disabled_accounts,
-        )
+    # reload_accounts=False prevents the editcontroller from reloading accounts
+    def reload_data(self, reload_accounts=False):
+        if reload_accounts:
+            self.accounts = self.database.accounts_get(
+                with_hidden=self.display_hidden_accounts,
+                with_disabled=self.display_disabled_accounts,
+            )
 
-        self.tree.clear()
-        self.tree.fill_tree(self.accounts)
+            self.tree.clear()
+            self.tree.fill_tree(self.accounts)
 
-        self.table.set_filters(None, None)
+            self.table.set_filters(None, None)
 
     def on_click_hidden_accounts(self):
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
-        self.reload_data()
+        self.reload_data(True)
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_disabled_accounts(self):
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
-        self.reload_data()
+        self.reload_data(True)
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_change_selection(self, selected_accounts, selected_shares):
