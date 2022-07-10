@@ -269,7 +269,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.database = parent_controller.database
 
         self.all_accounts = {a.id: a for a in self.database.accounts_get(True, True)}
+        self.accounts_graph_values = {a: {} for a in self.all_accounts}
         self.all_shares = {s.id: s for s in self.database.shares_get(True)}
+        self.shares_graph_values = {s: {} for s in self.all_shares}
 
         self.axisItems = {"bottom": pyqtgraph.DateAxisItem(orientation="bottom")}
 
@@ -285,17 +287,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def set_accounts(self, selected_accounts=[]):
         self.selected_accounts = selected_accounts
-        if not selected_accounts:
-            self.accounts_graph_values = {}
-        else:
+        if selected_accounts:
             self.calculate_accounts(selected_accounts)
         self.plot_graph()
 
     def set_shares(self, selected_shares=[]):
         self.selected_shares = selected_shares
-        if not selected_shares:
-            self.shares_graph_values = {}
-        else:
+        if selected_shares:
             self.calculate_shares(selected_shares)
         self.plot_graph()
 
@@ -434,15 +432,14 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.clear_plots()
         for share_id in self.selected_shares:
             # Convert values
-            x, y = self.convert_raw_to_graph(self.shares_raw_values[share_id])
-            self.shares_graph_values[share_id] = y
+            x = self.convert_raw_to_graph("share", share_id)
 
             # Prepare legend and plot
             share = self.all_shares[share_id]
             share_label = share.name + " (" + share.base_currency.name + ")"
             self.plots["share_" + str(share_id)] = self.plot(
-                x=x,
-                y=list(y.values()),
+                x=list(self.shares_graph_values[share_id].keys()),
+                y=list(self.shares_graph_values[share_id].values()),
                 name=share_label,
             )
 
@@ -450,34 +447,30 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         for account_id in self.selected_accounts:
             # Convert values
-            x, y = self.convert_raw_to_graph(self.accounts_raw_values[account_id])
-            self.accounts_graph_values[account_id] = y
+            self.convert_raw_to_graph("account", account_id)
 
             # Prepare legend and plot
             account = self.all_accounts[account_id]
             account_label = account.name + " (" + account.base_currency.name + ")"
             self.plots["account_" + str(account_id)] = self.plot(
-                x=x,
-                y=list(y.values()),
+                x=list(self.accounts_graph_values[account_id].keys()),
+                y=list(self.accounts_graph_values[account_id].values()),
                 name=account_label,
             )
 
             self.set_axis_range()
 
-    def convert_raw_to_graph(self, raw):
-        graph_values = {
-            date: raw[date]
-            for date in sorted(raw)
-            if date >= self.start_date and date <= self.end_date
-        }
-
+    def convert_raw_to_graph(self, element_type, element_id):
+        if element_type == "share":
+            raw, converted = self.shares_raw_values, self.shares_graph_values
+        else:
+            raw, converted = self.accounts_raw_values, self.accounts_graph_values
         # pyqtgraph accepts only timestamps for date axis
-        date_timestamps = [
-            datetime.datetime.fromordinal(x.toordinal()).timestamp()
-            for x in graph_values.keys()
-        ]
-
-        return date_timestamps, graph_values
+        converted[element_id] = {
+            datetime.datetime(d.year, d.month, d.day).timestamp(): raw[element_id][d]
+            for d in sorted(raw[element_id])
+            if d >= self.start_date and d <= self.end_date
+        }
 
     def clear_plots(self):
         for plot in self.plots:
