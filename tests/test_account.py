@@ -344,7 +344,70 @@ class TestAccount(unittest.TestCase):
             self.assertIn(
                 test_date, holdings, "Holdings date missing for " + str(test_date)
             )
-            self.assertEquals(
+            self.assertEqual(
+                holdings[test_date],
+                expected_holdings[test_date],
+                "Holdings wrong as of " + str(test_date),
+            )
+
+        self.database.session.add_all(
+            [
+                Account(
+                    id=50,
+                    name="test",
+                    code="Error",
+                    base_currency_id=5,
+                    enabled=True,
+                ),
+                Transaction(
+                    account_id=50,
+                    date=datetime.date(2020, 1, 1),
+                    label="First investment",
+                    type="cash_entry",
+                    quantity=10000,
+                    unit_price=1,
+                ),
+                Transaction(
+                    account_id=50,
+                    date=datetime.date(2020, 1, 5),
+                    label="Buy ACN",
+                    type="asset_buy",
+                    share_id=2,
+                    quantity=50,
+                    unit_price=100,
+                ),
+                Transaction(
+                    account_id=50,
+                    date=datetime.date(2020, 1, 15),
+                    label="Sell all ACN",
+                    type="asset_sell",
+                    share_id=2,
+                    quantity=50,
+                    unit_price=120,
+                ),
+            ]
+        )
+
+        holdings = self.database.accounts_get_by_id(50).holdings
+        expected_holdings = {
+            datetime.date(2020, 1, 1): {
+                "cash": 10000,
+                "shares": {},
+            },
+            datetime.date(2020, 1, 5): {
+                "cash": 5000,
+                "shares": {2: 50},
+            },
+            datetime.date(2020, 1, 15): {
+                "cash": 11000,
+                "shares": {},
+            },
+        }
+        for test_date in expected_holdings:
+            self.assertIn(
+                test_date, holdings, "Holdings date missing for " + str(test_date)
+            )
+            self.assertEqual(
                 holdings[test_date],
                 expected_holdings[test_date],
                 "Holdings wrong as of " + str(test_date),

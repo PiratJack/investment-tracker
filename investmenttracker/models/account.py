@@ -124,6 +124,8 @@ class Account(Base):
                     account_holdings[t.date]["shares"][t.share.id] += (
                         t.type.value["impact_asset"] * t.quantity
                     )
+                    if account_holdings[t.date]["shares"][t.share.id] == 0:
+                        del account_holdings[t.date]["shares"][t.share.id]
                 previous_holdings = account_holdings[t.date]
 
             return account_holdings

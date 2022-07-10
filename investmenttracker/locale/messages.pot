@@ -56,18 +56,6 @@ msgstr ""
 msgid "Max length for share price source is 250 characters"
 msgstr ""
 
-msgid "Missing account name"
-msgstr ""
-
-msgid "Max length for account name is 250 characters"
-msgstr ""
-
-msgid "Max length for account code is 250 characters"
-msgstr ""
-
-msgid "Missing account base currency"
-msgstr ""
-
 msgid "Arbitrage - Buy"
 msgstr ""
 
@@ -143,6 +131,18 @@ msgstr ""
 msgid "Missing transaction unit price"
 msgstr ""
 
+msgid "Missing account name"
+msgstr ""
+
+msgid "Max length for account name is 250 characters"
+msgstr ""
+
+msgid "Max length for account code is 250 characters"
+msgstr ""
+
+msgid "Missing account base currency"
+msgstr ""
+
 msgid "All"
 msgstr ""
 
@@ -192,12 +192,6 @@ msgid "Base currency"
 msgstr ""
 
 msgid "Group"
-msgstr ""
-
-msgid "Investment Tracker"
-msgstr ""
-
-msgid "My main toolbar"
 msgstr ""
 
 msgid "ID"
@@ -308,15 +302,6 @@ msgstr ""
 msgid "Display transactions"
 msgstr ""
 
-msgid "Graphs"
-msgstr ""
-
-msgid "Display graphs"
-msgstr ""
-
-msgid "Period"
-msgstr ""
-
 msgid "Add a share price"
 msgstr ""
 
@@ -330,4 +315,19 @@ msgid "Share Prices"
 msgstr ""
 
 msgid "Displays share prices"
+msgstr ""
+
+msgid "Investment Tracker"
+msgstr ""
+
+msgid "My main toolbar"
+msgstr ""
+
+msgid "Graphs"
+msgstr ""
+
+msgid "Display graphs"
+msgstr ""
+
+msgid "Period"
 msgstr ""

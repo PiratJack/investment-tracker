@@ -71,18 +71,6 @@ msgstr "Valeur manquante: source du prix"
 msgid "Max length for share price source is 250 characters"
 msgstr "La longueur maximale de la source du prix est de 250 caractères"
 
-msgid "Missing account name"
-msgstr "Nom du compte manquant"
-
-msgid "Max length for account name is 250 characters"
-msgstr "La longueur maximale du nom du compte est de 250 caractères"
-
-msgid "Max length for account code is 250 characters"
-msgstr "La longueur maximale du code du compte est de 250 caractères"
-
-msgid "Missing account base currency"
-msgstr "Monnaie du compte manquante"
-
 msgid "Arbitrage - Buy"
 msgstr "Arbitrage - Achat"
 
@@ -158,6 +146,18 @@ msgstr "Quantité manquante pour la transaction"
 msgid "Missing transaction unit price"
 msgstr "Prix unitaire manquant pour la transaction"
 
+msgid "Missing account name"
+msgstr "Nom du compte manquant"
+
+msgid "Max length for account name is 250 characters"
+msgstr "La longueur maximale du nom du compte est de 250 caractères"
+
+msgid "Max length for account code is 250 characters"
+msgstr "La longueur maximale du code du compte est de 250 caractères"
+
+msgid "Missing account base currency"
+msgstr "Monnaie du compte manquante"
+
 msgid "All"
 msgstr "Toutes"
 
@@ -208,12 +208,6 @@ msgstr "Monnaie de base"
 
 msgid "Group"
 msgstr "Groupe"
-
-msgid "Investment Tracker"
-msgstr "Suivi boursier"
-
-msgid "My main toolbar"
-msgstr "Barre des tâches"
 
 msgid "ID"
 msgstr "ID"
@@ -323,15 +317,6 @@ msgstr "Transactions"
 msgid "Display transactions"
 msgstr "Afficher les transactions"
 
-msgid "Graphs"
-msgstr "Graphes"
-
-msgid "Display graphs"
-msgstr "Afficher les graphiques"
-
-msgid "Period"
-msgstr "Période"
-
 msgid "Add a share price"
 msgstr "Ajouter une valeur"
 
@@ -346,6 +331,21 @@ msgstr "Valeur des titres"
 
 msgid "Displays share prices"
 msgstr "Afficher les valeurs"
+
+msgid "Investment Tracker"
+msgstr "Suivi boursier"
+
+msgid "My main toolbar"
+msgstr "Barre des tâches"
+
+msgid "Graphs"
+msgstr "Graphes"
+
+msgid "Display graphs"
+msgstr "Afficher les graphiques"
+
+msgid "Period"
+msgstr "Période"
 
 #~ msgid "Display disabled shares?"
 #~ msgstr "Afficher les titres désactivés?"
