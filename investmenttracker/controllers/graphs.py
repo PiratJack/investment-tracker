@@ -222,6 +222,22 @@ class SharesTree(QtWidgets.QTreeWidget):
         self.parent_controller.on_change_share_selection(self.get_selected_items())
 
 
+class PercentageAxisItem(pyqtgraph.AxisItem):
+    def tickStrings(self, values, scale, spacing):
+        if self.logMode:
+            return super().tickStrings(values, scale, spacing)
+
+        if any([v * scale > 3 for v in values]):
+            return super().tickStrings(values, scale, spacing)
+
+        strings = []
+        for v in values:
+            vs = v * scale
+            vstr = ("%%0.%df" % 1) % (vs * 100) + "%"
+            strings.append(vstr)
+        return strings
+
+
 class GraphsArea(pyqtgraph.PlotWidget):
     graph_types = {
         "value": {
@@ -231,10 +247,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
             "min": 0,
             "max": 1,
         },
-        "base_100": {
+        "baseline": {
             "min": 0,
         },
     }
+    graph_type = "value"
 
     all_accounts = {}
     all_shares = {}
@@ -261,10 +278,14 @@ class GraphsArea(pyqtgraph.PlotWidget):
     start_date = None
     end_date = None
 
+    baseline_date = None
+
     plots = {}
 
     def __init__(self, parent_controller):
-        super().__init__(axisItems={"bottom": pyqtgraph.DateAxisItem()})
+        super().__init__()
+        self.setAxisItems({"bottom": pyqtgraph.DateAxisItem()})
+        self.setAxisItems({"left": PercentageAxisItem("left")})
         self.parent_controller = parent_controller
         self.database = parent_controller.database
 
@@ -273,8 +294,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.all_shares = {s.id: s for s in self.database.shares_get(True)}
         self.shares_graph_values = {s: {} for s in self.all_shares}
 
-        self.axisItems = {"bottom": pyqtgraph.DateAxisItem(orientation="bottom")}
-
         self.setMouseEnabled(x=True, y=False)
         self.enableAutoRange(axis="x")
 
@@ -282,8 +301,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         # TODO: different types of graphs:
         #  TODO: - Account split (with total = 100%) - should display % in vertical axis
-        #  TODO: - Value of each element, with base 100 at a given date
-        self.graph_type = "value"
 
     def set_accounts(self, selected_accounts=[]):
         self.selected_accounts = selected_accounts
@@ -303,6 +320,19 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.calculate_accounts(self.selected_accounts)
         self.calculate_shares(self.selected_shares)
+        self.plot_graph()
+
+    def set_baseline(self, enabled, baseline_date):
+        self.calculate_accounts(self.selected_accounts)
+        self.calculate_shares(self.selected_shares)
+        if enabled:
+            self.baseline_date = baseline_date
+            self.graph_type = "baseline"
+        else:
+            self.baseline_date = None
+            self.graph_type = "value"
+        # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
+
         self.plot_graph()
 
     def calculate_shares(self, shares):
@@ -465,12 +495,33 @@ class GraphsArea(pyqtgraph.PlotWidget):
             raw, converted = self.shares_raw_values, self.shares_graph_values
         else:
             raw, converted = self.accounts_raw_values, self.accounts_graph_values
-        # pyqtgraph accepts only timestamps for date axis
-        converted[element_id] = {
-            datetime.datetime(d.year, d.month, d.day).timestamp(): raw[element_id][d]
-            for d in sorted(raw[element_id])
-            if d >= self.start_date and d <= self.end_date
-        }
+
+        if self.baseline_date:
+            # If there is a date before the baseline, take it. Otherwise, take the first available.
+            dates_before = [d for d in raw[element_id] if d <= self.baseline_date]
+            if dates_before:
+                baseline_value = raw[element_id][max(dates_before)]
+            else:
+                all_dates = [d for d in raw[element_id]]
+                baseline_value = raw[element_id][min(all_dates)]
+
+            converted[element_id] = {
+                datetime.datetime(d.year, d.month, d.day).timestamp(): raw[element_id][
+                    d
+                ]
+                / baseline_value
+                for d in sorted(raw[element_id])
+                if d >= self.start_date and d <= self.end_date
+            }
+        else:
+            # pyqtgraph accepts only timestamps for date axis
+            converted[element_id] = {
+                datetime.datetime(d.year, d.month, d.day).timestamp(): raw[element_id][
+                    d
+                ]
+                for d in sorted(raw[element_id])
+                if d >= self.start_date and d <= self.end_date
+            }
 
     def clear_plots(self):
         for plot in self.plots:
@@ -628,23 +679,51 @@ class GraphsController:
         self.right_column.layout = QtWidgets.QGridLayout()
         self.right_column.setLayout(self.right_column.layout)
 
+        self.right_column.layout.setHorizontalSpacing(
+            self.right_column.layout.horizontalSpacing() * 3
+        )
+
+        # Choose which dates to display
         self.period_label = QtWidgets.QLabel(_("Period"))
         self.right_column.layout.addWidget(self.period_label, 0, 0)
 
         self.start_date = QtWidgets.QDateEdit()
         self.start_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.start_date, 0, 1)
+        date_width = self.start_date.sizeHint().width()
+        self.start_date.setMinimumWidth(date_width * 2)
 
         self.end_date = QtWidgets.QDateEdit()
         self.end_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.end_date, 0, 2)
+        self.end_date.setMinimumWidth(date_width * 2)
 
+        self.right_column.layout.addWidget(QtWidgets.QWidget(), 0, 3)
+        self.right_column.layout.setColumnStretch(3, 1)
+
+        # Choose whether to display baseline (= one date equals 100%)
+        self.baseline_enabled = QtWidgets.QCheckBox(_("Display evolution?"))
+        self.baseline_enabled.stateChanged.connect(self.on_baseline_change)
+        self.baseline_enabled.setLayoutDirection(Qt.RightToLeft)
+        self.right_column.layout.addWidget(self.baseline_enabled, 0, 4, Qt.AlignRight)
+
+        self.baseline_label = QtWidgets.QLabel(_("Baseline date"))
+        self.right_column.layout.addWidget(self.baseline_label, 0, 5, Qt.AlignRight)
+
+        self.baseline_date = QtWidgets.QDateEdit()
+        self.baseline_date.dateChanged.connect(self.on_baseline_change)
+        self.right_column.layout.addWidget(self.baseline_date, 0, 6)
+        self.baseline_date.setMinimumWidth(date_width * 2)
+
+        # Add the graph
         self.graph = GraphsArea(self)
-        self.right_column.layout.addWidget(self.graph, 1, 0, 1, 3)
+        self.right_column.layout.addWidget(self.graph, 1, 0, 1, 7)
 
+        # Set default dates (done after to trigget the dateChanged connectors)
         delta = datetime.timedelta(6 * 30)
         self.start_date.setDate(datetime.date.today() - delta)
         self.end_date.setDate(datetime.date.today())
+        self.baseline_date.setDate(datetime.date.today() - delta)
 
     def reload_data(self):
         self.accounts = self.database.accounts_get(
@@ -694,3 +773,9 @@ class GraphsController:
 
     def on_change_share_selection(self, selected_shares):
         self.graph.set_shares(selected_shares)
+
+    def on_baseline_change(self):
+        baseline_date = datetime.date.fromisoformat(
+            self.baseline_date.date().toString(Qt.ISODate)
+        )
+        self.graph.set_baseline(self.baseline_enabled.isChecked(), baseline_date)
