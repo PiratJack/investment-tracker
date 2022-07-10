@@ -13,6 +13,7 @@ _ = gettext.gettext
 
 # TODO: Have different colors for each share / account (accounts should have a stronger shade)
 # TODO: Display value on markers
+# TODO: Move X axis based on the selected range
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -274,7 +275,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.setMouseEnabled(x=True, y=False)
         self.enableAutoRange(axis="x")
-        self.enableAutoRange(axis="y")
 
         self.plots["legend"] = self.addLegend()
 
@@ -287,18 +287,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.selected_accounts = selected_accounts
         if not selected_accounts:
             self.accounts_graph_values = {}
-            return
-
-        self.calculate_accounts(selected_accounts)
+        else:
+            self.calculate_accounts(selected_accounts)
         self.plot_graph()
 
     def set_shares(self, selected_shares=[]):
         self.selected_shares = selected_shares
         if not selected_shares:
             self.shares_graph_values = {}
-            return
-
-        self.calculate_shares(selected_shares)
+        else:
+            self.calculate_shares(selected_shares)
         self.plot_graph()
 
     def set_dates(self, start_date, end_date):
@@ -327,37 +325,48 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 )
                 self.shares_raw_values[share_id] |= {v.date: v.price for v in values}
 
+    # The goal of this function is to calculate the account's value for the graph
+    # There are several challenges:
+    # - We don't want to calculate outside of what's needed (to improve performance)
+    # - At each transaction, the holdings (= # of shares & cash) changes
+    # - Each share held may change value multiple times
+    # - We can't assume any of those dates align with others
+    # However, there are a couple rules we can use:
+    # - Accounts do not exist before their first transaction (that's an assumption)
+    # - Between 2 transactions, there is no change in holdings
+    #   This means we can take those holdings until the next transaction
+    # - There are more share price than transaction, so we should loop on transactions first
     def calculate_accounts(self, accounts):
         if not self.start_date or not self.end_date or not accounts:
             return
-
+        # TODO: determine how to handle NoPriceException - display nothing?
         # Evaluate the value from the start date until the end date
         for account_id in accounts:
             account = self.all_accounts[account_id]
+            if not account.holdings:
+                continue
+            account_holdings = account.holdings.copy()
+
             if account_id not in self.accounts_raw_values:
                 self.accounts_raw_values[account_id] = {}
 
-            account_holdings = account.holdings.copy()
-
-            # Find missing ranges
+            # Find missing ranges - improves performance
             ranges_missing = self.find_missing_date_ranges(
-                self.accounts_raw_values, account_id
+                self.accounts_raw_values, account_id, account.start_date
             )
             for range_missing in ranges_missing:
                 new_raw_values = {}
+
                 # Get holdings at start of range
-                previous_dates = [
-                    d for d in account_holdings.keys() if d <= range_missing[0]
+                holdings_at_start = account_holdings[
+                    max([d for d in account_holdings.keys() if d <= range_missing[0]])
                 ]
-                if previous_dates:
-                    holdings = account_holdings[max(previous_dates)]
-                    account_holdings[range_missing[0]] = {
-                        "cash": holdings["cash"],
-                        "shares": holdings["shares"].copy(),
-                    }
+                account_holdings[range_missing[0]] = {
+                    "cash": holdings_at_start["cash"],
+                    "shares": holdings_at_start["shares"].copy(),
+                }
 
                 for transaction_date in account_holdings.keys():
-                    holdings = account_holdings[transaction_date]
                     # Outside of requested range
                     if (
                         transaction_date < range_missing[0]
@@ -366,35 +375,27 @@ class GraphsArea(pyqtgraph.PlotWidget):
                         continue
 
                     # Get next transaction, because holdings are stable until then
-                    next_transaction_date = [
-                        x for x in account_holdings.keys() if x > transaction_date
-                    ]
-                    if (
-                        not next_transaction_date
-                        or min(next_transaction_date) > range_missing[1]
-                    ):
-                        next_transaction_date = range_missing[1]
-                    else:
-                        next_transaction_date = min(next_transaction_date)
+                    # range_missing[1] is here to guarantee there is a value + to limit the range of transactions
+                    next_transaction_date = min(
+                        [x for x in account_holdings.keys() if x > transaction_date]
+                        + [range_missing[1]]
+                    )
 
+                    holdings = account_holdings[transaction_date]
                     new_raw_values[transaction_date] = holdings["cash"]
                     for share_id in holdings["shares"]:
-                        # This avoids counting shares twice when adding new dates
-                        previous_share_value = 0
-                        try:
-                            share_values = self.get_share_value_in_range(
-                                share_id,
-                                transaction_date,
-                                next_transaction_date,
-                                account.base_currency,
-                            )
-                        except NoPriceException:
-                            # TODO: better handling of this - because it should not display anything (?)
-                            del new_raw_values[transaction_date]
-                            break
+                        # Get values from the DB
+                        share_values = self.get_share_value_in_range(
+                            share_id,
+                            transaction_date,
+                            next_transaction_date,
+                            account.base_currency,
+                        )
 
                         # Add all dates of this share to the list
+                        previous_share_value = 0
                         for share_value_date in share_values:
+                            # If date doesn't exist, take previous one and remove this share's value
                             if not share_value_date in new_raw_values:
                                 previous_value_date = max(
                                     d for d in new_raw_values if d < share_value_date
@@ -403,14 +404,12 @@ class GraphsArea(pyqtgraph.PlotWidget):
                                     new_raw_values[previous_value_date]
                                     - previous_share_value
                                 )
-                            new_raw_values[share_value_date] += (
-                                holdings["shares"][share_id]
-                                * share_values[share_value_date]
-                            )
+                            # Add the share value as of share_value_date
                             previous_share_value = (
                                 holdings["shares"][share_id]
                                 * share_values[share_value_date]
                             )
+                            new_raw_values[share_value_date] += previous_share_value
 
                         # Add dates from other shares (they're not in account_holdings)
                         missing_dates = [
@@ -432,99 +431,66 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 self.accounts_raw_values[account_id] |= new_raw_values
 
     def plot_graph(self):
-        for plot in self.plots:
-            self.plots[plot].clear()
-        self.plots = {"legend": self.plots["legend"]}
-
+        self.clear_plots()
         for share_id in self.selected_shares:
-            share = self.all_shares[share_id]
-            # Get raw values
-            self.shares_graph_values[share_id] = {
-                date: self.shares_raw_values[share_id][date]
-                for date in sorted(self.shares_raw_values[share_id])
-                if date >= self.start_date and date <= self.end_date
-            }
-
-            # Add start and end value based on past/future dates
-            dates_before = [
-                date
-                for date in self.shares_graph_values[share_id]
-                if date <= self.start_date
-            ]
-            dates_after = [
-                date
-                for date in self.shares_graph_values[share_id]
-                if date >= self.end_date
-            ]
-            if dates_before:
-                self.shares_graph_values[share_id][
-                    self.start_date
-                ] = self.shares_graph_values[share_id][max(dates_before)]
-            if dates_after:
-                self.shares_graph_values[share_id][
-                    self.end_date
-                ] = self.shares_graph_values[share_id][min(dates_after)]
-            date_timestamps = [
-                datetime.datetime.fromordinal(x.toordinal()).timestamp()
-                for x in self.shares_graph_values[share_id].keys()
-            ]
+            # Convert values
+            x, y = self.convert_raw_to_graph(self.shares_raw_values[share_id])
+            self.shares_graph_values[share_id] = y
 
             # Prepare legend and plot
+            share = self.all_shares[share_id]
             share_label = share.name + " (" + share.base_currency.name + ")"
-            self.plots[share_id] = self.plot(
-                x=date_timestamps,
-                y=list(self.shares_graph_values[share_id].values()),
+            self.plots["share_" + str(share_id)] = self.plot(
+                x=x,
+                y=list(y.values()),
                 name=share_label,
             )
 
             self.set_axis_range()
 
         for account_id in self.selected_accounts:
-            if not account_id in self.accounts_raw_values:
-                continue
-            account = self.all_accounts[account_id]
-            # Get raw values
-            self.accounts_graph_values[account_id] = {
-                date: self.accounts_raw_values[account_id][date]
-                for date in sorted(self.accounts_raw_values[account_id])
-                if date >= self.start_date and date <= self.end_date
-            }
-
-            # Add start and end value based on past/future dates
-            dates_before = [
-                date
-                for date in self.accounts_graph_values[account_id]
-                if date <= self.start_date
-            ]
-            dates_after = [
-                date
-                for date in self.accounts_graph_values[account_id]
-                if date >= self.end_date
-            ]
-            if dates_before:
-                self.accounts_graph_values[account_id][
-                    self.start_date
-                ] = self.accounts_graph_values[account_id][max(dates_before)]
-            if dates_after:
-                self.accounts_graph_values[account_id][
-                    self.end_date
-                ] = self.accounts_graph_values[account_id][min(dates_after)]
-            date_timestamps = [
-                datetime.datetime.fromordinal(x.toordinal()).timestamp()
-                for x in self.accounts_graph_values[account_id].keys()
-            ]
+            # Convert values
+            x, y = self.convert_raw_to_graph(self.accounts_raw_values[account_id])
+            self.accounts_graph_values[account_id] = y
 
             # Prepare legend and plot
+            account = self.all_accounts[account_id]
             account_label = account.name + " (" + account.base_currency.name + ")"
-            self.plots[account_id] = self.plot(
-                x=date_timestamps,
-                y=list(self.accounts_graph_values[account_id].values()),
+            self.plots["account_" + str(account_id)] = self.plot(
+                x=x,
+                y=list(y.values()),
                 name=account_label,
             )
 
             self.set_axis_range()
 
+    def convert_raw_to_graph(self, raw):
+        graph_values = {
+            date: raw[date]
+            for date in sorted(raw)
+            if date >= self.start_date and date <= self.end_date
+        }
+
+        # pyqtgraph accepts only timestamps for date axis
+        date_timestamps = [
+            datetime.datetime.fromordinal(x.toordinal()).timestamp()
+            for x in graph_values.keys()
+        ]
+
+        return date_timestamps, graph_values
+
+    def clear_plots(self):
+        for plot in self.plots:
+            if plot == "legend":
+                continue
+
+            self.removeItem(self.plots[plot])
+            self.plots[plot].clear()
+        self.plots = {"legend": self.plots["legend"]}
+
     def set_axis_range(self):
+        self.enableAutoRange(axis="y")
+
         if (
             "min" in self.graph_types[self.graph_type]
             and "max" in self.graph_types[self.graph_type]
@@ -539,17 +505,26 @@ class GraphsArea(pyqtgraph.PlotWidget):
             ymax = self.graph_types[self.graph_type]["max"]
         self.setYRange(ymin, ymax, padding=0)
 
-    def find_missing_date_ranges(self, raw_values, element_id):
+    # First date is the "start of the world" so nothing can be before
+    def find_missing_date_ranges(self, raw_values, element_id, first_date=None):
         ranges_missing = []
+        if not first_date:
+            first_date = datetime.date(1, 1, 1)
+        elif first_date > self.end_date:
+            return []
+
+        start = max(self.start_date, first_date)
         if raw_values and element_id in raw_values and raw_values[element_id]:
-            existing_dates = raw_values[element_id].keys()
-            if min(existing_dates) > self.start_date:
-                ranges_missing.append((self.start_date, min(existing_dates)))
+            existing_dates = list(raw_values[element_id].keys())
+            if min(existing_dates) > start:
+                ranges_missing.append((start, min(existing_dates + [self.end_date])))
 
             if max(existing_dates) < self.end_date:
-                ranges_missing.append((max(existing_dates), self.end_date))
+                ranges_missing.append(
+                    (max(existing_dates + [self.start_date]), self.end_date)
+                )
         else:
-            ranges_missing.append((self.start_date, self.end_date))
+            ranges_missing.append((start, self.end_date))
 
         return ranges_missing
 
