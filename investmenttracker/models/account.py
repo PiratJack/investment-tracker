@@ -103,7 +103,30 @@ class Account(Base):
                         * transaction.share.last_price.price
                     )
 
-            return value
+        if attr == "holdings":
+            account_holdings = {}
+            previous_holdings = {"cash": 0, "shares": {}}
+            for t in sorted(self.transactions, key=lambda t: t.date):
+                # Set up value based on previous ones
+                if not account_holdings or t.date not in account_holdings:
+                    account_holdings[t.date] = {
+                        "cash": previous_holdings["cash"],
+                        "shares": previous_holdings["shares"].copy(),
+                    }
+
+                # Now, add the actual transaction
+                account_holdings[t.date]["cash"] += (
+                    t.type.value["impact_currency"] * t.quantity * t.unit_price
+                )
+                if t.type.value["impact_asset"]:
+                    if t.share.id not in account_holdings[t.date]["shares"]:
+                        account_holdings[t.date]["shares"][t.share.id] = 0
+                    account_holdings[t.date]["shares"][t.share.id] += (
+                        t.type.value["impact_asset"] * t.quantity
+                    )
+                previous_holdings = account_holdings[t.date]
+
+            return account_holdings
 
         raise AttributeError
 

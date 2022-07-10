@@ -13,7 +13,6 @@ _ = gettext.gettext
 
 # TODO: Have different colors for each share / account (accounts should have a stronger shade)
 # TODO: Display value on markers
-# TODO: Display of accounts
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -280,7 +279,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plots["legend"] = self.addLegend()
 
         # TODO: different types of graphs:
-        #  TODO: - Values of each element
         #  TODO: - Account split (with total = 100%) - should display % in vertical axis
         #  TODO: - Value of each element, with base 100 at a given date
         self.graph_type = "value"
@@ -333,46 +331,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if not self.start_date or not self.end_date or not accounts:
             return
 
-        # Calculate holdings (which will never move, because we take all transactions)
-        for account_id in accounts:
-            if account_id in self.accounts_holdings:
-                continue
-
-            account = self.all_accounts[account_id]
-
-            account_holdings = {}
-            for t in sorted(account.transactions, key=lambda t: t.date):
-                # Set up initial value
-                if not account_holdings:
-                    account_holdings[t.date] = {"cash": 0, "shares": {}}
-                # Set up value based on previous transaction
-                elif t.date not in account_holdings:
-                    previous_date = max(account_holdings.keys())
-                    account_holdings[t.date] = {
-                        "cash": account_holdings[previous_date]["cash"],
-                        "shares": account_holdings[previous_date]["shares"].copy(),
-                    }
-
-                # Now, add the actual transaction
-                account_holdings[t.date]["cash"] += (
-                    t.type.value["impact_currency"] * t.quantity * t.unit_price
-                )
-                if t.type.value["impact_asset"]:
-                    if t.share.id not in account_holdings[t.date]["shares"]:
-                        account_holdings[t.date]["shares"][t.share.id] = 0
-                    account_holdings[t.date]["shares"][t.share.id] += (
-                        t.type.value["impact_asset"] * t.quantity
-                    )
-
-            self.accounts_holdings[account_id] = account_holdings
-
         # Evaluate the value from the start date until the end date
         for account_id in accounts:
             account = self.all_accounts[account_id]
             if account_id not in self.accounts_raw_values:
                 self.accounts_raw_values[account_id] = {}
 
-            account_holdings = self.accounts_holdings[account_id]
+            account_holdings = account.holdings.copy()
 
             # Find missing ranges
             ranges_missing = self.find_missing_date_ranges(

@@ -265,14 +265,14 @@ class TestAccount(unittest.TestCase):
         )
 
     def test_attributes(self):
-        # Account balance
+        ##### Account balance #####
         self.assertEqual(
             self.database.accounts_get()[0].balance,
             3010,
             "Account balance should be 3010",
         )
 
-        # Shares held
+        ##### Shared held #####
         shares = self.database.accounts_get()[0].shares
         self.assertEqual(shares[2], 40, "Account should have 40 NYSE:ACN")
         self.assertEqual(shares[3], 10, "Account should have 10 NASDAQ:WDAY")
@@ -283,11 +283,11 @@ class TestAccount(unittest.TestCase):
             total_invested, 10000, "Total invested in account should be 10k"
         )
 
-        # Total value
+        ##### Total value #####
         total_value = self.database.accounts_get()[0].total_value
         self.assertEqual(total_value, 0, "INVALID TEST")
 
-        # Asset & cash balance per transaction
+        ##### Asset & cash balance per transaction #####
         account = self.database.accounts_get_by_id(4)
         transaction = account.transactions[1]
         balance = account.balance_after_transaction(transaction)
@@ -319,6 +319,36 @@ class TestAccount(unittest.TestCase):
             lambda _: account.balance_after_transaction(account2.transactions[0]),
             "This transaction is for another account",
         )
+
+        ##### Holdings #####
+        holdings = self.database.accounts_get_by_id(1).holdings
+        expected_holdings = {
+            datetime.date(2020, 1, 1): {
+                "cash": 10000,
+                "shares": {},
+            },
+            datetime.date(2020, 1, 5): {
+                "cash": 5000,
+                "shares": {2: 50},
+            },
+            datetime.date(2020, 1, 25): {
+                "cash": 3000,
+                "shares": {2: 50, 3: 10},
+            },
+            datetime.date(2020, 4, 15): {
+                "cash": 3010,
+                "shares": {2: 40, 3: 10},
+            },
+        }
+        for test_date in expected_holdings:
+            self.assertIn(
+                test_date, holdings, "Holdings date missing for " + str(test_date)
+            )
+            self.assertEquals(
+                holdings[test_date],
+                expected_holdings[test_date],
+                "Holdings wrong as of " + str(test_date),
+            )
 
     def test_validations(self):
         account = Account(
