@@ -115,7 +115,7 @@ class TestShare(unittest.TestCase):
             "Share short name is wrong",
         )
 
-    def test_last_price(self):
+    def test_attributes(self):
         # No last price
         test_name = "Missing last price should raise NoPriceException"
         share = self.database.share_get_by_id(1)
@@ -136,6 +136,21 @@ class TestShare(unittest.TestCase):
             last_price.currency.main_code, "USD", "Last price should be 550 USD"
         )
         self.assertEqual(last_price.source, "Second test", "Last price is Second test")
+
+        # Graph label
+        share = self.database.share_get_by_id(2)
+        self.assertEqual(
+            share.graph_label,
+            "Accenture (Dollar)",
+            "Share graph label is wrong",
+        )
+
+        share = self.database.share_get_by_id(5)
+        self.assertEqual(
+            share.graph_label,
+            "Euro",
+            "Share graph label is wrong",
+        )
 
     def test_validations(self):
         share = Share(id=1, name="Test share", main_code="FE4451")

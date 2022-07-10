@@ -272,7 +272,7 @@ class TestAccount(unittest.TestCase):
             "Account balance should be 3010",
         )
 
-        ##### Shared held #####
+        ##### Shares held #####
         shares = self.database.accounts_get()[0].shares
         self.assertEqual(shares[2], 40, "Account should have 40 NYSE:ACN")
         self.assertEqual(shares[3], 10, "Account should have 10 NASDAQ:WDAY")
@@ -427,7 +427,6 @@ class TestAccount(unittest.TestCase):
                     id=27,
                     name="test",
                     code="Error",
-                    base_currency_id=5,
                     enabled=True,
                 ),
             ]
@@ -437,6 +436,21 @@ class TestAccount(unittest.TestCase):
             account.start_date,
             None,
             "Account start date is wrong",
+        )
+
+        ##### Graph name #####
+        account = self.database.accounts_get_by_id(1)
+        self.assertEqual(
+            account.graph_label,
+            "Main account (Euro)",
+            "Account graph label is wrong",
+        )
+
+        account = self.database.accounts_get_by_id(27)
+        self.assertEqual(
+            account.graph_label,
+            "test",
+            "Account graph label is wrong",
         )
 
     def test_validations(self):

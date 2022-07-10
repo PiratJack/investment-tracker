@@ -76,6 +76,12 @@ class Account(Base):
             except:
                 return None
 
+        # Display in graph
+        if attr == "graph_label":
+            return self.name + (
+                " (" + self.base_currency.name + ")" if self.base_currency else ""
+            )
+
         if attr == "shares":
             shares = {}
             for transaction in self.transactions:

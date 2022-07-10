@@ -57,6 +57,12 @@ class Share(Base):
                     self,
                 )
 
+        # Display in graph
+        if attr == "graph_label":
+            return self.name + (
+                " (" + self.base_currency.name + ")" if self.base_currency else ""
+            )
+
         raise AttributeError
 
     @sqlalchemy.orm.validates("main_code")
