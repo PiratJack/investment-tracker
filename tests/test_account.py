@@ -413,6 +413,32 @@ class TestAccount(unittest.TestCase):
                 "Holdings wrong as of " + str(test_date),
             )
 
+        ##### Start date #####
+        account = self.database.accounts_get_by_id(1)
+        self.assertEqual(
+            account.start_date,
+            datetime.date(2020, 1, 1),
+            "Account start date is wrong",
+        )
+
+        self.database.session.add_all(
+            [
+                Account(
+                    id=27,
+                    name="test",
+                    code="Error",
+                    base_currency_id=5,
+                    enabled=True,
+                ),
+            ]
+        )
+        account = self.database.accounts_get_by_id(27)
+        self.assertEqual(
+            account.start_date,
+            None,
+            "Account start date is wrong",
+        )
+
     def test_validations(self):
         account = Account(
             id=50,

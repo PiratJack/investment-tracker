@@ -69,6 +69,13 @@ class Account(Base):
                 )
             return balance
 
+        # Date of first transaction
+        if attr == "start_date":
+            try:
+                return min([t.date for t in self.transactions])
+            except:
+                return None
+
         if attr == "shares":
             shares = {}
             for transaction in self.transactions:
