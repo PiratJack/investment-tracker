@@ -14,6 +14,7 @@ _ = gettext.gettext
 # TODO: Have different colors for each share / account (accounts should have a stronger shade)
 # TODO: Display value on markers
 # TODO: Move X axis based on the selected range
+# TODO: Division by zero when both "base 100" and "split" are checked ==> prevent that
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -245,7 +246,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         },
         "split": {
             "min": 0,
-            "max": 1,
+            "max": 1.1,
         },
         "baseline": {
             "min": 0,
@@ -299,9 +300,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.plots["legend"] = self.addLegend()
 
-        # TODO: different types of graphs:
-        #  TODO: - Account split (with total = 100%) - should display % in vertical axis
-
     def set_accounts(self, selected_accounts=[]):
         self.selected_accounts = selected_accounts
         if selected_accounts:
@@ -331,6 +329,62 @@ class GraphsArea(pyqtgraph.PlotWidget):
         else:
             self.baseline_date = None
             self.graph_type = "value"
+        # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
+
+        self.plot_graph()
+
+    def set_account_split(self, enabled):
+        if len(self.selected_accounts) != 1:
+            raise UserWarning("Only 1 account can be displayed in this mode")
+
+        self.graph_type = "split" if enabled else "value"
+
+        # Get raw calculations for everything we need
+        self.calculate_accounts(self.selected_accounts)
+        account_id = self.selected_accounts[0]
+        account = self.all_accounts[account_id]
+        held_shares = set(
+            [
+                d
+                for date in self.accounts_holdings[account_id]
+                for d in self.accounts_holdings[account_id][date]["shares"]
+            ]
+        )
+        self.calculate_shares(held_shares)
+
+        # Now convert to percentages
+        holdings = self.accounts_holdings[account_id]
+        self.shares_graph_values = {}
+        self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
+        print(self.accounts_graph_values)
+        for share_id in held_shares:
+            self.shares_graph_values[share_id] = {
+                date: (
+                    holdings[date]["shares"][share_id]
+                    * self.get_share_value_as_of(share_id, date, account.base_currency)
+                    / self.accounts_raw_values[account_id][date]
+                    if share_id in holdings[date]["shares"]
+                    else 0
+                )
+                + sum(
+                    self.shares_graph_values[s][date] for s in self.shares_graph_values
+                )
+                for date in holdings
+            }
+
+        self.selected_shares = list(held_shares) + [account.base_currency.id]
+        # This should yield 1 for each date (because it contains the sum of everything)
+        self.shares_graph_values[account.base_currency.id] = {
+            date: (
+                holdings[date]["cash"] / self.accounts_raw_values[account_id][date]
+                if "cash" in holdings[date]
+                else 0
+            )
+            + self.shares_graph_values[share_id][date]
+            # share_id contains the last share from the loop, thus everything except cash
+            for date in holdings
+        }
+
         # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
 
         self.plot_graph()
@@ -373,7 +427,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
             account = self.all_accounts[account_id]
             if not account.holdings:
                 continue
-            account_holdings = account.holdings.copy()
+            if account_id not in self.accounts_holdings:
+                self.accounts_holdings[account_id] = account.holdings.copy()
+            holdings = self.accounts_holdings[account_id]
 
             if account_id not in self.accounts_raw_values:
                 self.accounts_raw_values[account_id] = {}
@@ -386,15 +442,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 new_raw_values = {}
 
                 # Get holdings at start of range
-                holdings_at_start = account_holdings[
-                    max([d for d in account_holdings.keys() if d <= range_missing[0]])
+                holdings_at_start = holdings[
+                    max([d for d in holdings.keys() if d <= range_missing[0]])
                 ]
-                account_holdings[range_missing[0]] = {
+                holdings[range_missing[0]] = {
                     "cash": holdings_at_start["cash"],
                     "shares": holdings_at_start["shares"].copy(),
                 }
 
-                for transaction_date in account_holdings.keys():
+                transaction_dates = list(holdings.keys())
+                for transaction_date in transaction_dates:
                     # Outside of requested range
                     if (
                         transaction_date < range_missing[0]
@@ -405,13 +462,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
                     # Get next transaction, because holdings are stable until then
                     # range_missing[1] is here to guarantee there is a value + to limit the range of transactions
                     next_transaction_date = min(
-                        [x for x in account_holdings.keys() if x > transaction_date]
+                        [x for x in holdings.keys() if x > transaction_date]
                         + [range_missing[1]]
                     )
 
-                    holdings = account_holdings[transaction_date]
-                    new_raw_values[transaction_date] = holdings["cash"]
-                    for share_id in holdings["shares"]:
+                    current_holdings = holdings[transaction_date]
+                    new_raw_values[transaction_date] = current_holdings["cash"]
+                    for share_id in current_holdings["shares"]:
                         # Get values from the DB
                         share_values = self.get_share_value_in_range(
                             share_id,
@@ -423,6 +480,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                         # Add all dates of this share to the list
                         previous_share_value = 0
                         for share_value_date in share_values:
+                            holdings[share_value_date] = current_holdings
                             # If date doesn't exist, take previous one and remove this share's value
                             if not share_value_date in new_raw_values:
                                 previous_value_date = max(
@@ -434,26 +492,26 @@ class GraphsArea(pyqtgraph.PlotWidget):
                                 )
                             # Add the share value as of share_value_date
                             previous_share_value = (
-                                holdings["shares"][share_id]
+                                current_holdings["shares"][share_id]
                                 * share_values[share_value_date]
                             )
                             new_raw_values[share_value_date] += previous_share_value
 
-                        # Add dates from other shares (they're not in account_holdings)
+                        # Add dates from other shares (they're not in holdings)
                         missing_dates = [
                             d
                             for d in new_raw_values
                             if d not in share_values
-                            and d not in account_holdings
-                            and d > transaction_date
-                            and d < next_transaction_date
+                            # and d not in holdings
+                            and d > transaction_date and d < next_transaction_date
                         ]
                         for missing_date in missing_dates:
+                            holdings[missing_date] = holdings[transaction_date]
                             share_value = self.get_share_value_as_of(
                                 share_id, missing_date, account.base_currency
                             )
                             new_raw_values[missing_date] += (
-                                holdings["shares"][share_id] * share_value
+                                current_holdings["shares"][share_id] * share_value
                             )
 
                 self.accounts_raw_values[account_id] |= new_raw_values
@@ -462,15 +520,14 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.clear_plots()
         for share_id in self.selected_shares:
             # Convert values
-            x = self.convert_raw_to_graph("share", share_id)
+            self.convert_raw_to_graph("share", share_id)
 
             # Prepare legend and plot
             share = self.all_shares[share_id]
-            share_label = share.name + " (" + share.base_currency.name + ")"
             self.plots["share_" + str(share_id)] = self.plot(
                 x=list(self.shares_graph_values[share_id].keys()),
                 y=list(self.shares_graph_values[share_id].values()),
-                name=share_label,
+                name=share.graph_label,
             )
 
             self.set_axis_range()
@@ -481,20 +538,27 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
             # Prepare legend and plot
             account = self.all_accounts[account_id]
-            account_label = account.name + " (" + account.base_currency.name + ")"
             self.plots["account_" + str(account_id)] = self.plot(
                 x=list(self.accounts_graph_values[account_id].keys()),
                 y=list(self.accounts_graph_values[account_id].values()),
-                name=account_label,
+                name=account.graph_label,
             )
 
             self.set_axis_range()
 
     def convert_raw_to_graph(self, element_type, element_id):
+        # in "split" mode, the graph values are already calculated
+        # Therefore, only the date filtering is needed
         if element_type == "share":
-            raw, converted = self.shares_raw_values, self.shares_graph_values
+            if self.graph_type == "split":
+                raw, converted = self.shares_graph_values, self.shares_graph_values
+            else:
+                raw, converted = self.shares_raw_values, self.shares_graph_values
         else:
-            raw, converted = self.accounts_raw_values, self.accounts_graph_values
+            if self.graph_type == "split":
+                raw, converted = self.accounts_graph_values, self.accounts_graph_values
+            else:
+                raw, converted = self.accounts_raw_values, self.accounts_graph_values
 
         if self.baseline_date:
             # If there is a date before the baseline, take it. Otherwise, take the first available.
@@ -698,7 +762,9 @@ class GraphsController:
         self.right_column.layout.addWidget(self.end_date, 0, 2)
         self.end_date.setMinimumWidth(date_width * 2)
 
-        self.right_column.layout.addWidget(QtWidgets.QWidget(), 0, 3)
+        self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
+        self.split_enabled.stateChanged.connect(self.on_display_split_change)
+        self.right_column.layout.addWidget(self.split_enabled, 0, 3, Qt.AlignRight)
         self.right_column.layout.setColumnStretch(3, 1)
 
         # Choose whether to display baseline (= one date equals 100%)
@@ -779,3 +845,6 @@ class GraphsController:
             self.baseline_date.date().toString(Qt.ISODate)
         )
         self.graph.set_baseline(self.baseline_enabled.isChecked(), baseline_date)
+
+    def on_display_split_change(self):
+        self.graph.set_account_split(self.split_enabled.isChecked())

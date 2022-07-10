@@ -32,22 +32,6 @@ msgstr ""
 msgid "Max length for share code value is 250 characters"
 msgstr ""
 
-#, python-brace-format
-msgid "No price available for share {name} ({main_code})"
-msgstr ""
-
-msgid "Max length for share main code is 250 characters"
-msgstr ""
-
-msgid "Missing share name"
-msgstr ""
-
-msgid "Max length for share name is 250 characters"
-msgstr ""
-
-msgid "Share base currency can't be itself"
-msgstr ""
-
 msgid "Missing share price share ID"
 msgstr ""
 
@@ -154,6 +138,22 @@ msgid "Max length for account code is 250 characters"
 msgstr ""
 
 msgid "Missing account base currency"
+msgstr ""
+
+#, python-brace-format
+msgid "No price available for share {name} ({main_code})"
+msgstr ""
+
+msgid "Max length for share main code is 250 characters"
+msgstr ""
+
+msgid "Missing share name"
+msgstr ""
+
+msgid "Max length for share name is 250 characters"
+msgstr ""
+
+msgid "Share base currency can't be itself"
 msgstr ""
 
 msgid "All"
@@ -343,4 +343,13 @@ msgid "Display graphs"
 msgstr ""
 
 msgid "Period"
+msgstr ""
+
+msgid "Display account composition?"
+msgstr ""
+
+msgid "Display evolution?"
+msgstr ""
+
+msgid "Baseline date"
 msgstr ""
