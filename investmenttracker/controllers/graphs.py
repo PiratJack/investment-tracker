@@ -14,7 +14,6 @@ _ = gettext.gettext
 # TODO: Have different colors for each share / account (accounts should have a stronger shade)
 # TODO: Display value on markers
 # TODO: Move X axis based on the selected range
-# TODO: Division by zero when both "base 100" and "split" are checked ==> prevent that
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -844,7 +843,11 @@ class GraphsController:
         baseline_date = datetime.date.fromisoformat(
             self.baseline_date.date().toString(Qt.ISODate)
         )
+        self.split_enabled.setEnabled(not self.baseline_enabled.isChecked())
+
         self.graph.set_baseline(self.baseline_enabled.isChecked(), baseline_date)
 
     def on_display_split_change(self):
+        self.baseline_enabled.setEnabled(not self.split_enabled.isChecked())
+        self.baseline_date.setEnabled(not self.split_enabled.isChecked())
         self.graph.set_account_split(self.split_enabled.isChecked())
