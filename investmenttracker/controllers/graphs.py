@@ -338,55 +338,61 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.graph_type = "split" if enabled else "value"
 
-        # Get raw calculations for everything we need
-        self.calculate_accounts(self.selected_accounts)
-        account_id = self.selected_accounts[0]
-        account = self.all_accounts[account_id]
-        held_shares = set(
-            [
-                d
-                for date in self.accounts_holdings[account_id]
-                for d in self.accounts_holdings[account_id][date]["shares"]
-            ]
-        )
-        self.calculate_shares(held_shares)
+        if self.graph_type == "split":
+            # Get raw calculations for everything we need
+            self.calculate_accounts(self.selected_accounts)
+            account_id = self.selected_accounts[0]
+            account = self.all_accounts[account_id]
+            held_shares = set(
+                [
+                    d
+                    for date in self.accounts_holdings[account_id]
+                    for d in self.accounts_holdings[account_id][date]["shares"]
+                ]
+            )
+            self.calculate_shares(held_shares)
 
-        # Now convert to percentages
-        holdings = self.accounts_holdings[account_id]
-        self.shares_graph_values = {}
-        self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
-        print(self.accounts_graph_values)
-        for share_id in held_shares:
-            self.shares_graph_values[share_id] = {
+            # Now convert to percentages
+            holdings = self.accounts_holdings[account_id]
+            self.shares_graph_values = {}
+            self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
+
+            for share_id in held_shares:
+                self.shares_graph_values[share_id] = {
+                    date: (
+                        holdings[date]["shares"][share_id]
+                        * self.get_share_value_as_of(
+                            share_id, date, account.base_currency
+                        )
+                        / self.accounts_raw_values[account_id][date]
+                        if share_id in holdings[date]["shares"]
+                        else 0
+                    )
+                    + sum(
+                        self.shares_graph_values[s][date]
+                        for s in self.shares_graph_values
+                    )
+                    for date in holdings
+                }
+
+            self.selected_shares = list(held_shares) + [account.base_currency.id]
+            self.calculate_shares([account.base_currency.id])
+
+            # This should yield 1 for each date (because it contains the sum of everything)
+            self.shares_graph_values[account.base_currency.id] = {
                 date: (
-                    holdings[date]["shares"][share_id]
-                    * self.get_share_value_as_of(share_id, date, account.base_currency)
-                    / self.accounts_raw_values[account_id][date]
-                    if share_id in holdings[date]["shares"]
+                    holdings[date]["cash"] / self.accounts_raw_values[account_id][date]
+                    if "cash" in holdings[date]
                     else 0
                 )
-                + sum(
-                    self.shares_graph_values[s][date] for s in self.shares_graph_values
-                )
+                + self.shares_graph_values[share_id][date]
+                # share_id contains the last share from the loop, thus everything except cash
                 for date in holdings
             }
 
-        self.selected_shares = list(held_shares) + [account.base_currency.id]
-        # This should yield 1 for each date (because it contains the sum of everything)
-        self.shares_graph_values[account.base_currency.id] = {
-            date: (
-                holdings[date]["cash"] / self.accounts_raw_values[account_id][date]
-                if "cash" in holdings[date]
-                else 0
-            )
-            + self.shares_graph_values[share_id][date]
-            # share_id contains the last share from the loop, thus everything except cash
-            for date in holdings
-        }
+            # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
 
-        # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
-
-        self.plot_graph()
+            self.plot_graph()
 
     def calculate_shares(self, shares):
         if not self.start_date or not self.end_date or not shares:
@@ -851,3 +857,6 @@ class GraphsController:
         self.baseline_enabled.setEnabled(not self.split_enabled.isChecked())
         self.baseline_date.setEnabled(not self.split_enabled.isChecked())
         self.graph.set_account_split(self.split_enabled.isChecked())
+        if not self.split_enabled.isChecked():
+            self.accounts_tree.on_select_item()
+            self.shares_tree.on_select_item()
