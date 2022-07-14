@@ -330,7 +330,8 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.selected_shares = selected_shares
         if selected_shares:
             self.calculate_shares(selected_shares)
-        self.plot_graph()
+        if not self.graph_type == "split":
+            self.plot_graph()
 
     def set_dates(self, start_date, end_date):
         self.start_date = start_date
