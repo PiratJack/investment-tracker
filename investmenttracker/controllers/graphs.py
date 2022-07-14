@@ -11,7 +11,6 @@ from models.base import NoPriceException
 
 _ = gettext.gettext
 
-# TODO: Have different colors for each share / account (accounts should have a stronger shade)
 # TODO: Display value on markers
 # TODO: Move X axis based on the selected range
 
@@ -280,6 +279,28 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     baseline_date = None
 
+    color_set = [
+        (166, 206, 227),
+        (31, 120, 180),
+        (178, 223, 138),
+        (51, 160, 44),
+        (251, 154, 153),
+        (227, 26, 28),
+        (253, 191, 111),
+        (255, 127, 0),
+    ]
+
+    color_set_split = [
+        (166, 206, 227, 150),
+        (31, 120, 180, 150),
+        (178, 223, 138, 150),
+        (51, 160, 44, 150),
+        (251, 154, 153, 150),
+        (227, 26, 28, 150),
+        (253, 191, 111, 150),
+        (255, 127, 0, 150),
+    ]
+
     plots = {}
 
     def __init__(self, parent_controller):
@@ -426,7 +447,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
     def calculate_accounts(self, accounts):
         if not self.start_date or not self.end_date or not accounts:
             return
-        # TODO: determine how to handle NoPriceException - display nothing?
+        # TODO: determine how to handle NoPriceException - If only share, don't display it. If in an account, make it as 0 / don't display at all. In both cases, show warning.
         # Evaluate the value from the start date until the end date
         for account_id in accounts:
             account = self.all_accounts[account_id]
@@ -523,18 +544,37 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def plot_graph(self):
         self.clear_plots()
-        for share_id in self.selected_shares:
+        previous_share = 0
+        color_set = (
+            self.color_set_split if self.graph_type == "split" else self.color_set
+        )
+        # Need to plot from the top to bottom (for splits), otherwise areas get overwritten
+        for share_id in reversed(self.selected_shares):
             # Convert values
             self.convert_raw_to_graph("share", share_id)
 
             # Prepare legend and plot
             share = self.all_shares[share_id]
+            share_color = color_set[share_id % len(color_set)]
+
+            # For splits, the first share to display will fill via "fillLevel" and "brush"
+            brush = share_color if self.graph_type == "split" else None
+            y0 = self.plots["share_" + str(previous_share)] if previous_share else [0]
+            y0 = (
+                self.shares_graph_values[previous_share].values()
+                if previous_share
+                else [0]
+            )
+
             self.plots["share_" + str(share_id)] = self.plot(
                 x=list(self.shares_graph_values[share_id].keys()),
                 y=list(self.shares_graph_values[share_id].values()),
                 name=share.graph_label,
+                pen=share_color,
+                fillLevel=0,
+                brush=brush,
             )
-
+            previous_share = share_id
             self.set_axis_range()
 
         for account_id in self.selected_accounts:
@@ -547,6 +587,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 x=list(self.accounts_graph_values[account_id].keys()),
                 y=list(self.accounts_graph_values[account_id].values()),
                 name=account.graph_label,
+                pen=pyqtgraph.mkPen(
+                    width=2, color=color_set[account_id % len(color_set)]
+                ),
             )
 
             self.set_axis_range()
@@ -860,3 +903,4 @@ class GraphsController:
         if not self.split_enabled.isChecked():
             self.accounts_tree.on_select_item()
             self.shares_tree.on_select_item()
+            self.on_change_dates()
