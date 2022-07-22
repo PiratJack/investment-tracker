@@ -18,12 +18,13 @@ Done:
 - Database models exist for stocks, stock prices, transactions, accounts
 - Validations exist for stocks, stock prices, transactions, accounts
 - UI to manage accounts, shares, share prices and transactions
-- Graphs, with both a value graph and a base 100 graph
+- Graph with absolute value (value in the base currency of the account or share)
+- Graph with a 100 baseline (on a date selected by the user)
+- Split view: how an account's composition changed over time
 
 What is remaining:
 - Create API to manage stocks, stock prices, transactions, accounts
 - Create graph for % split of a given account
-- Make graphs prettier
 - Add display of calculations in graphs (like variations over given periods)
 - Improve the graphs calculation engine (it's kind of good but very loopy) - if possible
 

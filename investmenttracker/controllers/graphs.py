@@ -448,100 +448,105 @@ class GraphsArea(pyqtgraph.PlotWidget):
     def calculate_accounts(self, accounts):
         if not self.start_date or not self.end_date or not accounts:
             return
-        # TODO: determine how to handle NoPriceException - If only share, don't display it. If in an account, make it as 0 / don't display at all. In both cases, show warning.
         # Evaluate the value from the start date until the end date
         for account_id in accounts:
-            account = self.all_accounts[account_id]
-            if not account.holdings:
-                continue
-            if account_id not in self.accounts_holdings:
-                self.accounts_holdings[account_id] = account.holdings.copy()
-            holdings = self.accounts_holdings[account_id]
+            try:
+                account = self.all_accounts[account_id]
+                if not account.holdings:
+                    continue
+                if account_id not in self.accounts_holdings:
+                    self.accounts_holdings[account_id] = account.holdings.copy()
+                holdings = self.accounts_holdings[account_id]
 
-            if account_id not in self.accounts_raw_values:
-                self.accounts_raw_values[account_id] = {}
+                if account_id not in self.accounts_raw_values:
+                    self.accounts_raw_values[account_id] = {}
 
-            # Find missing ranges - improves performance
-            ranges_missing = self.find_missing_date_ranges(
-                self.accounts_raw_values, account_id, account.start_date
-            )
-            for range_missing in ranges_missing:
-                new_raw_values = {}
+                # Find missing ranges - improves performance
+                ranges_missing = self.find_missing_date_ranges(
+                    self.accounts_raw_values, account_id, account.start_date
+                )
+                for range_missing in ranges_missing:
+                    new_raw_values = {}
 
-                # Get holdings at start of range
-                holdings_at_start = holdings[
-                    max([d for d in holdings.keys() if d <= range_missing[0]])
-                ]
-                holdings[range_missing[0]] = {
-                    "cash": holdings_at_start["cash"],
-                    "shares": holdings_at_start["shares"].copy(),
-                }
+                    # Get holdings at start of range
+                    holdings_at_start = holdings[
+                        max([d for d in holdings.keys() if d <= range_missing[0]])
+                    ]
+                    holdings[range_missing[0]] = {
+                        "cash": holdings_at_start["cash"],
+                        "shares": holdings_at_start["shares"].copy(),
+                    }
 
-                transaction_dates = list(holdings.keys())
-                for transaction_date in transaction_dates:
-                    # Outside of requested range
-                    if (
-                        transaction_date < range_missing[0]
-                        or transaction_date > range_missing[1]
-                    ):
-                        continue
+                    transaction_dates = list(holdings.keys())
+                    for transaction_date in transaction_dates:
+                        # Outside of requested range
+                        if (
+                            transaction_date < range_missing[0]
+                            or transaction_date > range_missing[1]
+                        ):
+                            continue
 
-                    # Get next transaction, because holdings are stable until then
-                    # range_missing[1] is here to guarantee there is a value + to limit the range of transactions
-                    next_transaction_date = min(
-                        [x for x in holdings.keys() if x > transaction_date]
-                        + [range_missing[1]]
-                    )
-
-                    current_holdings = holdings[transaction_date]
-                    new_raw_values[transaction_date] = current_holdings["cash"]
-                    for share_id in current_holdings["shares"]:
-                        # Get values from the DB
-                        share_values = self.get_share_value_in_range(
-                            share_id,
-                            transaction_date,
-                            next_transaction_date,
-                            account.base_currency,
+                        # Get next transaction, because holdings are stable until then
+                        # range_missing[1] is here to guarantee there is a value + to limit the range of transactions
+                        next_transaction_date = min(
+                            [x for x in holdings.keys() if x > transaction_date]
+                            + [range_missing[1]]
                         )
 
-                        # Add all dates of this share to the list
-                        previous_share_value = 0
-                        for share_value_date in share_values:
-                            holdings[share_value_date] = current_holdings
-                            # If date doesn't exist, take previous one and remove this share's value
-                            if not share_value_date in new_raw_values:
-                                previous_value_date = max(
-                                    d for d in new_raw_values if d < share_value_date
-                                )
-                                new_raw_values[share_value_date] = (
-                                    new_raw_values[previous_value_date]
-                                    - previous_share_value
-                                )
-                            # Add the share value as of share_value_date
-                            previous_share_value = (
-                                current_holdings["shares"][share_id]
-                                * share_values[share_value_date]
-                            )
-                            new_raw_values[share_value_date] += previous_share_value
-
-                        # Add dates from other shares (they're not in holdings)
-                        missing_dates = [
-                            d
-                            for d in new_raw_values
-                            if d not in share_values
-                            # and d not in holdings
-                            and d > transaction_date and d < next_transaction_date
-                        ]
-                        for missing_date in missing_dates:
-                            holdings[missing_date] = holdings[transaction_date]
-                            share_value = self.get_share_value_as_of(
-                                share_id, missing_date, account.base_currency
-                            )
-                            new_raw_values[missing_date] += (
-                                current_holdings["shares"][share_id] * share_value
+                        current_holdings = holdings[transaction_date]
+                        new_raw_values[transaction_date] = current_holdings["cash"]
+                        for share_id in current_holdings["shares"]:
+                            # Get values from the DB
+                            share_values = self.get_share_value_in_range(
+                                share_id,
+                                transaction_date,
+                                next_transaction_date,
+                                account.base_currency,
                             )
 
-                self.accounts_raw_values[account_id] |= new_raw_values
+                            # Add all dates of this share to the list
+                            previous_share_value = 0
+                            for share_value_date in share_values:
+                                holdings[share_value_date] = current_holdings
+                                # If date doesn't exist, take previous one and remove this share's value
+                                if not share_value_date in new_raw_values:
+                                    previous_value_date = max(
+                                        d
+                                        for d in new_raw_values
+                                        if d < share_value_date
+                                    )
+                                    new_raw_values[share_value_date] = (
+                                        new_raw_values[previous_value_date]
+                                        - previous_share_value
+                                    )
+                                # Add the share value as of share_value_date
+                                previous_share_value = (
+                                    current_holdings["shares"][share_id]
+                                    * share_values[share_value_date]
+                                )
+                                new_raw_values[share_value_date] += previous_share_value
+
+                            # Add dates from other shares (they're not in holdings)
+                            missing_dates = [
+                                d
+                                for d in new_raw_values
+                                if d not in share_values
+                                # and d not in holdings
+                                and d > transaction_date and d < next_transaction_date
+                            ]
+                            for missing_date in missing_dates:
+                                holdings[missing_date] = holdings[transaction_date]
+                                share_value = self.get_share_value_as_of(
+                                    share_id, missing_date, account.base_currency
+                                )
+                                new_raw_values[missing_date] += (
+                                    current_holdings["shares"][share_id] * share_value
+                                )
+
+                    self.accounts_raw_values[account_id] |= new_raw_values
+            except NoPriceException as e:
+                e.account = self.all_accounts[account_id]
+                self.add_error(e)
 
     def plot_graph(self):
         self.clear_plots()
@@ -691,11 +696,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
-            raise NoPriceException("No value found", share_id)
+            raise NoPriceException("No value found", self.all_shares[share_id])
         share_values = [d for d in self.shares_raw_values[share_id] if d <= start_date]
         # If no value known before the start, we can't proceed
         if not share_values:
-            raise NoPriceException("No value found", share_id)
+            raise NoPriceException("No value found", self.all_shares[share_id])
 
         return self.shares_raw_values[share_id][max(share_values)]
 
@@ -705,11 +710,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
-            raise NoPriceException("No value found", share_id)
+            raise NoPriceException("No value found", self.all_shares[share_id])
 
         first_date = [d for d in self.shares_raw_values[share_id] if d <= start_date]
         if not first_date:
-            raise NoPriceException("No value found", share_id)
+            raise NoPriceException("No value found", self.all_shares[share_id])
         share_values = {start_date: self.shares_raw_values[share_id][max(first_date)]}
         share_values |= {
             d: self.shares_raw_values[share_id][d]
@@ -719,12 +724,17 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         return share_values
 
+    def add_error(self, exception):
+        self.parent_controller.add_error(exception)
+
 
 class GraphsController:
     name = "Graphs"
     display_hidden_accounts = False
     display_disabled_accounts = False
     display_hidden_shares = False
+
+    errors = []
 
     def __init__(self, parent_window):
         self.parent_window = parent_window
@@ -830,9 +840,13 @@ class GraphsController:
         self.right_column.layout.addWidget(self.baseline_date, 0, 6)
         self.baseline_date.setMinimumWidth(date_width * 2)
 
+        # Error messages
+        self.error_messages = QtWidgets.QLabel()
+        self.right_column.layout.addWidget(self.error_messages, 1, 0, 1, 7)
+
         # Add the graph
         self.graph = GraphsArea(self)
-        self.right_column.layout.addWidget(self.graph, 1, 0, 1, 7)
+        self.right_column.layout.addWidget(self.graph, 2, 0, 1, 7)
 
         # Set default dates (done after to trigget the dateChanged connectors)
         delta = datetime.timedelta(6 * 30)
@@ -884,9 +898,11 @@ class GraphsController:
         self.graph.set_dates(start_date, end_date)
 
     def on_change_account_selection(self, selected_accounts):
+        self.reset_errors()
         self.graph.set_accounts(selected_accounts)
 
     def on_change_share_selection(self, selected_shares):
+        self.reset_errors()
         self.graph.set_shares(selected_shares)
 
     def on_baseline_change(self):
@@ -905,3 +921,19 @@ class GraphsController:
             self.accounts_tree.on_select_item()
             self.shares_tree.on_select_item()
             self.on_change_dates()
+
+    def reset_errors(self):
+        self.errors = []
+        self.error_messages.setText("")
+
+    def add_error(self, exception):
+        self.errors.append(exception)
+        message = ""
+        for error in self.errors:
+            message += (
+                _(
+                    "Could not display account {account} due to missing value for {share}"
+                ).format(account=error.account.name, share=error.share.name)
+                + "\n"
+            )
+        self.error_messages.setText(message)
