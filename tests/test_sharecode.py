@@ -27,9 +27,9 @@ class TestShareCode(unittest.TestCase):
                 Share(id=4, name="HSBC", main_code="LU4325", base_currency_id=5),
                 Share(id=5, name="Euro", main_code="EUR"),
                 Share(id=6, name="Dollar", main_code="USD"),
-                ShareCode(share_id=1, origin="Boursorama", value="1rACN"),
-                ShareCode(share_id=1, origin="Quantalys", value="14587"),
-                ShareCode(share_id=1, origin="AlphaVantage", value="FR4941"),
+                ShareCode(share_id=1, origin="boursorama", value="1rACN"),
+                ShareCode(share_id=1, origin="quantalys", value="14587"),
+                ShareCode(share_id=1, origin="alphavantage", value="FR4941"),
             ]
         )
         self.database.session.commit()

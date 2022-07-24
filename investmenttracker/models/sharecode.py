@@ -1,7 +1,8 @@
+import enum
 import gettext
 import sqlalchemy.orm
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 
 from .base import Base, ValidationException
 from .share import Share
@@ -9,11 +10,23 @@ from .share import Share
 _ = gettext.gettext
 
 
+class ShareCodeOrigin(enum.Enum):
+    alphavantage = {
+        "name": "Alphavantage",
+    }
+    boursorama = {
+        "name": "Boursorama",
+    }
+    quantalys = {
+        "name": "Quantalys",
+    }
+
+
 class ShareCode(Base):
     __tablename__ = "share_codes"
     id = Column(Integer, primary_key=True)
     share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
-    origin = Column(String(250), nullable=False)
+    origin = Column(Enum(ShareCodeOrigin, validate_strings=True), nullable=False)
     value = Column(String(250), nullable=False)
     share = sqlalchemy.orm.relationship(Share, back_populates="codes")
 
@@ -28,9 +41,9 @@ class ShareCode(Base):
     @sqlalchemy.orm.validates("origin")
     def validate_origin(self, key, value):
         self.validate_missing_field(key, value, _("Missing share code origin"))
-        if len(value) > 250:
+        if value not in self.__table__.columns["origin"].type.enums:
             raise ValidationException(
-                _("Max length for share code origin is 250 characters"),
+                _("Sharecode origin is invalid"),
                 self,
                 key,
                 value,
@@ -59,7 +72,7 @@ class ShareCode(Base):
                 + " ("
                 + str(self.value)
                 + " @ "
-                + str(self.origin)
+                + str(self.origin.value["name"])
                 + ")"
             )
         return "ShareCode (" + str(self.value) + " @ " + str(self.origin) + ")"

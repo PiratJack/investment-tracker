@@ -1,6 +1,7 @@
 import gettext
 
 import models.share
+import models.sharecode
 from controllers.editcontroller import EditController
 
 _ = gettext.gettext
@@ -11,7 +12,7 @@ class ShareController(EditController):
 
     fields = {
         "name": {
-            "label": _("Name"),  # TODO: Display a star in red
+            "label": _("Name"),  # TODO (cosmetic): Display a star in red
             "type": "text",
         },
         "main_code": {
@@ -66,7 +67,37 @@ class ShareController(EditController):
             self.item.group.id if self.item.group else 0
         )
 
-    # TODO: Add share codes
+        print(self.item.codes)
+        print(self.fields)
+
+        for origin in models.sharecode.ShareCodeOrigin:
+            self.fields["code_" + origin.name] = {
+                "label": _("Code for {origin}").format(origin=origin.value["name"]),
+                "type": "text",
+                "default": "",
+            }
+        if self.item.codes:
+            for code in self.item.codes:
+                self.fields["code_" + code.origin.name]["default"] = code.value
+
+    def validate_data(self):
+        super().validate_data()
+        for origin in models.sharecode.ShareCodeOrigin:
+            value = getattr(self.item, "code_" + origin.name)
+            existing_code = [code for code in self.item.codes if code.origin == origin]
+            if value:
+                if existing_code:
+                    existing_code[0].value = value
+                else:
+                    new_code = models.sharecode.ShareCode(
+                        share_id=self.item.id, origin=origin.name, value=value
+                    )
+                    self.item.codes.append(new_code)
+            else:
+                if existing_code:
+                    self.database.delete(existing_code[0])
+
+    # TODO (major): Add share codes
 
     def close(self):
         self.window.close()
