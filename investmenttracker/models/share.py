@@ -1,4 +1,5 @@
 import gettext
+import datetime
 import sqlalchemy.orm
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
@@ -48,7 +49,12 @@ class Share(Base):
     def __getattr__(self, attr):
         if attr == "last_price":
             try:
-                return sorted(self.prices, key=lambda price: price.date)[-1]
+                prices = [
+                    price
+                    for price in self.prices
+                    if price.date >= datetime.date.today() + datetime.timedelta(-14)
+                ]
+                return sorted(prices, key=lambda price: price.date)[-1]
             except IndexError:
                 raise NoPriceException(
                     _("No price available for share {name} ({main_code})").format(

@@ -69,13 +69,17 @@ class AccountsTree(QtWidgets.QTreeWidget):
 
         # Fill in the data
         for account in accounts:
+            try:
+                value = str(account.total_value)
+            except:
+                value = _("Unknown or too old")
             account_widget = QtWidgets.QTreeWidgetItem(
                 [
                     account.name,
                     str(account.id),
                     account.code,
                     "",
-                    str(account.total_value),
+                    value,
                     "",
                     str(account.total_invested),
                     "",
@@ -118,8 +122,8 @@ class AccountsTree(QtWidgets.QTreeWidget):
                         "",
                         share.main_code,
                         str(account.shares[share.id]),
-                        _("Unknown"),
-                        _("Unknown"),
+                        _("Unknown or too old"),
+                        "",
                         "",
                         "",
                     ]

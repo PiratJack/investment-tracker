@@ -34,16 +34,16 @@ class TestShare(unittest.TestCase):
                 Share(id=5, name="Euro", main_code="EUR"),
                 Share(id=6, name="Dollar", main_code="USD"),
                 Share(id=7, name="Bicoin", main_code="XFE"),
-                SharePrice(
+                SharePrice(  # ACN at 458 EUR on January 1st, 2022
                     share_id=2,
                     date=datetime.datetime(2022, 1, 1),
                     price=458,
                     currency_id=5,
                     source="Test",
                 ),
-                SharePrice(
+                SharePrice(  # ACN at 550 EUR 5 days ago
                     share_id=2,
-                    date=datetime.datetime(2022, 4, 1),
+                    date=datetime.datetime.today() + datetime.timedelta(-5),
                     price=550,
                     currency_id=6,
                     source="Second test",

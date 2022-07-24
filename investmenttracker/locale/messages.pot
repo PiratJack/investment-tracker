@@ -115,6 +115,18 @@ msgstr ""
 msgid "Missing transaction unit price"
 msgstr ""
 
+msgid "Missing account name"
+msgstr ""
+
+msgid "Max length for account name is 250 characters"
+msgstr ""
+
+msgid "Max length for account code is 250 characters"
+msgstr ""
+
+msgid "Missing account base currency"
+msgstr ""
+
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr ""
@@ -129,18 +141,6 @@ msgid "Max length for share name is 250 characters"
 msgstr ""
 
 msgid "Share base currency can't be itself"
-msgstr ""
-
-msgid "Missing account name"
-msgstr ""
-
-msgid "Max length for account name is 250 characters"
-msgstr ""
-
-msgid "Max length for account code is 250 characters"
-msgstr ""
-
-msgid "Missing account base currency"
 msgstr ""
 
 msgid "All"
@@ -333,7 +333,7 @@ msgstr ""
 msgid "Total invested"
 msgstr ""
 
-msgid "Unknown"
+msgid "Unknown or too old"
 msgstr ""
 
 msgid "Add new account"
