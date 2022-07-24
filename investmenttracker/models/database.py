@@ -99,8 +99,8 @@ class Database:
             query = query.filter(shareprice.SharePrice.date <= end_date)
         return query.all()
 
-    def share_price_delete(self, share_price):
-        self.session.delete(share_price)
+    def delete(self, item):
+        self.session.delete(item)
         self.session.commit()
 
     # Transactions

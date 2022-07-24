@@ -337,7 +337,7 @@ class TestSharePrice(unittest.TestCase):
 
         nb_before_delete = len(share_prices)
 
-        self.database.share_price_delete(share_prices[0])
+        self.database.delete(share_prices[0])
         share_prices = self.database.share_price_query()
         share_prices = share_prices.filter(
             SharePrice.date >= datetime.datetime(2022, 3, 1).date()
