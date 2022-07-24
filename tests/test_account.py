@@ -5,10 +5,11 @@ import unittest
 import investmenttracker.models.database as databasemodel
 from sqlalchemy.orm.exc import NoResultFound
 
-from investmenttracker.models.base import ValidationException
+from investmenttracker.models.base import NoPriceException, ValidationException
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
+from investmenttracker.models.shareprice import SharePrice
 
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)
@@ -30,35 +31,35 @@ class TestAccount(unittest.TestCase):
                 Share(id=4, name="HSBC", main_code="LU4325", base_currency_id=5),
                 Share(id=5, name="Euro", main_code="EUR"),
                 Share(id=6, name="Dollar", main_code="USD"),
-                Account(
+                Account(  # Account 1 "Main account"
                     id=1,
                     name="Main account",
                     code="AUFE1",
                     base_currency_id=5,
                     enabled=True,
                 ),
-                Account(
+                Account(  # Account 2 "Hidden account"
                     id=2,
                     name="Hidden account",
                     code="487485",
                     base_currency_id=5,
                     hidden=True,
                 ),
-                Account(
+                Account(  # Account 3 "Disabled account"
                     id=3,
                     name="Disabled account",
                     code="54614",
                     base_currency_id=5,
                     enabled=False,
                 ),
-                Account(
+                Account(  # Account 4 Account with lots of history"
                     id=4,
                     name="Account with lots of history",
                     code="HIST",
                     base_currency_id=5,
                     enabled=True,
                 ),
-                Transaction(
+                Transaction(  # Account 1: deposit 10k on January 1st, 2020
                     account_id=1,
                     date=datetime.date(2020, 1, 1),
                     label="First investment",
@@ -66,7 +67,7 @@ class TestAccount(unittest.TestCase):
                     quantity=10000,
                     unit_price=1,
                 ),
-                Transaction(
+                Transaction(  # Account 1: buy 50 ACN at 100 on January 5th, 2020
                     account_id=1,
                     date=datetime.date(2020, 1, 5),
                     label="Buy ACN",
@@ -75,7 +76,7 @@ class TestAccount(unittest.TestCase):
                     quantity=50,
                     unit_price=100,
                 ),
-                Transaction(
+                Transaction(  # Account 1: buy 10 WDAY at 200 on January 25th, 2020
                     account_id=1,
                     date=datetime.date(2020, 1, 25),
                     label="Buy Workday",
@@ -84,7 +85,7 @@ class TestAccount(unittest.TestCase):
                     quantity=10,
                     unit_price=200,
                 ),
-                Transaction(
+                Transaction(  # Account 1: sell 10 ACN at 1 on April 15th, 2020
                     account_id=1,
                     date=datetime.date(2020, 4, 15),
                     label="Sell ACN",
@@ -93,7 +94,7 @@ class TestAccount(unittest.TestCase):
                     quantity=10,
                     unit_price=1,
                 ),
-                Transaction(
+                Transaction(  # Account 4: deposit 10k on April 1st, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 1),
                     label="First investment",
@@ -101,7 +102,7 @@ class TestAccount(unittest.TestCase):
                     quantity=10000,
                     unit_price=1,
                 ),
-                Transaction(
+                Transaction(  # Account 4: buy 10 ACN at 200 on April 1th, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 1),
                     label="Buy Accenture",
@@ -110,7 +111,7 @@ class TestAccount(unittest.TestCase):
                     quantity=10,
                     unit_price=200,
                 ),
-                Transaction(
+                Transaction(  # Account 4: buy 30 HSBC at 100 on April 1th, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 1),
                     label="Buy HSBC",
@@ -119,7 +120,7 @@ class TestAccount(unittest.TestCase):
                     quantity=30,
                     unit_price=100,
                 ),
-                Transaction(
+                Transaction(  # Account 4: sell 5 ACN at 250 on April 10th, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 10),
                     label="Sell Accenture",
@@ -128,7 +129,7 @@ class TestAccount(unittest.TestCase):
                     quantity=5,
                     unit_price=250,
                 ),
-                Transaction(
+                Transaction(  # Account 4: buy 20 HSBC at 125 on April 10th, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 10),
                     label="Buy HSBC again",
@@ -136,6 +137,48 @@ class TestAccount(unittest.TestCase):
                     share_id=4,
                     quantity=20,
                     unit_price=125,
+                ),
+                SharePrice(  # ACN at 100 EUR on January 5th, 2020
+                    share_id=2,
+                    date=datetime.date(2020, 1, 5),
+                    price=100,
+                    currency_id=5,
+                    source="Lambda",
+                ),
+                SharePrice(  # ACN at 1 EUR on April 15th, 2020
+                    share_id=2,
+                    date=datetime.date(2020, 4, 15),
+                    price=1,
+                    currency_id=5,
+                    source="Lambda",
+                ),
+                SharePrice(  # ACN at 10 EUR 5 days ago (otherwise test fails)
+                    share_id=2,
+                    date=datetime.date.today() + datetime.timedelta(days=-5),
+                    price=10,
+                    currency_id=5,
+                    source="Lambda",
+                ),
+                SharePrice(  # WDAY at 10 USD 5 days ago (otherwise test fails)
+                    share_id=3,
+                    date=datetime.date.today() + datetime.timedelta(days=-5),
+                    price=10,
+                    currency_id=6,
+                    source="Lambda",
+                ),
+                SharePrice(  # USD at 10 EUR 5 days ago (otherwise test fails)
+                    share_id=6,
+                    date=datetime.date.today() + datetime.timedelta(days=-5),
+                    price=10,
+                    currency_id=5,
+                    source="Lambda",
+                ),
+                SharePrice(  # HSBC at 10 AXA 5 days ago (which makes no sense)
+                    share_id=4,
+                    date=datetime.date.today() + datetime.timedelta(days=-5),
+                    price=10,
+                    currency_id=1,
+                    source="Lambda",
                 ),
             ]
         )
@@ -284,8 +327,16 @@ class TestAccount(unittest.TestCase):
         )
 
         ##### Total value #####
-        total_value = self.database.accounts_get()[0].total_value
-        self.assertEqual(total_value, 0, "INVALID TEST")
+        # Prices exist, either directly or through foreign exchange
+        total_value = self.database.accounts_get_by_id(1).total_value
+        self.assertEqual(total_value, 4410, "Account value should be 4510")
+
+        # No price exists, should raise an exception
+        self.assertRaises(
+            NoPriceException,
+            lambda _: self.database.accounts_get_by_id(4).total_value,
+            "No price available, should raise an exception",
+        )
 
         ##### Asset & cash balance per transaction #####
         account = self.database.accounts_get_by_id(4)

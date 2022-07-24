@@ -55,7 +55,7 @@ class Share(Base):
                         name=self.name, main_code=self.main_code
                     ),
                     self,
-                )
+                ) from None
 
         # Display in graph
         if attr == "graph_label":

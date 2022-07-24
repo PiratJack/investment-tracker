@@ -1,9 +1,3 @@
-msgid "Missing share group name"
-msgstr ""
-
-msgid "Max length for share group name is 250 characters"
-msgstr ""
-
 msgid "Missing share code share ID"
 msgstr ""
 
@@ -17,6 +11,12 @@ msgid "Missing share code value"
 msgstr ""
 
 msgid "Max length for share code value is 250 characters"
+msgstr ""
+
+msgid "Missing share group name"
+msgstr ""
+
+msgid "Max length for share group name is 250 characters"
 msgstr ""
 
 msgid "Missing share price share ID"
@@ -115,18 +115,6 @@ msgstr ""
 msgid "Missing transaction unit price"
 msgstr ""
 
-msgid "Missing account name"
-msgstr ""
-
-msgid "Max length for account name is 250 characters"
-msgstr ""
-
-msgid "Max length for account code is 250 characters"
-msgstr ""
-
-msgid "Missing account base currency"
-msgstr ""
-
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr ""
@@ -143,6 +131,18 @@ msgstr ""
 msgid "Share base currency can't be itself"
 msgstr ""
 
+msgid "Missing account name"
+msgstr ""
+
+msgid "Max length for account name is 250 characters"
+msgstr ""
+
+msgid "Max length for account code is 250 characters"
+msgstr ""
+
+msgid "Missing account base currency"
+msgstr ""
+
 msgid "All"
 msgstr ""
 
@@ -150,12 +150,6 @@ msgid "Select a value"
 msgstr ""
 
 msgid "Shares without group"
-msgstr ""
-
-msgid "Displays detailed information (for debug purpose)"
-msgstr ""
-
-msgid "Displays additional information (for end users)"
 msgstr ""
 
 msgid "Account"
@@ -174,24 +168,6 @@ msgid "Active"
 msgstr ""
 
 msgid "Hidden"
-msgstr ""
-
-msgid "Share"
-msgstr ""
-
-msgid "Main code"
-msgstr ""
-
-msgid "Get prices online?"
-msgstr ""
-
-msgid "Enabled"
-msgstr ""
-
-msgid "Base currency"
-msgstr ""
-
-msgid "Group"
 msgstr ""
 
 msgid "ID"
@@ -230,7 +206,61 @@ msgstr ""
 msgid "Display disabled accounts?"
 msgstr ""
 
+msgid "Displays detailed information (for debug purpose)"
+msgstr ""
+
+msgid "Displays additional information (for end users)"
+msgstr ""
+
+msgid "Investment Tracker"
+msgstr ""
+
+msgid "My main toolbar"
+msgstr ""
+
+msgid "Share"
+msgstr ""
+
+msgid "Main code"
+msgstr ""
+
+msgid "Get prices online?"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Base currency"
+msgstr ""
+
+msgid "Group"
+msgstr ""
+
+msgid "Add a share price"
+msgstr ""
+
+msgid "Please confirm"
+msgstr ""
+
+msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
 msgid "Price"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Share Prices"
+msgstr ""
+
+msgid "Displays share prices"
 msgstr ""
 
 msgid "Price date"
@@ -255,9 +285,6 @@ msgid "Display hidden shares?"
 msgstr ""
 
 msgid "Transaction"
-msgstr ""
-
-msgid "Date"
 msgstr ""
 
 msgid "Label"
@@ -287,12 +314,6 @@ msgstr ""
 msgid "Cash balance"
 msgstr ""
 
-msgid "Delete"
-msgstr ""
-
-msgid "Please confirm"
-msgstr ""
-
 msgid "Are you sure you want to delete this transaction?"
 msgstr ""
 
@@ -300,27 +321,6 @@ msgid "Transactions"
 msgstr ""
 
 msgid "Display transactions"
-msgstr ""
-
-msgid "Add a share price"
-msgstr ""
-
-msgid "Are you sure you want to delete this price?"
-msgstr ""
-
-msgid "Source"
-msgstr ""
-
-msgid "Share Prices"
-msgstr ""
-
-msgid "Displays share prices"
-msgstr ""
-
-msgid "Investment Tracker"
-msgstr ""
-
-msgid "My main toolbar"
 msgstr ""
 
 msgid "Graphs"
@@ -339,4 +339,8 @@ msgid "Display evolution?"
 msgstr ""
 
 msgid "Baseline date"
+msgstr ""
+
+#, python-brace-format
+msgid "Could not display account {account} due to missing value for {share}"
 msgstr ""

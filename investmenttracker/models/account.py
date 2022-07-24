@@ -1,9 +1,10 @@
 import gettext
+import datetime
 import sqlalchemy.orm
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
-from .base import Base, ValidationException
+from .base import Base, ValidationException, NoPriceException
 from .transaction import TransactionTypes
 
 _ = gettext.gettext
@@ -105,16 +106,40 @@ class Account(Base):
 
         if attr == "total_value":
             # TODO: Evaluate based on value & currency exchange (if needed)
-            return 0
             value = 0
             value += self.balance
-            for transaction in self.transactions:
-                if transaction.share:
-                    value += (
-                        transaction.type.value["impact_asset"]
-                        * transaction.quantity
-                        * transaction.share.last_price.price
-                    )
+            shares = {
+                transaction.share.id: transaction.share
+                for transaction in self.transactions
+                if transaction.share
+            }
+            for share_id in self.shares:
+                share = shares[share_id]
+                prices = [
+                    price
+                    for price in share.prices
+                    if price.currency == self.base_currency
+                    and price.date
+                    >= datetime.date.today() + datetime.timedelta(days=-14)
+                ]
+                if prices:
+                    price = sorted(prices, key=lambda a: a.date, reverse=True)[-1].price
+                else:
+                    currency_prices = [
+                        price
+                        for price in share.last_price.currency.prices
+                        if price.currency == self.base_currency
+                        and price.date
+                        >= datetime.date.today() + datetime.timedelta(days=-14)
+                    ]
+                    if not currency_prices:
+                        raise NoPriceException(
+                            "Could not find any price for share (even through FOREX)",
+                            share,
+                        )
+                    price = share.last_price.price * currency_prices[-1].price
+                value += self.shares[share_id] * price
+            return value
 
         if attr == "holdings":
             account_holdings = {}
