@@ -41,7 +41,7 @@ class SharesTree(QtWidgets.QTreeWidget):
             "alignment": Qt.AlignRight,
         },
         {
-            "name": _("Get prices online?"),
+            "name": _("Get prices online from?"),
             "size": 100,
             "alignment": Qt.AlignCenter,
         },
@@ -88,7 +88,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                         QtCore.QDate(share.last_price.date).toString(
                             Qt.SystemLocaleShortDate
                         ),
-                        share.sync,
+                        share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
                         "",
                     ]
@@ -99,7 +99,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                         share.main_code,
                         "",
                         "",
-                        share.sync,
+                        share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
                         "",
                     ]
@@ -123,7 +123,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     QtCore.QDate(share.last_price.date).toString(
                         Qt.SystemLocaleShortDate
                     ),
-                    share.sync,
+                    share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
                     "",
                 ]
@@ -134,7 +134,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     share.main_code,
                     "",
                     "",
-                    share.sync,
+                    share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
                     "",
                 ]

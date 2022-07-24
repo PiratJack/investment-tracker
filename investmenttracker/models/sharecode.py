@@ -5,28 +5,16 @@ import sqlalchemy.orm
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 
 from .base import Base, ValidationException
-from .share import Share
+from .share import Share, ShareDataOrigin
 
 _ = gettext.gettext
-
-
-class ShareCodeOrigin(enum.Enum):
-    alphavantage = {
-        "name": "Alphavantage",
-    }
-    boursorama = {
-        "name": "Boursorama",
-    }
-    quantalys = {
-        "name": "Quantalys",
-    }
 
 
 class ShareCode(Base):
     __tablename__ = "share_codes"
     id = Column(Integer, primary_key=True)
     share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
-    origin = Column(Enum(ShareCodeOrigin, validate_strings=True), nullable=False)
+    origin = Column(Enum(ShareDataOrigin, validate_strings=True), nullable=False)
     value = Column(String(250), nullable=False)
     share = sqlalchemy.orm.relationship(Share, back_populates="codes")
 

@@ -3,6 +3,7 @@ import gettext
 import models.share
 import models.sharecode
 from controllers.editcontroller import EditController
+from models.base import ValidationException
 
 _ = gettext.gettext
 
@@ -19,10 +20,6 @@ class ShareController(EditController):
             "label": _("Main code"),
             "type": "text",
         },
-        "sync": {
-            "label": _("Get prices online?"),
-            "type": "checkbox",
-        },
         "enabled": {
             "label": _("Enabled"),
             "type": "checkbox",
@@ -37,6 +34,10 @@ class ShareController(EditController):
         },
         "group_id": {
             "label": _("Group"),
+            "type": "list",
+        },
+        "sync_origin": {
+            "label": _("Get prices online from?"),
             "type": "list",
         },
     }
@@ -57,7 +58,14 @@ class ShareController(EditController):
             self.item = models.share.Share()
         self.fields["name"]["default"] = self.item.name
         self.fields["main_code"]["default"] = self.item.main_code
-        self.fields["sync"]["default"] = self.item.sync
+        self.fields["sync_origin"]["possible_values"] = [
+            (g.value["name"], g.name) for g in models.share.ShareDataOrigin
+        ]
+        if self.item.sync_origin:
+            self.fields["sync_origin"]["default"] = self.item.sync_origin.name
+        else:
+            if "default" in self.fields["sync_origin"]:
+                del self.fields["sync_origin"]["default"]
         self.fields["enabled"]["default"] = self.item.enabled
         self.fields["base_currency_id"]["default"] = (
             self.item.base_currency.id if self.item.base_currency else 0
@@ -67,10 +75,7 @@ class ShareController(EditController):
             self.item.group.id if self.item.group else 0
         )
 
-        print(self.item.codes)
-        print(self.fields)
-
-        for origin in models.sharecode.ShareCodeOrigin:
+        for origin in models.sharecode.ShareDataOrigin:
             self.fields["code_" + origin.name] = {
                 "label": _("Code for {origin}").format(origin=origin.value["name"]),
                 "type": "text",
@@ -80,9 +85,8 @@ class ShareController(EditController):
             for code in self.item.codes:
                 self.fields["code_" + code.origin.name]["default"] = code.value
 
-    def validate_data(self):
-        super().validate_data()
-        for origin in models.sharecode.ShareCodeOrigin:
+    def on_validation_end(self):
+        for origin in models.sharecode.ShareDataOrigin:
             value = getattr(self.item, "code_" + origin.name)
             existing_code = [code for code in self.item.codes if code.origin == origin]
             if value:
@@ -96,6 +100,31 @@ class ShareController(EditController):
             else:
                 if existing_code:
                     self.database.delete(existing_code[0])
+                    self.item.codes.remove(existing_code[0])
+
+        if self.item.sync_origin:
+            sync_origin = [
+                v
+                for v in models.share.ShareDataOrigin
+                if v.name == self.item.sync_origin
+            ]
+            if not sync_origin:
+                self.item.sync_origin = None
+            else:
+                self.item.sync_origin = sync_origin[0]
+
+                existing_code = [
+                    code
+                    for code in self.item.codes
+                    if code.origin == self.item.sync_origin
+                ]
+                if not existing_code:
+                    raise ValidationException(
+                        _("Missing code for sync"),
+                        self.item,
+                        "code_" + self.item.sync_origin.name,
+                        None,
+                    )
 
     def close(self):
         self.window.close()

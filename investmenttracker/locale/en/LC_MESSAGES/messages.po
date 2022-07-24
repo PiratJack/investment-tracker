@@ -154,7 +154,7 @@ msgstr ""
 msgid "Foreign exchange"
 msgstr ""
 
-msgid "Get prices online?"
+msgid "Get prices online from?"
 msgstr ""
 
 msgid "Graphs"
@@ -221,6 +221,9 @@ msgid "Missing account base currency"
 msgstr ""
 
 msgid "Missing account name"
+msgstr ""
+
+msgid "Missing code for sync"
 msgstr ""
 
 msgid "Missing share code origin"
