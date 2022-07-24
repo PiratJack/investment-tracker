@@ -86,7 +86,7 @@ class Account(Base):
         if attr == "shares":
             shares = {}
             for transaction in self.transactions:
-                if transaction.share:
+                if transaction.type.value["impact_asset"]:
                     share_id = transaction.share.id
                     if share_id not in shares:
                         shares[share_id] = 0
@@ -105,7 +105,6 @@ class Account(Base):
             )
 
         if attr == "total_value":
-            # TODO: Evaluate based on value & currency exchange (if needed)
             value = 0
             value += self.balance
             shares = {
@@ -115,29 +114,34 @@ class Account(Base):
             }
             for share_id in self.shares:
                 share = shares[share_id]
-                prices = [
-                    price
-                    for price in share.prices
-                    if price.currency == self.base_currency
-                    and price.date
-                    >= datetime.date.today() + datetime.timedelta(days=-14)
-                ]
-                if prices:
-                    price = sorted(prices, key=lambda a: a.date, reverse=True)[-1].price
+                if share == self.base_currency:
+                    price = 1
                 else:
-                    currency_prices = [
+                    prices = [
                         price
-                        for price in share.last_price.currency.prices
+                        for price in share.prices
                         if price.currency == self.base_currency
                         and price.date
                         >= datetime.date.today() + datetime.timedelta(days=-14)
                     ]
-                    if not currency_prices:
-                        raise NoPriceException(
-                            "Could not find any price for share (even through FOREX)",
-                            share,
-                        )
-                    price = share.last_price.price * currency_prices[-1].price
+                    if prices:
+                        price = sorted(prices, key=lambda a: a.date, reverse=True)[
+                            -1
+                        ].price
+                    else:
+                        currency_prices = [
+                            price
+                            for price in share.last_price.currency.prices
+                            if price.currency == self.base_currency
+                            and price.date
+                            >= datetime.date.today() + datetime.timedelta(days=-14)
+                        ]
+                        if not currency_prices:
+                            raise NoPriceException(
+                                "Could not find any price for share (even through FOREX)",
+                                share,
+                            )
+                        price = share.last_price.price * currency_prices[-1].price
                 value += self.shares[share_id] * price
             return value
 

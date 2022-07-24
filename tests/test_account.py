@@ -14,6 +14,7 @@ from investmenttracker.models.shareprice import SharePrice
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)
 
+# Delete existing database if it exists
 try:
     os.remove(DATABASE_FILE)
 except OSError:
@@ -52,7 +53,7 @@ class TestAccount(unittest.TestCase):
                     base_currency_id=5,
                     enabled=False,
                 ),
-                Account(  # Account 4 Account with lots of history"
+                Account(  # Account 4 "Account with lots of history"
                     id=4,
                     name="Account with lots of history",
                     code="HIST",
@@ -92,6 +93,15 @@ class TestAccount(unittest.TestCase):
                     type="asset_sell",
                     share_id=2,
                     quantity=10,
+                    unit_price=1,
+                ),
+                Transaction(  # Account 1: company funding of 100 EUR on April 15th 2020
+                    account_id=1,
+                    date=datetime.date(2020, 4, 15),
+                    label="Get funded",
+                    type="company_funding",
+                    share_id=5,
+                    quantity=100,
                     unit_price=1,
                 ),
                 Transaction(  # Account 4: deposit 10k on April 1st, 2020
@@ -137,6 +147,15 @@ class TestAccount(unittest.TestCase):
                     share_id=4,
                     quantity=20,
                     unit_price=125,
+                ),
+                Transaction(  # Account 3: buy 10 EUR with EUR (absurd, just for test)
+                    account_id=3,
+                    date=datetime.date(2020, 4, 10),
+                    label="Buy EUR",
+                    type="asset_buy",
+                    share_id=5,
+                    quantity=10,
+                    unit_price=1,
                 ),
                 SharePrice(  # ACN at 100 EUR on January 5th, 2020
                     share_id=2,
@@ -311,8 +330,8 @@ class TestAccount(unittest.TestCase):
         ##### Account balance #####
         self.assertEqual(
             self.database.accounts_get()[0].balance,
-            3010,
-            "Account balance should be 3010",
+            3110,
+            "Account balance should be 3110",
         )
 
         ##### Shares held #####
@@ -329,7 +348,7 @@ class TestAccount(unittest.TestCase):
         ##### Total value #####
         # Prices exist, either directly or through foreign exchange
         total_value = self.database.accounts_get_by_id(1).total_value
-        self.assertEqual(total_value, 4410, "Account value should be 4510")
+        self.assertEqual(total_value, 4510, "Account value should be 4510")
 
         # No price exists, should raise an exception
         self.assertRaises(
@@ -337,6 +356,10 @@ class TestAccount(unittest.TestCase):
             lambda _: self.database.accounts_get_by_id(4).total_value,
             "No price available, should raise an exception",
         )
+
+        # Test buy base currency (should not happen, but at least it's handled)
+        total_value = self.database.accounts_get_by_id(3).total_value
+        self.assertEqual(total_value, 0, "Account value should be 0")
 
         ##### Asset & cash balance per transaction #####
         account = self.database.accounts_get_by_id(4)
@@ -346,7 +369,7 @@ class TestAccount(unittest.TestCase):
             balance, (8000, 10), "Cash/asset balance of transaction is wrong"
         )
 
-        balance = account.balance_after_transaction(8)
+        balance = account.balance_after_transaction(9)
         self.assertEqual(
             balance, (6250, 5), "Cash/asset balance of transaction is wrong"
         )
@@ -387,7 +410,7 @@ class TestAccount(unittest.TestCase):
                 "shares": {2: 50, 3: 10},
             },
             datetime.date(2020, 4, 15): {
-                "cash": 3010,
+                "cash": 3110,
                 "shares": {2: 40, 3: 10},
             },
         }
