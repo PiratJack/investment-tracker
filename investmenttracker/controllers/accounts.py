@@ -7,7 +7,7 @@ from models.base import NoPriceException
 import controllers.account
 
 _ = gettext.gettext
-# TODO: Double-click on tree opens edit window
+# TODO (cosmetic): Double-click on tree opens edit window
 
 
 class AccountsTree(QtWidgets.QTreeWidget):

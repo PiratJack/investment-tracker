@@ -11,8 +11,8 @@ from models.base import NoPriceException
 
 _ = gettext.gettext
 
-# TODO: Display value on markers
-# TODO: Move X axis based on the selected range
+# TODO (minor): Display value on markers
+# TODO (minor): Move X axis based on the selected range
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -691,7 +691,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return ranges_missing
 
     def get_share_value_as_of(self, share_id, start_date, currency):
-        # TODO: Take into account foreign exchange
+        # TODO (minor): Take into account foreign exchange
         if share_id not in self.shares_raw_values:
             self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
@@ -705,7 +705,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return self.shares_raw_values[share_id][max(share_values)]
 
     def get_share_value_in_range(self, share_id, start_date, end_date, currency):
-        # TODO: Take into account foreign exchange
+        # TODO (minor): Take into account foreign exchange
         if share_id not in self.shares_raw_values:
             self.calculate_shares([share_id])
         # If no value known at all, we can't proceed

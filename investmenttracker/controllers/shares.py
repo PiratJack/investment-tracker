@@ -10,7 +10,7 @@ import controllers.sharegroup
 import controllers.share
 
 _ = gettext.gettext
-# TODO: Double-click on tree opens edit window
+# TODO (cosmetic): Double-click on tree opens edit window
 
 
 class SharesTree(QtWidgets.QTreeWidget):

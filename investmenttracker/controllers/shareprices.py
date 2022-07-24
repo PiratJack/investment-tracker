@@ -111,7 +111,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             and index.row() != len(self.share_prices)
         ):
             return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
-        # TODO: Display colors if prices change too much
+        # TODO (cosmetic): Display colors if prices change too much
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
 
@@ -221,7 +221,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
 
         if messagebox == QtWidgets.QMessageBox.Yes:
             if price.id:
-                self.database.share_price_delete(price)
+                self.database.delete(price)
             self.beginRemoveRows(index, index.row(), index.row())
             self.set_filters()  # Reload the data
             self.endRemoveRows()

@@ -53,7 +53,7 @@ class TransactionController(EditController):
     }
 
     error_widgets = []
-    # TODO: change size when additional fields are displayed
+    # TODO (minor): change size when additional fields are displayed
     def __init__(self, parent_controller, transaction_id=0):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
