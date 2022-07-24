@@ -97,7 +97,5 @@ class ShareController(EditController):
                 if existing_code:
                     self.database.delete(existing_code[0])
 
-    # TODO (major): Add share codes
-
     def close(self):
         self.window.close()
