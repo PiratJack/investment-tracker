@@ -91,7 +91,7 @@ class Database:
             else:
                 query = query.filter(shareprice.SharePrice.currency == currency)
         if start_date:
-            two_weeks = datetime.timedelta(days=-14)
+            two_weeks = datetime.timedelta(days=-31)
             actual_start_date = start_date + two_weeks
             if not end_date:
                 end_date = start_date

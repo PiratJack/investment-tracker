@@ -1,6 +1,6 @@
 import gettext
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 
 from models.base import NoPriceException
@@ -85,7 +85,9 @@ class SharesTree(QtWidgets.QTreeWidget):
                         str(share.last_price.price)
                         + " "
                         + share.last_price.currency.main_code,
-                        share.last_price.date,  # TODO: display date in system format
+                        QtCore.QDate(share.last_price.date).toString(
+                            Qt.SystemLocaleShortDate
+                        ),
                         share.sync,
                         share.hidden,
                         "",
@@ -115,8 +117,12 @@ class SharesTree(QtWidgets.QTreeWidget):
                     share.name,
                     share.id,
                     share.main_code,
-                    str(share.last_price.price) + " " + share.last_price.currency,
-                    share.last_price.date,  # TODO: display date in system format
+                    str(share.last_price.price)
+                    + " "
+                    + share.last_price.currency.main_code,
+                    QtCore.QDate(share.last_price.date).toString(
+                        Qt.SystemLocaleShortDate
+                    ),
                     share.sync,
                     share.hidden,
                     "",

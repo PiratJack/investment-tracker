@@ -52,7 +52,8 @@ class Share(Base):
                 prices = [
                     price
                     for price in self.prices
-                    if price.date >= datetime.date.today() + datetime.timedelta(-14)
+                    if price.date
+                    >= datetime.date.today() + datetime.timedelta(days=-31)
                 ]
                 return sorted(prices, key=lambda price: price.date)[-1]
             except IndexError:

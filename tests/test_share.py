@@ -43,7 +43,7 @@ class TestShare(unittest.TestCase):
                 ),
                 SharePrice(  # ACN at 550 EUR 5 days ago
                     share_id=2,
-                    date=datetime.datetime.today() + datetime.timedelta(-5),
+                    date=datetime.datetime.today() + datetime.timedelta(days=-5),
                     price=550,
                     currency_id=6,
                     source="Second test",

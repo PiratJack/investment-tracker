@@ -1,6 +1,6 @@
 import gettext
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 
 from models.base import NoPriceException
@@ -112,7 +112,9 @@ class AccountsTree(QtWidgets.QTreeWidget):
                         share.main_code,
                         str(account.shares[share.id]),
                         str(account.shares[share.id] * last_price.price),
-                        str(last_price.date),  # TODO: display date in system format
+                        QtCore.QDate(last_price.date).toString(
+                            Qt.SystemLocaleShortDate
+                        ),
                         "",
                         "",
                     ]

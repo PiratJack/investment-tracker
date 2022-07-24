@@ -122,7 +122,7 @@ class Account(Base):
                         for price in share.prices
                         if price.currency == self.base_currency
                         and price.date
-                        >= datetime.date.today() + datetime.timedelta(days=-14)
+                        >= datetime.date.today() + datetime.timedelta(days=-31)
                     ]
                     if prices:
                         price = sorted(prices, key=lambda a: a.date, reverse=True)[
@@ -134,7 +134,7 @@ class Account(Base):
                             for price in share.last_price.currency.prices
                             if price.currency == self.base_currency
                             and price.date
-                            >= datetime.date.today() + datetime.timedelta(days=-14)
+                            >= datetime.date.today() + datetime.timedelta(days=-31)
                         ]
                         if not currency_prices:
                             raise NoPriceException(

@@ -70,7 +70,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             return [
                 price.share.name if price.share else QtCore.QVariant(),
                 price.id,
-                price.date.strftime("%Y-%m-%d") if price.date else QtCore.QVariant(),
+                QtCore.QDate(price.date),
                 price.price,
                 price.currency.short_name() if price.currency else QtCore.QVariant(),
                 price.source,

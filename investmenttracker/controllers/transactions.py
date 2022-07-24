@@ -202,7 +202,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
             return [
                 transaction.account.name,
                 transaction.id,
-                str(transaction.date),
+                QtCore.QDate(transaction.date),
                 transaction.type.value["name"],
                 transaction.label,
                 asset_total,

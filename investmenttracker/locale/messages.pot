@@ -200,61 +200,10 @@ msgstr ""
 msgid "Group"
 msgstr ""
 
-msgid "Add a share price"
-msgstr ""
-
-msgid "Please confirm"
-msgstr ""
-
-msgid "Are you sure you want to delete this price?"
-msgstr ""
-
-msgid "ID"
+msgid "Transaction"
 msgstr ""
 
 msgid "Date"
-msgstr ""
-
-msgid "Price"
-msgstr ""
-
-msgid "Source"
-msgstr ""
-
-msgid "Delete"
-msgstr ""
-
-msgid "Share Prices"
-msgstr ""
-
-msgid "Displays share prices"
-msgstr ""
-
-msgid "Price date"
-msgstr ""
-
-msgid "Hidden?"
-msgstr ""
-
-msgid "Edit"
-msgstr ""
-
-msgid "Add new group"
-msgstr ""
-
-msgid "Add new share"
-msgstr ""
-
-msgid "Shares"
-msgstr ""
-
-msgid "Display shares"
-msgstr ""
-
-msgid "Display hidden shares?"
-msgstr ""
-
-msgid "Transaction"
 msgstr ""
 
 msgid "Label"
@@ -275,22 +224,13 @@ msgstr ""
 msgid "Currency delta"
 msgstr ""
 
-msgid "Add a transaction"
+msgid "ID"
 msgstr ""
 
-msgid "Asset balance"
+msgid "Graphs"
 msgstr ""
 
-msgid "Cash balance"
-msgstr ""
-
-msgid "Are you sure you want to delete this transaction?"
-msgstr ""
-
-msgid "Transactions"
-msgstr ""
-
-msgid "Display transactions"
+msgid "Display graphs"
 msgstr ""
 
 msgid "Display hidden accounts?"
@@ -299,10 +239,7 @@ msgstr ""
 msgid "Display disabled accounts?"
 msgstr ""
 
-msgid "Graphs"
-msgstr ""
-
-msgid "Display graphs"
+msgid "Display hidden shares?"
 msgstr ""
 
 msgid "Period"
@@ -319,6 +256,51 @@ msgstr ""
 
 #, python-brace-format
 msgid "Could not display account {account} due to missing value for {share}"
+msgstr ""
+
+msgid "Add a transaction"
+msgstr ""
+
+msgid "Asset balance"
+msgstr ""
+
+msgid "Cash balance"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Please confirm"
+msgstr ""
+
+msgid "Are you sure you want to delete this transaction?"
+msgstr ""
+
+msgid "Transactions"
+msgstr ""
+
+msgid "Display transactions"
+msgstr ""
+
+msgid "Add a share price"
+msgstr ""
+
+msgid "Are you sure you want to delete this price?"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Share Prices"
+msgstr ""
+
+msgid "Displays share prices"
 msgstr ""
 
 msgid "Quantity"
@@ -343,4 +325,22 @@ msgid "Accounts"
 msgstr ""
 
 msgid "Display your accounts"
+msgstr ""
+
+msgid "Price date"
+msgstr ""
+
+msgid "Hidden?"
+msgstr ""
+
+msgid "Add new group"
+msgstr ""
+
+msgid "Add new share"
+msgstr ""
+
+msgid "Shares"
+msgstr ""
+
+msgid "Display shares"
 msgstr ""
