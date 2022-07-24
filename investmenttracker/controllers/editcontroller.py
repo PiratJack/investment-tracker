@@ -99,7 +99,7 @@ class EditController:
                     field["widget"].valueChanged.connect(field["onchange"])
 
             elif field["type"] == "sharelist":
-                include_choice_all = field.get("include_all_choice", False)
+                include_choice_all = field.get("include_choice_all", False)
                 field["widget"] = ShareComboBox(
                     self.database, include_choice_all=include_choice_all
                 )

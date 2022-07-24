@@ -15,8 +15,6 @@ class ShareComboBox(QtWidgets.QComboBox):
         values = []
         if include_choice_all:
             values.append((_("All"), -1, True))
-        else:
-            values.append((_("Select a value"), -1, True))
 
         # Shared in groups
         groups = self.database.share_groups_get_all()

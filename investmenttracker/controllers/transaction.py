@@ -78,7 +78,9 @@ class TransactionController(EditController):
             if "default" in self.fields["type"]:
                 del self.fields["type"]["default"]
         self.fields["quantity"]["default"] = self.item.quantity
-        self.fields["share_id"]["default"] = self.item.share_id
+        self.fields["share_id"]["default"] = (
+            self.item.share_id if self.item.share_id else 0
+        )
         self.fields["unit_price"]["default"] = self.item.unit_price
 
         for field_id in self.fields:
