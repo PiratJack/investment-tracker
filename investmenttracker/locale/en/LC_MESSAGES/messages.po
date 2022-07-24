@@ -83,6 +83,10 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
+#, python-brace-format
+msgid "Code for {origin}"
+msgstr ""
+
 msgid "Company funding"
 msgstr ""
 
@@ -193,9 +197,6 @@ msgid "Max length for account code is 250 characters"
 msgstr ""
 
 msgid "Max length for account name is 250 characters"
-msgstr ""
-
-msgid "Max length for share code origin is 250 characters"
 msgstr ""
 
 msgid "Max length for share code value is 250 characters"
@@ -314,6 +315,9 @@ msgid "Share Prices"
 msgstr ""
 
 msgid "Share base currency can't be itself"
+msgstr ""
+
+msgid "Sharecode origin is invalid"
 msgstr ""
 
 msgid "Shares"

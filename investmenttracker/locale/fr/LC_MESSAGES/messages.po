@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-07-24 14:18+0200\n"
+"PO-Revision-Date: 2022-07-24 16:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -84,6 +84,10 @@ msgstr "Retrait"
 
 msgid "Code"
 msgstr "Code"
+
+#, python-brace-format
+msgid "Code for {origin}"
+msgstr "Code pour {origin}"
 
 msgid "Company funding"
 msgstr "Rémunération employeur"
@@ -196,9 +200,6 @@ msgstr "La longueur maximale du code du compte est de 250 caractères"
 
 msgid "Max length for account name is 250 characters"
 msgstr "La longueur maximale du nom du compte est de 250 caractères"
-
-msgid "Max length for share code origin is 250 characters"
-msgstr "La longueur maximale de l'origine du code est de 250 caractères"
 
 msgid "Max length for share code value is 250 characters"
 msgstr "La longueur maximale du code est de 250 caractères"
@@ -318,6 +319,9 @@ msgstr "Valeur des titres"
 msgid "Share base currency can't be itself"
 msgstr "Une action ne peut avoir elle-même comme monnaie de base"
 
+msgid "Sharecode origin is invalid"
+msgstr "Origine du code invalide"
+
 msgid "Shares"
 msgstr "Titres"
 
@@ -359,6 +363,3 @@ msgstr "Inconnu ou trop ancien"
 
 msgid "Value"
 msgstr "Valeur"
-
-#~ msgid "Unknown"
-#~ msgstr "Inconnu"
