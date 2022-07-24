@@ -176,10 +176,12 @@ class EditController:
             except AttributeError:
                 pass
             except ValidationException as e:
+                field_widget = self.fields[e.key]["widget"]
                 self.add_error_field(e.message, field_widget)
 
                 has_error = True
             except ValidationWarningException as e:
+                field_widget = self.fields[e.key]["widget"]
                 self.add_error_field(e.message, field_widget, True)
 
                 if field_id not in self.seen_warnings:
