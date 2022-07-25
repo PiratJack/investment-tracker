@@ -17,7 +17,7 @@ class SharesTree(QtWidgets.QTreeWidget):
     columns = [
         {
             "name": _("Name"),
-            "size": 0.4,
+            "size": 0.3,
             "alignment": Qt.AlignLeft,
         },
         {
@@ -27,23 +27,28 @@ class SharesTree(QtWidgets.QTreeWidget):
         },
         {
             "name": _("Main code"),
-            "size": 0.2,
+            "size": 0.1,
             "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Price"),
-            "size": 0.2,
+            "size": 0.1,
             "alignment": Qt.AlignRight,
         },
         {
             "name": _("Price date"),
-            "size": 0.2,
+            "size": 0.1,
             "alignment": Qt.AlignRight,
         },
         {
+            "name": _("Codes"),
+            "size": 0.2,
+            "alignment": Qt.AlignLeft,
+        },
+        {
             "name": _("Get prices online from?"),
-            "size": 100,
-            "alignment": Qt.AlignCenter,
+            "size": 0.1,
+            "alignment": Qt.AlignLeft,
         },
         {
             "name": _("Hidden?"),
@@ -77,6 +82,12 @@ class SharesTree(QtWidgets.QTreeWidget):
                 if share.hidden and self.parent_controller.display_hidden == False:
                     continue
                 # Try to display the last price
+                codes = ", ".join(
+                    [
+                        code.origin.value["name"] + ": " + code.value
+                        for code in share.codes
+                    ]
+                )
                 try:
                     child = [
                         share.name,
@@ -88,6 +99,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                         QtCore.QDate(share.last_price.date).toString(
                             Qt.SystemLocaleShortDate
                         ),
+                        codes,
                         share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
                         "",
@@ -99,6 +111,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                         share.main_code,
                         "",
                         "",
+                        codes,
                         share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
                         "",
@@ -112,6 +125,9 @@ class SharesTree(QtWidgets.QTreeWidget):
         # Add shares without group
         for share in shares_without_group:
             # Try to display the last price
+            codes = ", ".join(
+                [code.origin.value["name"] + ": " + code.value for code in share.codes]
+            )
             try:
                 child = [
                     share.name,
@@ -123,6 +139,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     QtCore.QDate(share.last_price.date).toString(
                         Qt.SystemLocaleShortDate
                     ),
+                    codes,
                     share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
                     "",
@@ -134,6 +151,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     share.main_code,
                     "",
                     "",
+                    codes,
                     share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
                     "",
