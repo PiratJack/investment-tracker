@@ -53,22 +53,25 @@ class TransactionController(EditController):
     }
 
     error_widgets = []
-    # TODO (minor): change size when additional fields are displayed
+
     def __init__(self, parent_controller, transaction_id=0):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.transaction_id = int(transaction_id)
+
+        # Define list of values
         self.fields["account_id"]["possible_values"] = [
             (g.name, g.id) for g in self.database.accounts_get()
         ]
         self.fields["type"]["possible_values"] = [
             (g.value["name"], g.name) for g in models.transaction.TransactionTypes
         ]
+
+        # Get existing data & define default field values
         if transaction_id:
             self.item = self.database.transaction_get_by_id(transaction_id)
         else:
             self.item = models.transaction.Transaction()
-
         self.fields["account_id"]["default"] = self.item.account_id
         self.fields["date"]["default"] = self.item.date
         self.fields["label"]["default"] = self.item.label
@@ -103,6 +106,10 @@ class TransactionController(EditController):
         self.clear_errors()
 
     def on_change_type(self):
+        # Somewhat, doing this increases the height to the wanted one
+        self.window.sizeHint()
+
+        # Hide all type-dependent fields
         value = self.fields["type"]["widget"].currentData()
         for field_id in (
             "quantity",
@@ -114,6 +121,7 @@ class TransactionController(EditController):
             self.fields[field_id]["widget"].hide()
             self.form_layout.labelForField(self.fields[field_id]["widget"]).hide()
 
+        # Display type-dependent fields
         transaction_type = [
             v for v in models.transaction.TransactionTypes if v.name == value
         ]
@@ -142,12 +150,18 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
+        # Increase height if needed
+        if self.window.height() <= self.window.sizeHint().height():
+            self.window.resize(self.window.sizeHint())
+
+    # Calculate total currency impact when quantity / unit price change
     def on_change_quantity_or_unit_price(self):
         total = self.get_quantity() * self.get_unit_price()
         self.fields["currency_delta"]["widget"].setValue(total)
 
         self.on_change_any_value()
 
+    # Calculate unit price when total changes
     def on_change_currency_delta(self):
         try:
             unit_price = self.get_currency_delta() / self.get_quantity()
@@ -157,6 +171,7 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
+    # Displays known share prices
     def on_change_share_or_date(self):
         date = datetime.datetime.fromisoformat(
             self.fields["date"]["widget"].date().toString(Qt.ISODate)
@@ -188,6 +203,7 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
+    # User selects a known share price => update unit price
     def on_change_known_unit_price(self):
         chosen_price = self.fields["known_unit_price"]["widget"].currentData()
         if chosen_price and not type(chosen_price) == int:
@@ -195,6 +211,7 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
+    # Raise warning if cash or asset balance becomes negative
     def on_validation_end(self):
         if not self.item.account:
             account = self.database.accounts_get_by_id(self.item.account_id)
@@ -223,6 +240,7 @@ class TransactionController(EditController):
     def get_currency_delta(self):
         return self.fields["currency_delta"]["widget"].value()
 
+    # Ensure entered data matches transaction's database fields
     def save(self):
         value = self.fields["type"]["widget"].currentData()
         transaction_type = [
