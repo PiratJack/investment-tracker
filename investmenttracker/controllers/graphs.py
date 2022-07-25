@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 import pyqtgraph
 
 import models.share
-from models.base import NoPriceException
+from models.base import NoPriceException, ValidationException
 
 _ = gettext.gettext
 
@@ -333,6 +333,12 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.plot_graph()
 
     def set_dates(self, start_date, end_date):
+        if start_date and end_date and start_date > end_date:
+            exception = ValidationException(
+                _("Start date must be before end date"), None, None, None
+            )
+            self.add_error(exception)
+            return
         self.start_date = start_date
         self.end_date = end_date
 
@@ -847,6 +853,7 @@ class GraphsController:
 
         # Error messages
         self.error_messages = QtWidgets.QLabel()
+        self.error_messages.setProperty("class", "validation_warning")
         self.right_column.layout.addWidget(self.error_messages, 1, 0, 1, 7)
 
         # Add the graph
@@ -894,6 +901,7 @@ class GraphsController:
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_change_dates(self):
+        self.reset_errors()
         start_date = datetime.date.fromisoformat(
             self.start_date.date().toString(Qt.ISODate)
         )
@@ -935,10 +943,13 @@ class GraphsController:
         self.errors.append(exception)
         message = ""
         for error in self.errors:
-            message += (
-                _(
-                    "Could not display account {account} due to missing value for {share}"
-                ).format(account=error.account.name, share=error.share.name)
-                + "\n"
-            )
+            try:
+                message += (
+                    _(
+                        "Could not display account {account} due to missing value for {share}"
+                    ).format(account=error.account.name, share=error.share.name)
+                    + "\n"
+                )
+            except AttributeError:
+                message = error.message
         self.error_messages.setText(message)
