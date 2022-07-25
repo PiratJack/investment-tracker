@@ -11,8 +11,6 @@ from models.base import NoPriceException, ValidationException
 
 _ = gettext.gettext
 
-# TODO (minor): Display value on markers
-
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
     columns = [
@@ -301,6 +299,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
     ]
 
     plots = {}
+    markers = []
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -316,6 +315,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.setMouseEnabled(x=True, y=False)
         self.enableAutoRange(axis="x")
+        self.showGrid(x=True, y=True)
 
         self.plots["legend"] = self.addLegend()
 
@@ -555,7 +555,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def plot_graph(self):
         self.clear_plots()
-        previous_share = 0
         color_set = (
             self.color_set_split if self.graph_type == "split" else self.color_set
         )
@@ -570,22 +569,32 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
             # For splits, the first share to display will fill via "fillLevel" and "brush"
             brush = share_color if self.graph_type == "split" else None
-            y0 = self.plots["share_" + str(previous_share)] if previous_share else [0]
-            y0 = (
-                self.shares_graph_values[previous_share].values()
-                if previous_share
-                else [0]
-            )
 
+            x = list(self.shares_graph_values[share_id].keys())
+            y = list(self.shares_graph_values[share_id].values())
             self.plots["share_" + str(share_id)] = self.plot(
-                x=list(self.shares_graph_values[share_id].keys()),
-                y=list(self.shares_graph_values[share_id].values()),
+                x=x,
+                y=y,
                 name=share.graph_label,
                 pen=share_color,
                 fillLevel=0,
                 brush=brush,
             )
-            previous_share = share_id
+
+            # Add markers
+            markers = list(zip(x, y))
+            markers = markers[:: len(markers) // 50] if len(markers) > 50 else markers
+            for x, y in markers:
+                if self.graph_type == "split":
+                    break
+                if self.graph_type == "value":
+                    marker = pyqtgraph.TextItem(str(y))
+                else:
+                    marker = pyqtgraph.TextItem("{:.1%}".format(y))
+                self.addItem(marker)
+                marker.setPos(x, y)
+                self.markers.append(marker)
+
             self.set_axis_range()
 
         for account_id in self.selected_accounts:
@@ -594,14 +603,31 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
             # Prepare legend and plot
             account = self.all_accounts[account_id]
+            x = list(self.accounts_graph_values[account_id].keys())
+            y = list(self.accounts_graph_values[account_id].values())
             self.plots["account_" + str(account_id)] = self.plot(
-                x=list(self.accounts_graph_values[account_id].keys()),
-                y=list(self.accounts_graph_values[account_id].values()),
+                x=x,
+                y=y,
                 name=account.graph_label,
                 pen=pyqtgraph.mkPen(
                     width=2, color=color_set[account_id % len(color_set)]
                 ),
             )
+
+            # Add markers
+            markers = list(zip(x, y))
+            markers = markers[:: len(markers) // 50] if len(markers) > 50 else markers
+            for x, y in markers:
+                if self.graph_type == "split":
+                    # It would always be 100%
+                    break
+                if self.graph_type == "value":
+                    marker = pyqtgraph.TextItem(str(y))
+                else:
+                    marker = pyqtgraph.TextItem("{:.1%}".format(y))
+                self.addItem(marker)
+                marker.setPos(x, y)
+                self.markers.append(marker)
 
             self.set_axis_range()
 
@@ -654,6 +680,10 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.removeItem(self.plots[plot])
             self.plots[plot].clear()
         self.plots = {"legend": self.plots["legend"]}
+
+        for marker in self.markers:
+            self.removeItem(marker)
+        self.markers = []
 
     def set_axis_range(self):
         start, end = (
