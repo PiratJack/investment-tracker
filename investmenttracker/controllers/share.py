@@ -85,28 +85,36 @@ class ShareController(EditController):
             for code in self.item.codes:
                 self.fields["code_" + code.origin.name]["default"] = code.value
 
-    def on_validation_end(self):
+    def after_item_save(self):
+        # This refreshes the data from DB, so that self.item.id is set
+        self.database.session.flush()
+
+        # Get each code value
         for origin in models.sharecode.ShareDataOrigin:
-            value = getattr(self.item, "code_" + origin.name)
+            user_input = getattr(self.item, "code_" + origin.name)
             existing_code = [code for code in self.item.codes if code.origin == origin]
-            if value:
+            if user_input:
                 if existing_code:
-                    existing_code[0].value = value
+                    existing_code[0].value = user_input
                 else:
                     new_code = models.sharecode.ShareCode(
-                        share_id=self.item.id, origin=origin.name, value=value
+                        share_id=self.item.id, origin=origin.name, value=user_input
                     )
                     self.item.codes.append(new_code)
+                    self.database.session.add(new_code)
+                    self.database.session.flush()
+                    self.database.session.refresh(new_code)
             else:
                 if existing_code:
-                    self.database.delete(existing_code[0])
                     self.item.codes.remove(existing_code[0])
+                    self.database.delete(existing_code[0])
 
+        # Ensure we have a code for the origin of syncing
         if self.item.sync_origin:
             sync_origin = [
                 v
                 for v in models.share.ShareDataOrigin
-                if v.name == self.item.sync_origin
+                if v.name == self.item.sync_origin or v == self.item.sync_origin
             ]
             if not sync_origin:
                 self.item.sync_origin = None
