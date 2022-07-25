@@ -244,7 +244,31 @@ class EditController:
         has_error = self.validate_data()
 
         if not has_error:
-            self.database.session.add(self.item)
+            try:
+                self.database.session.add(self.item)
+                self.after_item_save()
+            except AttributeError:
+                pass
+            except ValidationException as e:
+                field_widget = self.fields[e.key]["widget"]
+                self.add_error_field(e.message, field_widget)
+
+                has_error = True
+            except ValidationWarningException as e:
+                field_widget = self.fields[e.key]["widget"]
+                self.add_error_field(e.message, field_widget, True)
+
+                if field_id not in self.seen_warnings:
+                    has_new_warnings = True
+                    self.seen_warnings.append(field_id)
+                else:
+                    self.item.ignore_warnings = True
+                    self.set_value(field_id)
+                    self.item.ignore_warnings = False
+
+            if has_error:
+                return
+
             self.database.session.commit()
 
             self.parent_controller.reload_data()
