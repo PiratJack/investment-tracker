@@ -12,7 +12,6 @@ from models.base import NoPriceException
 _ = gettext.gettext
 
 # TODO (minor): Display value on markers
-# TODO (minor): Move X axis based on the selected range
 
 
 class AccountsSharesTree(QtWidgets.QTreeWidget):
@@ -651,6 +650,12 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plots = {"legend": self.plots["legend"]}
 
     def set_axis_range(self):
+        start, end = (
+            datetime.datetime(d.year, d.month, d.day).timestamp()
+            for d in (self.start_date, self.end_date)
+        )
+        self.setXRange(start, end, padding=0)
+
         self.enableAutoRange(axis="y")
 
         if (
