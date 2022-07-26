@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-07-24 19:39+0200\n"
+"PO-Revision-Date: 2022-07-26 09:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -88,6 +88,9 @@ msgstr "Code"
 #, python-brace-format
 msgid "Code for {origin}"
 msgstr "Code pour {origin}"
+
+msgid "Codes"
+msgstr "Codes"
 
 msgid "Company funding"
 msgstr "Rémunération employeur"
@@ -307,9 +310,6 @@ msgstr "Quantité"
 msgid "Rate"
 msgstr "Taux"
 
-msgid "Select a value"
-msgstr "Choisir une valeur"
-
 msgid "Share"
 msgstr "Titre"
 
@@ -340,6 +340,9 @@ msgstr "Fusion/Division - Source"
 msgid "Split & merge - Target"
 msgstr "Fusion/Division - Cible"
 
+msgid "Start date must be before end date"
+msgstr "La date de début doit être avant la date de fin"
+
 msgid "Taxes - in cash"
 msgstr "Taxes - en espèces"
 
@@ -366,3 +369,6 @@ msgstr "Inconnu ou trop ancien"
 
 msgid "Value"
 msgstr "Valeur"
+
+#~ msgid "Select a value"
+#~ msgstr "Choisir une valeur"

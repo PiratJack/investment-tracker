@@ -63,11 +63,7 @@ class Account(Base):
         if attr == "balance":
             balance = 0
             for transaction in self.transactions:
-                balance += (
-                    transaction.type.value["impact_currency"]
-                    * transaction.quantity
-                    * transaction.unit_price
-                )
+                balance += transaction.cash_total
             return balance
 
         # Date of first transaction
@@ -157,15 +153,11 @@ class Account(Base):
                     }
 
                 # Now, add the actual transaction
-                account_holdings[t.date]["cash"] += (
-                    t.type.value["impact_currency"] * t.quantity * t.unit_price
-                )
+                account_holdings[t.date]["cash"] += t.cash_total
                 if t.type.value["impact_asset"]:
                     if t.share.id not in account_holdings[t.date]["shares"]:
                         account_holdings[t.date]["shares"][t.share.id] = 0
-                    account_holdings[t.date]["shares"][t.share.id] += (
-                        t.type.value["impact_asset"] * t.quantity
-                    )
+                    account_holdings[t.date]["shares"][t.share.id] += t.asset_total
                     if account_holdings[t.date]["shares"][t.share.id] == 0:
                         del account_holdings[t.date]["shares"][t.share.id]
                 previous_holdings = account_holdings[t.date]
@@ -198,13 +190,13 @@ class Account(Base):
             raise ValueError("Transaction doesn't exist in that account")
 
         cash_balance = sum(
-            t.type.value["impact_currency"] * t.quantity * t.unit_price
+            t.cash_total
             for t in self.transactions
             if t.date < transaction.date
             or (t.date == transaction.date and t.id <= transaction.id)
         )
         asset_balance = sum(
-            t.type.value["impact_asset"] * t.quantity
+            t.asset_total
             for t in self.transactions
             if (
                 t.date < transaction.date
@@ -217,13 +209,13 @@ class Account(Base):
 
     def balance_before_staged_transaction(self, transaction):
         cash_balance = sum(
-            t.type.value["impact_currency"] * t.quantity * t.unit_price
+            t.cash_total
             for t in self.transactions
             if t.date < transaction.date
             or (t.date == transaction.date and t.id != transaction.id)
         )
         asset_balance = sum(
-            t.type.value["impact_asset"] * t.quantity
+            t.asset_total
             for t in self.transactions
             if t.id != transaction.id
             and t.type.value["impact_asset"]

@@ -219,17 +219,14 @@ class TransactionController(EditController):
             account = self.item.account
         balance = account.balance_before_staged_transaction(self.item)
 
-        transaction_type = models.transaction.TransactionTypes[self.item.type]
-        if transaction_type.value["impact_currency"] == -1:
-            if balance[0] - self.item.quantity * self.item.unit_price < 0:
-                raise ValidationWarningException(
-                    "Cash balance negative", self.item, "quantity", self.item.quantity
-                )
-        if transaction_type.value["impact_asset"] == -1:
-            if balance[1] - self.item.quantity < 0:
-                raise ValidationWarningException(
-                    "Asset balance negative", self.item, "quantity", self.item.quantity
-                )
+        if balance[0] + self.item.cash_total < 0:
+            raise ValidationWarningException(
+                "Cash balance negative", self.item, "currency_delta", self.item.quantity
+            )
+        if balance[1] + self.item.asset_total < 0:
+            raise ValidationWarningException(
+                "Asset balance negative", self.item, "quantity", self.item.quantity
+            )
 
     def get_quantity(self):
         return self.fields["quantity"]["widget"].value()

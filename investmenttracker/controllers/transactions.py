@@ -189,27 +189,17 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 return QtCore.QVariant()
 
             transaction = self.transactions[index.row()]
-            currency_total = (
-                transaction.quantity
-                * transaction.unit_price
-                * transaction.type.value["impact_currency"]
-            )
-            asset_total = ""
-            if transaction.type.value["impact_asset"]:
-                asset_total = (
-                    transaction.quantity * transaction.type.value["impact_asset"]
-                )
             return [
                 transaction.account.name,
                 transaction.id,
                 QtCore.QDate(transaction.date),
                 transaction.type.value["name"],
                 transaction.label,
-                asset_total,
+                transaction.asset_total,
                 transaction.share.short_name() if transaction.share else "",
                 transaction.account.balance_after_transaction(transaction)[1],
                 transaction.unit_price if transaction.unit_price != 1 else "",
-                currency_total,  # Total in currency
+                transaction.cash_total,
                 transaction.account.balance_after_transaction(transaction)[0],
                 QtCore.QVariant(),
                 QtCore.QVariant(),

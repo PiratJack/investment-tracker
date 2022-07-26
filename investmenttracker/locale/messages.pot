@@ -74,6 +74,9 @@ msgstr ""
 msgid "Code for {origin}"
 msgstr ""
 
+msgid "Codes"
+msgstr ""
+
 msgid "Company funding"
 msgstr ""
 
@@ -292,9 +295,6 @@ msgstr ""
 msgid "Rate"
 msgstr ""
 
-msgid "Select a value"
-msgstr ""
-
 msgid "Share"
 msgstr ""
 
@@ -323,6 +323,9 @@ msgid "Split & merge - Source"
 msgstr ""
 
 msgid "Split & merge - Target"
+msgstr ""
+
+msgid "Start date must be before end date"
 msgstr ""
 
 msgid "Taxes - in cash"

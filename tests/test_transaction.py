@@ -130,6 +130,38 @@ class TestTransaction(unittest.TestCase):
             "Transaction representation is wrong",
         )
 
+        # Cash and Asset totals
+        self.assertEqual(
+            account.transactions[1].cash_total,
+            -5000,
+            "Transaction cash total is wrong",
+        )
+        self.assertEqual(
+            account.transactions[1].asset_total,
+            50,
+            "Transaction asset total is wrong",
+        )
+
+        transaction = Transaction(
+            account_id=1,
+            date=datetime.datetime(2020, 4, 15),
+            label="Sell ACN",
+            type="asset_sell",
+            share_id=2,
+            quantity=10,
+            unit_price=1,
+        )
+        self.assertEqual(
+            transaction.cash_total,
+            10,
+            "Transaction cash total is wrong",
+        )
+        self.assertEqual(
+            transaction.asset_total,
+            -10,
+            "Transaction asset total is wrong",
+        )
+
         transaction = Transaction(
             account_id=1,
             date=datetime.datetime(2020, 4, 15),

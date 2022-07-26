@@ -184,6 +184,20 @@ class Transaction(Base):
             raise ValidationException(message, self, key, value)
         return value
 
+    def __getattr__(self, attr):
+        if attr == "cash_total":
+            type_enum = (
+                TransactionTypes[self.type] if type(self.type) == str else self.type
+            )
+            return type_enum.value["impact_currency"] * self.quantity * self.unit_price
+        if attr == "asset_total":
+            type_enum = (
+                TransactionTypes[self.type] if type(self.type) == str else self.type
+            )
+            return type_enum.value["impact_asset"] * self.quantity
+
+        raise AttributeError
+
     def __repr__(self):
         type_str = self.type if type(self.type) == str else self.type.value["name"]
         account_str = self.account.name if self.account else ""
