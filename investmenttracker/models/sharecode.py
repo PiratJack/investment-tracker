@@ -1,4 +1,3 @@
-import enum
 import gettext
 import sqlalchemy.orm
 

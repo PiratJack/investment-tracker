@@ -196,7 +196,7 @@ class Transaction(Base):
             )
             return type_enum.value["impact_asset"] * self.quantity
 
-        raise AttributeError
+        raise AttributeError("'Transaction' object has no attribute '" + attr + "'")
 
     def __repr__(self):
         type_str = self.type if type(self.type) == str else self.type.value["name"]

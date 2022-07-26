@@ -81,7 +81,7 @@ class Share(Base):
                 " (" + self.base_currency.name + ")" if self.base_currency else ""
             )
 
-        raise AttributeError
+        raise AttributeError("'Share' object has no attribute '" + attr + "'")
 
     @sqlalchemy.orm.validates("main_code")
     def validate_main_code(self, key, value):
