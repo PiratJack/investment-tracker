@@ -18,7 +18,7 @@ class Account(Base):
     enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)
 
-    base_currency_id = Column(Integer, ForeignKey("shares.id"))
+    base_currency_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
     base_currency = sqlalchemy.orm.relationship("Share")
     transactions = sqlalchemy.orm.relationship(
         "Transaction", order_by="Transaction.date", back_populates="account"
@@ -55,6 +55,11 @@ class Account(Base):
         return value
 
     @sqlalchemy.orm.validates("base_currency")
+    def validate_base_currency(self, key, value):
+        self.validate_missing_field(key, value, _("Missing account base currency"))
+        return value
+
+    @sqlalchemy.orm.validates("base_currency_id")
     def validate_base_currency(self, key, value):
         self.validate_missing_field(key, value, _("Missing account base currency"))
         return value
@@ -164,7 +169,7 @@ class Account(Base):
 
             return account_holdings
 
-        raise AttributeError
+        raise AttributeError("'Account' object has no attribute '" + attr + "'")
 
     def validate_missing_field(self, key, value, message):
         if value == "" or value is None:
