@@ -1,3 +1,4 @@
+import locale
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -25,3 +26,9 @@ class ValidationWarningException(Exception):
         self.item = item
         self.key = key
         self.invalid_value = invalid_value
+
+
+def format_number(number, currency=None):
+    return locale.format_string("%.2f", number, grouping=True) + (
+        (" " + currency) if currency else ""
+    )
