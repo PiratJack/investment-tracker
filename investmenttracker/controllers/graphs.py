@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 import pyqtgraph
 
 import models.share
-from models.base import NoPriceException, ValidationException
+from models.base import NoPriceException, ValidationException, format_number
 
 _ = gettext.gettext
 
@@ -588,7 +588,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 if self.graph_type == "split":
                     break
                 if self.graph_type == "value":
-                    marker = pyqtgraph.TextItem(str(y))
+                    marker = pyqtgraph.TextItem(format_number(y))
                 else:
                     marker = pyqtgraph.TextItem("{:.1%}".format(y))
                 self.addItem(marker)
@@ -622,7 +622,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                     # It would always be 100%
                     break
                 if self.graph_type == "value":
-                    marker = pyqtgraph.TextItem(str(y))
+                    marker = pyqtgraph.TextItem(format_number(y))
                 else:
                     marker = pyqtgraph.TextItem("{:.1%}".format(y))
                 self.addItem(marker)

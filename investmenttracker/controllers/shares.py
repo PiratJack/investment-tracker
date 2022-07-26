@@ -3,7 +3,7 @@ import gettext
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 
-from models.base import NoPriceException
+from models.base import NoPriceException, format_number
 import models.share
 import models.shareprice
 import controllers.sharegroup
@@ -62,7 +62,7 @@ class SharesTree(QtWidgets.QTreeWidget):
         },
     ]
 
-    column_edit_button = 7
+    column_edit_button = 8
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -93,9 +93,9 @@ class SharesTree(QtWidgets.QTreeWidget):
                         share.name,
                         share.id,
                         share.main_code,
-                        str(share.last_price.price)
-                        + " "
-                        + share.last_price.currency.main_code,
+                        format_number(
+                            share.last_price.price, share.last_price.currency.main_code
+                        ),
                         QtCore.QDate(share.last_price.date).toString(
                             Qt.SystemLocaleShortDate
                         ),
@@ -133,9 +133,9 @@ class SharesTree(QtWidgets.QTreeWidget):
                     share.name,
                     share.id,
                     share.main_code,
-                    str(share.last_price.price)
-                    + " "
-                    + share.last_price.currency.main_code,
+                    format_number(
+                        share.last_price.price, share.last_price.currency.main_code
+                    ),
                     QtCore.QDate(share.last_price.date).toString(
                         Qt.SystemLocaleShortDate
                     ),

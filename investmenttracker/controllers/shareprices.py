@@ -7,7 +7,7 @@ import sqlalchemy.exc
 
 from .widgets.sharecombobox import ShareComboBox
 from .widgets.delegates import DateDelegate, ShareDelegate
-import models.base
+from models.base import ValidationException, format_number
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
 _ = gettext.gettext
@@ -71,7 +71,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
                 price.share.name if price.share else QtCore.QVariant(),
                 price.id,
                 QtCore.QDate(price.date) if price.date else QtCore.QVariant(),
-                price.price,
+                format_number(price.price),
                 price.currency.short_name() if price.currency else QtCore.QVariant(),
                 price.source,
                 QtCore.QVariant(),
@@ -144,7 +144,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
                 self.dataChanged.emit(index, index, [Qt.EditRole])
                 return True
 
-            except (sqlalchemy.exc.IntegrityError, models.base.ValidationException):
+            except (sqlalchemy.exc.IntegrityError, ValidationException):
                 self.database.session.rollback()
                 return True
 

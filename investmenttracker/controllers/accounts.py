@@ -3,7 +3,7 @@ import gettext
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 
-from models.base import NoPriceException
+from models.base import NoPriceException, format_number
 import controllers.account
 
 _ = gettext.gettext
@@ -70,7 +70,9 @@ class AccountsTree(QtWidgets.QTreeWidget):
         # Fill in the data
         for account in accounts:
             try:
-                value = str(account.total_value)
+                value = format_number(
+                    account.total_value, account.base_currency.main_code
+                )
             except:
                 value = _("Unknown or too old")
             account_widget = QtWidgets.QTreeWidgetItem(
@@ -81,7 +83,7 @@ class AccountsTree(QtWidgets.QTreeWidget):
                     "",
                     value,
                     "",
-                    str(account.total_invested),
+                    format_number(account.total_invested),
                     "",
                 ]
             )
@@ -110,8 +112,11 @@ class AccountsTree(QtWidgets.QTreeWidget):
                         share.name,
                         "",
                         share.main_code,
-                        str(account.shares[share.id]),
-                        str(account.shares[share.id] * last_price.price),
+                        format_number(account.shares[share.id]),
+                        format_number(
+                            account.shares[share.id] * last_price.price,
+                            last_price.currency.main_code,
+                        ),
                         QtCore.QDate(last_price.date).toString(
                             Qt.SystemLocaleShortDate
                         ),
@@ -123,7 +128,7 @@ class AccountsTree(QtWidgets.QTreeWidget):
                         share.name,
                         "",
                         share.main_code,
-                        str(account.shares[share.id]),
+                        format_number(account.shares[share.id]),
                         _("Unknown or too old"),
                         "",
                         "",

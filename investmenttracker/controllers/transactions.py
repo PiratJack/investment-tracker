@@ -4,6 +4,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 
 import controllers.transaction
+from models.base import format_number
 
 _ = gettext.gettext
 
@@ -189,18 +190,22 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 return QtCore.QVariant()
 
             transaction = self.transactions[index.row()]
+            currency_code = transaction.account.base_currency.main_code
+            balance = transaction.account.balance_after_transaction(transaction)
             return [
                 transaction.account.name,
                 transaction.id,
                 QtCore.QDate(transaction.date),
                 transaction.type.value["name"],
                 transaction.label,
-                transaction.asset_total,
+                format_number(transaction.asset_total),
                 transaction.share.short_name() if transaction.share else "",
-                transaction.account.balance_after_transaction(transaction)[1],
-                transaction.unit_price if transaction.unit_price != 1 else "",
-                transaction.cash_total,
-                transaction.account.balance_after_transaction(transaction)[0],
+                format_number(balance[1]),
+                format_number(transaction.unit_price, currency_code)
+                if transaction.unit_price != 1
+                else "",
+                format_number(transaction.cash_total, currency_code),
+                format_number(balance[0], currency_code),
                 QtCore.QVariant(),
                 QtCore.QVariant(),
             ][col]
@@ -263,7 +268,7 @@ class TransactionsTableView(QtWidgets.QTableView):
         },
         {
             "name": _("Label"),
-            "size": 0.2,
+            "size": 0.17,
             "alignment": Qt.AlignLeft,
         },
         {
@@ -273,7 +278,7 @@ class TransactionsTableView(QtWidgets.QTableView):
         },
         {
             "name": _("Share"),
-            "size": 0.15,
+            "size": 0.1,
             "alignment": Qt.AlignRight,
         },
         {
@@ -283,12 +288,12 @@ class TransactionsTableView(QtWidgets.QTableView):
         },
         {
             "name": _("Rate"),
-            "size": 0.05,
+            "size": 0.08,
             "alignment": Qt.AlignRight,
         },
         {
             "name": _("Currency delta"),
-            "size": 0.05,
+            "size": 0.1,
             "alignment": Qt.AlignRight,
         },
         {
@@ -437,7 +442,7 @@ class TransactionsController:
         self.right_column = QtWidgets.QWidget()
         self.right_column.layout = QtWidgets.QVBoxLayout()
         self.right_column.setLayout(self.right_column.layout)
-        self.display_widget.layout.addWidget(self.right_column, 4)
+        self.display_widget.layout.addWidget(self.right_column, 6)
 
         self.table = TransactionsTableView(self)
         self.right_column.layout.addWidget(self.table)
