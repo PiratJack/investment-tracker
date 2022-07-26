@@ -184,12 +184,12 @@ class EditController:
                 field_widget = self.fields[e.key]["widget"]
                 self.add_error_field(e.message, field_widget, True)
 
-                if field_id not in self.seen_warnings:
+                if e.key not in self.seen_warnings:
                     has_new_warnings = True
-                    self.seen_warnings.append(field_id)
+                    self.seen_warnings.append(e.key)
                 else:
                     self.item.ignore_warnings = True
-                    self.set_value(field_id)
+                    self.set_value(e.key)
                     self.item.ignore_warnings = False
 
         return has_error or has_new_warnings
@@ -242,6 +242,7 @@ class EditController:
 
     def save(self):
         has_error = self.validate_data()
+        has_new_warnings = False
 
         if not has_error:
             try:
@@ -258,15 +259,15 @@ class EditController:
                 field_widget = self.fields[e.key]["widget"]
                 self.add_error_field(e.message, field_widget, True)
 
-                if field_id not in self.seen_warnings:
+                if e.key not in self.seen_warnings:
                     has_new_warnings = True
-                    self.seen_warnings.append(field_id)
+                    self.seen_warnings.append(e.key)
                 else:
                     self.item.ignore_warnings = True
-                    self.set_value(field_id)
+                    self.set_value(e.key)
                     self.item.ignore_warnings = False
 
-            if has_error:
+            if has_error or has_new_warnings:
                 return
 
             self.database.session.commit()
