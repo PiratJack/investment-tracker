@@ -61,7 +61,8 @@ class TransactionController(EditController):
 
         # Define list of values
         self.fields["account_id"]["possible_values"] = [
-            (g.name, g.id) for g in self.database.accounts_get()
+            (g.name, g.id)
+            for g in self.database.accounts_get(with_hidden=True, with_disabled=True)
         ]
         self.fields["type"]["possible_values"] = [
             (g.value["name"], g.name) for g in models.transaction.TransactionTypes
