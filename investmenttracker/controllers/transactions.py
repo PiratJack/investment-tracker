@@ -53,8 +53,10 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
             self.addTopLevelItem(account_item)
 
             # Add held shares
+            shares = []
             for share_id in account.shares:
-                share = self.database.share_get_by_id(share_id)
+                shares.append(self.database.share_get_by_id(share_id))
+            for share in sorted(shares, key=lambda a: a.name):
                 account_item.addChild(self.add_share(share, account_item))
 
     def resizeEvent(self, event):
