@@ -29,6 +29,8 @@ class ValidationWarningException(Exception):
 
 
 def format_number(number, currency=None):
+    if number == 0:
+        return "-"
     return locale.format_string("%.2f", number, grouping=True) + (
         (" " + currency) if currency else ""
     )
