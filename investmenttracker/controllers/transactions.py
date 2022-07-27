@@ -41,7 +41,7 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
         self.itemSelectionChanged.connect(self.on_select_item)
 
     def fill_tree(self, accounts):
-        for account in accounts:
+        for account in sorted(accounts, key=lambda a: a.name):
             if account.hidden and not self.parent_controller.display_hidden_accounts:
                 continue
             if (
