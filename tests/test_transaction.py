@@ -4,7 +4,7 @@ import unittest
 
 import investmenttracker.models.database as databasemodel
 
-from investmenttracker.models.base import ValidationException
+from investmenttracker.models.base import ValidationException, format_number
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
@@ -185,6 +185,28 @@ class TestTransaction(unittest.TestCase):
             len(transactions),
             2,
             "Complex filter should yield 2 transactions",
+        )
+
+        # Formatting numbers
+        self.assertEqual(
+            format_number(0),
+            "-",
+            "0 should be displayed as -",
+        )
+        self.assertEqual(
+            format_number(10**-9),
+            "-",
+            "Small numbers should be displayed as -",
+        )
+        self.assertEqual(
+            format_number(1584.415159),
+            "1584.42",
+            "Regular numbers should be displayed with 2 decimals",
+        )
+        self.assertEqual(
+            format_number(1584.415159, "EUR"),
+            "1584.42 EUR",
+            "Regular numbers should be displayed with 2 decimals",
         )
 
     def test_validations(self):

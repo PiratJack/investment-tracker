@@ -40,10 +40,15 @@ class TransactionTypes(enum.Enum):
         "impact_currency": -1,
         "impact_asset": 0,
     }
-    company_funding = {
-        "name": _("Company funding"),
+    company_funding_cash = {
+        "name": _("Company funding - Cash"),
         "impact_currency": 1,
         "impact_asset": 0,
+    }
+    company_funding_asset = {
+        "name": _("Company funding - Asset"),
+        "impact_currency": 0,
+        "impact_asset": 1,
     }
     dividends = {
         "name": _("Dividends"),
