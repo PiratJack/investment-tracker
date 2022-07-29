@@ -77,7 +77,10 @@ msgstr ""
 msgid "Codes"
 msgstr ""
 
-msgid "Company funding"
+msgid "Company funding - Asset"
+msgstr ""
+
+msgid "Company funding - Cash"
 msgstr ""
 
 #, python-brace-format
