@@ -60,7 +60,7 @@ class Account(Base):
         return value
 
     @sqlalchemy.orm.validates("base_currency_id")
-    def validate_base_currency(self, key, value):
+    def validate_base_currency_id(self, key, value):
         self.validate_missing_field(key, value, _("Missing account base currency"))
         return value
 

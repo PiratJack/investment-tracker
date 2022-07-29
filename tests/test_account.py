@@ -99,7 +99,7 @@ class TestAccount(unittest.TestCase):
                     account_id=1,
                     date=datetime.date(2020, 4, 15),
                     label="Get funded",
-                    type="company_funding",
+                    type="company_funding_cash",
                     share_id=5,
                     quantity=100,
                     unit_price=1,
@@ -502,6 +502,7 @@ class TestAccount(unittest.TestCase):
                     name="test",
                     code="Error",
                     enabled=True,
+                    base_currency_id=1,
                 ),
             ]
         )
@@ -523,7 +524,7 @@ class TestAccount(unittest.TestCase):
         account = self.database.accounts_get_by_id(27)
         self.assertEqual(
             account.graph_label,
-            "test",
+            "test (AXA)",
             "Account graph label is wrong",
         )
 
@@ -532,7 +533,7 @@ class TestAccount(unittest.TestCase):
             id=50,
             name="test",
             code="Error",
-            base_currency_id=5,
+            # base_currency_id=5,
             enabled=True,
         )
 
