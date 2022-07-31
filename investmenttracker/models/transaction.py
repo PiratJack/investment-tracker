@@ -14,101 +14,109 @@ class TransactionTypes(enum.Enum):
         "name": _("Arbitrage - Buy"),
         "impact_currency": 0,
         "impact_asset": 1,
+        "has_asset": 1,
     }
     arbitrage_sell = {
         "name": _("Arbitrage - Sell"),
         "impact_currency": 0,
         "impact_asset": -1,
+        "has_asset": 1,
     }
     asset_buy = {
         "name": _("Asset buy / subscription"),
         "impact_currency": -1,
         "impact_asset": 1,
+        "has_asset": 1,
     }
     asset_sell = {
         "name": _("Asset sell"),
         "impact_currency": 1,
         "impact_asset": -1,
+        "has_asset": 1,
     }
     cash_entry = {
         "name": _("Cash deposit"),
         "impact_currency": 1,
         "impact_asset": 0,
+        "has_asset": 0,
     }
     cash_exit = {
         "name": _("Cash withdrawal"),
         "impact_currency": -1,
         "impact_asset": 0,
+        "has_asset": 0,
     }
     company_funding_cash = {
         "name": _("Company funding - Cash"),
         "impact_currency": 1,
         "impact_asset": 0,
+        "has_asset": 0,
     }
     company_funding_asset = {
         "name": _("Company funding - Asset"),
         "impact_currency": 0,
         "impact_asset": 1,
+        "has_asset": 1,
     }
     dividends = {
         "name": _("Dividends"),
         "impact_currency": 1,
         "impact_asset": 0,
+        "has_asset": 1,
     }
     fee_asset = {
         "name": _("Management fee - in units"),
         "impact_currency": 0,
         "impact_asset": -1,
+        "has_asset": 1,
     }
     fee_cash = {
         "name": _("Management fee - in cash"),
         "impact_currency": -1,
         "impact_asset": 0,
-    }
-    forex = {
-        "name": _("Foreign exchange"),
-        "impact_currency": -1,
-        "impact_asset": 1,
-    }
-    interest = {
-        "name": _("Interests"),
-        "impact_currency": 1,
-        "impact_asset": 0,
+        "has_asset": 0,
     }
     movement_fee = {
         "name": _("Movement fee"),
         "impact_currency": -1,
         "impact_asset": 0,
+        "has_asset": 1,
     }
     profit_asset = {
         "name": _("Profit - in units"),
         "impact_currency": 0,
         "impact_asset": 1,
+        "has_asset": 1,
     }
     profit_cash = {
         "name": _("Profit - in cash"),
         "impact_currency": 1,
         "impact_asset": 0,
+        "has_asset": 1,
     }
     split_source = {
         "name": _("Split & merge - Source"),
         "impact_currency": 0,
         "impact_asset": -1,
+        "has_asset": 1,
     }
     split_target = {
         "name": _("Split & merge - Target"),
         "impact_currency": 0,
         "impact_asset": 1,
+        "has_asset": 1,
     }
     taxes_cash = {
         "name": _("Taxes - in cash"),
         "impact_currency": -1,
         "impact_asset": 0,
+        "has_asset": 0,
     }
     taxes_asset = {
         "name": _("Taxes - in units"),
         "impact_currency": 0,
         "impact_asset": -1,
+        "has_asset": 1,
     }
 
 

@@ -201,11 +201,13 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.type.value["name"],
                 transaction.label,
                 format_number(transaction.asset_total),
-                transaction.share.short_name() if transaction.share else "",
-                format_number(balance[1]),
+                transaction.share.short_name() if transaction.share else "-",
+                format_number(balance[1])
+                if transaction.type.value["has_asset"]
+                else "-",
                 format_number(transaction.unit_price, currency_code)
                 if transaction.unit_price != 1
-                else "",
+                else "-",
                 format_number(transaction.cash_total, currency_code),
                 format_number(balance[0], currency_code),
                 QtCore.QVariant(),

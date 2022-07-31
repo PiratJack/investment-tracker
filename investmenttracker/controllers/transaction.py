@@ -128,7 +128,7 @@ class TransactionController(EditController):
         ]
         if transaction_type:
             transaction_type = transaction_type[0].value
-            if transaction_type["impact_asset"]:
+            if transaction_type["has_asset"]:
                 for field_id in ("quantity", "share_id"):
                     self.fields[field_id]["widget"].show()
                     self.form_layout.labelForField(
@@ -142,7 +142,7 @@ class TransactionController(EditController):
                         self.fields[field_id]["widget"]
                     ).show()
 
-            if transaction_type["impact_asset"] and transaction_type["impact_currency"]:
+            if transaction_type["has_asset"] and transaction_type["impact_currency"]:
                 for field_id in ("unit_price", "known_unit_price"):
                     self.fields[field_id]["widget"].show()
                     self.form_layout.labelForField(
@@ -247,7 +247,7 @@ class TransactionController(EditController):
         if transaction_type:
             transaction_type = transaction_type[0].value
             if (
-                not transaction_type["impact_asset"]
+                not transaction_type["has_asset"]
                 and transaction_type["impact_currency"]
             ):
                 self.fields["quantity"]["widget"].setValue(
