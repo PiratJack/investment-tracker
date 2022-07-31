@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-07-29 20:40+0200\n"
+"PO-Revision-Date: 2022-07-31 10:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -159,9 +159,6 @@ msgstr "Modifier"
 msgid "Enabled"
 msgstr "Activé"
 
-msgid "Foreign exchange"
-msgstr "Conversion"
-
 msgid "Get prices online from?"
 msgstr "Récupérer les valeurs depuis?"
 
@@ -179,9 +176,6 @@ msgstr "Masqué?"
 
 msgid "ID"
 msgstr "ID"
-
-msgid "Interests"
-msgstr "Intérêts"
 
 msgid "Investment Tracker"
 msgstr "Suivi boursier"
@@ -364,6 +358,18 @@ msgstr "Le type de transaction est invalide"
 msgid "Transactions"
 msgstr "Transactions"
 
+msgid "Transfer - Asset in"
+msgstr "Transfert entrant - Titre"
+
+msgid "Transfer - Asset out"
+msgstr "Transfert sortant - Titre"
+
+msgid "Transfer - Cash in"
+msgstr "Transfert entrant - Espèces"
+
+msgid "Transfer - Cash out"
+msgstr "Transfert sortant - Espèces"
+
 msgid "Type"
 msgstr "Type"
 
@@ -372,6 +378,12 @@ msgstr "Inconnu ou trop ancien"
 
 msgid "Value"
 msgstr "Valeur"
+
+#~ msgid "Foreign exchange"
+#~ msgstr "Conversion"
+
+#~ msgid "Interests"
+#~ msgstr "Intérêts"
 
 #~ msgid "Select a value"
 #~ msgstr "Choisir une valeur"

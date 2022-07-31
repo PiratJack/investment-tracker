@@ -144,9 +144,6 @@ msgstr ""
 msgid "Enabled"
 msgstr ""
 
-msgid "Foreign exchange"
-msgstr ""
-
 msgid "Get prices online from?"
 msgstr ""
 
@@ -163,9 +160,6 @@ msgid "Hidden?"
 msgstr ""
 
 msgid "ID"
-msgstr ""
-
-msgid "Interests"
 msgstr ""
 
 msgid "Investment Tracker"
@@ -347,6 +341,18 @@ msgid "Transaction type is invalid"
 msgstr ""
 
 msgid "Transactions"
+msgstr ""
+
+msgid "Transfer - Asset in"
+msgstr ""
+
+msgid "Transfer - Asset out"
+msgstr ""
+
+msgid "Transfer - Cash in"
+msgstr ""
+
+msgid "Transfer - Cash out"
 msgstr ""
 
 msgid "Type"

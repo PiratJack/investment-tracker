@@ -118,6 +118,30 @@ class TransactionTypes(enum.Enum):
         "impact_asset": -1,
         "has_asset": 1,
     }
+    transfer_in_cash = {
+        "name": _("Transfer - Cash in"),
+        "impact_currency": 1,
+        "impact_asset": 0,
+        "has_asset": 0,
+    }
+    transfer_in_asset = {
+        "name": _("Transfer - Asset in"),
+        "impact_currency": 0,
+        "impact_asset": 1,
+        "has_asset": 1,
+    }
+    transfer_out_cash = {
+        "name": _("Transfer - Cash out"),
+        "impact_currency": -1,
+        "impact_asset": 0,
+        "has_asset": 0,
+    }
+    transfer_out_asset = {
+        "name": _("Transfer - Asset out"),
+        "impact_currency": 0,
+        "impact_asset": -1,
+        "has_asset": 1,
+    }
 
 
 class Transaction(Base):
