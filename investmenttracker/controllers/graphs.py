@@ -382,6 +382,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
             # Now convert to percentages
             holdings = self.accounts_holdings[account_id]
             self.shares_graph_values = {}
+            holdings = {
+                d: holdings[d]
+                for d in holdings
+                if d >= self.start_date and d <= self.end_date
+            }
             self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
 
             for share_id in held_shares:
@@ -511,7 +516,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
                             # Add all dates of this share to the list
                             previous_share_value = 0
-                            for share_value_date in share_values:
+                            for share_value_date in sorted(share_values.keys()):
                                 holdings[share_value_date] = current_holdings
                                 # If date doesn't exist, take previous one and remove this share's value
                                 if not share_value_date in new_raw_values:
@@ -524,6 +529,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                                         new_raw_values[previous_value_date]
                                         - previous_share_value
                                     )
+
                                 # Add the share value as of share_value_date
                                 previous_share_value = (
                                     current_holdings["shares"][share_id]
@@ -733,8 +739,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def get_share_value_as_of(self, share_id, start_date, currency):
         # TODO (minor): Take into account foreign exchange
-        if share_id not in self.shares_raw_values:
-            self.calculate_shares([share_id])
+        self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
             raise NoPriceException("No value found", self.all_shares[share_id])
@@ -747,8 +752,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def get_share_value_in_range(self, share_id, start_date, end_date, currency):
         # TODO (minor): Take into account foreign exchange
-        if share_id not in self.shares_raw_values:
-            self.calculate_shares([share_id])
+        self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
             raise NoPriceException("No value found", self.all_shares[share_id])
