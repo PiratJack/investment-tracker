@@ -323,6 +323,10 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.selected_accounts = selected_accounts
         if selected_accounts:
             self.calculate_accounts(selected_accounts)
+        try:
+            self.set_account_split()
+        except (UserWarning, NoPriceException) as e:
+            self.add_error(e)
         self.plot_graph()
 
     def set_shares(self, selected_shares=[]):
@@ -359,11 +363,12 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.plot_graph()
 
-    def set_account_split(self, enabled):
-        if len(self.selected_accounts) != 1:
-            raise UserWarning("Only 1 account can be displayed in this mode")
+    def set_account_split(self, enabled=-1):
+        if enabled != -1:
+            self.graph_type = "split" if enabled else "value"
 
-        self.graph_type = "split" if enabled else "value"
+        if self.graph_type == "split" and len(self.selected_accounts) != 1:
+            raise UserWarning("Only 1 account can be displayed in this mode")
 
         if self.graph_type == "split":
             # Get raw calculations for everything we need
@@ -390,22 +395,27 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
 
             for share_id in held_shares:
-                self.shares_graph_values[share_id] = {
-                    date: (
-                        holdings[date]["shares"][share_id]
-                        * self.get_share_value_as_of(
-                            share_id, date, account.base_currency
+                try:
+                    self.shares_graph_values[share_id] = {
+                        date: (
+                            holdings[date]["shares"][share_id]
+                            * self.get_share_value_as_of(
+                                share_id, date, account.base_currency
+                            )
+                            / self.accounts_raw_values[account_id][date]
+                            if share_id in holdings[date]["shares"]
+                            else 0
                         )
-                        / self.accounts_raw_values[account_id][date]
-                        if share_id in holdings[date]["shares"]
-                        else 0
-                    )
-                    + sum(
-                        self.shares_graph_values[s][date]
-                        for s in self.shares_graph_values
-                    )
-                    for date in holdings
-                }
+                        + sum(
+                            self.shares_graph_values[s][date]
+                            for s in self.shares_graph_values
+                        )
+                        for date in holdings
+                    }
+                except (KeyError, NoPriceException):
+                    e = NoPriceException(_("No value found"), self.all_shares[share_id])
+                    e.account = account
+                    raise e
 
             self.selected_shares = list(held_shares) + [account.base_currency.id]
             self.calculate_shares([account.base_currency.id])
@@ -856,12 +866,14 @@ class GraphsController:
         self.right_column.layout.addWidget(self.period_label, 0, 0)
 
         self.start_date = QtWidgets.QDateEdit()
+        self.start_date.setDate(datetime.date.today() - datetime.timedelta(6 * 30))
         self.start_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.start_date, 0, 1)
         date_width = self.start_date.sizeHint().width()
         self.start_date.setMinimumWidth(date_width * 2)
 
         self.end_date = QtWidgets.QDateEdit()
+        self.end_date.setDate(datetime.date.today())
         self.end_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.end_date, 0, 2)
         self.end_date.setMinimumWidth(date_width * 2)
@@ -881,6 +893,7 @@ class GraphsController:
         self.right_column.layout.addWidget(self.baseline_label, 0, 5, Qt.AlignRight)
 
         self.baseline_date = QtWidgets.QDateEdit()
+        self.baseline_date.setDate(datetime.date.today() - datetime.timedelta(6 * 30))
         self.baseline_date.dateChanged.connect(self.on_baseline_change)
         self.right_column.layout.addWidget(self.baseline_date, 0, 6)
         self.baseline_date.setMinimumWidth(date_width * 2)
@@ -894,11 +907,8 @@ class GraphsController:
         self.graph = GraphsArea(self)
         self.right_column.layout.addWidget(self.graph, 2, 0, 1, 7)
 
-        # Set default dates (done after to trigget the dateChanged connectors)
-        delta = datetime.timedelta(6 * 30)
-        self.start_date.setDate(datetime.date.today() - delta)
-        self.end_date.setDate(datetime.date.today())
-        self.baseline_date.setDate(datetime.date.today() - delta)
+        # Trigger date change once all dates are set
+        self.on_change_dates()
 
     def reload_data(self):
         self.accounts = self.database.accounts_get(
@@ -963,7 +973,10 @@ class GraphsController:
     def on_display_split_change(self):
         self.baseline_enabled.setEnabled(not self.split_enabled.isChecked())
         self.baseline_date.setEnabled(not self.split_enabled.isChecked())
-        self.graph.set_account_split(self.split_enabled.isChecked())
+        try:
+            self.graph.set_account_split(self.split_enabled.isChecked())
+        except (UserWarning, NoPriceException) as e:
+            self.add_error(e)
         if not self.split_enabled.isChecked():
             self.accounts_tree.on_select_item()
             self.shares_tree.on_select_item()
@@ -975,15 +988,18 @@ class GraphsController:
 
     def add_error(self, exception):
         self.errors.append(exception)
-        message = ""
+        messages = []
         for error in self.errors:
-            try:
-                message += (
+            if type(error) == UserWarning:
+                messages.append(str(error))
+            elif type(error) == NoPriceException:
+                messages.append(
                     _(
                         "Could not display account {account} due to missing value for {share}"
                     ).format(account=error.account.name, share=error.share.name)
-                    + "\n"
                 )
-            except AttributeError:
-                message = error.message
-        self.error_messages.setText(message)
+            else:
+                raise error
+        print(self.errors)
+        messages = set(messages)
+        self.error_messages.setText("\n".join(messages))
