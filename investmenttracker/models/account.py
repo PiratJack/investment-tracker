@@ -69,6 +69,8 @@ class Account(Base):
             balance = 0
             for transaction in self.transactions:
                 balance += transaction.cash_total
+            if abs(balance) <= 10**-8:
+                return 0
             return balance
 
         # Date of first transaction
@@ -94,6 +96,8 @@ class Account(Base):
                     shares[share_id] += (
                         transaction.type.value["impact_asset"] * transaction.quantity
                     )
+            # Remove zeroes to avoid further issues
+            shares = {a: shares[a] for a in shares if abs(shares[a]) >= 10**-8}
             return shares
 
         if attr == "total_invested":
@@ -159,6 +163,9 @@ class Account(Base):
 
                 # Now, add the actual transaction
                 account_holdings[t.date]["cash"] += t.cash_total
+                # Cash below precision limit: put as 0
+                if abs(account_holdings[t.date]["cash"]) <= 10**-8:
+                    account_holdings[t.date]["cash"] = 0
                 if t.type.value["impact_asset"]:
                     if t.share.id not in account_holdings[t.date]["shares"]:
                         account_holdings[t.date]["shares"][t.share.id] = 0
