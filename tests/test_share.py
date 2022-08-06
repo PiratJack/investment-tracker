@@ -79,7 +79,7 @@ class TestShare(unittest.TestCase):
         share = self.database.share_get_by_id(1)
         self.assertEqual(
             str(share),
-            "Share AXA (FR847238, EUR, unsynced, enabled)",
+            "Share AXA (FR847238, EUR, unsynced)",
             "Share representation is wrong",
         )
         share = Share(
@@ -91,7 +91,7 @@ class TestShare(unittest.TestCase):
         )
         self.assertEqual(
             str(share),
-            "Share Hidden share (FEFZE, unsynced, enabled)",
+            "Share Hidden share (FEFZE, unsynced)",
             "Share representation is wrong",
         )
 

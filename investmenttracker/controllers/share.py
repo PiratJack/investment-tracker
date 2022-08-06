@@ -20,10 +20,6 @@ class ShareController(EditController):
             "label": _("Main code"),
             "type": "text",
         },
-        "enabled": {
-            "label": _("Enabled"),
-            "type": "checkbox",
-        },
         "base_currency_id": {
             "label": _("Base currency"),
             "type": "sharelist",
@@ -66,7 +62,6 @@ class ShareController(EditController):
         else:
             if "default" in self.fields["sync_origin"]:
                 del self.fields["sync_origin"]["default"]
-        self.fields["enabled"]["default"] = self.item.enabled
         self.fields["base_currency_id"]["default"] = (
             self.item.base_currency.id if self.item.base_currency else 0
         )

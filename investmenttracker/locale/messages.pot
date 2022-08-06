@@ -141,9 +141,6 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-msgid "Enabled"
-msgstr ""
-
 msgid "Get prices online from?"
 msgstr ""
 
@@ -266,6 +263,9 @@ msgstr ""
 
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
+msgstr ""
+
+msgid "No value found"
 msgstr ""
 
 msgid "Period"

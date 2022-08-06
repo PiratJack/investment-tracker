@@ -156,9 +156,6 @@ msgstr "Dividendes"
 msgid "Edit"
 msgstr "Modifier"
 
-msgid "Enabled"
-msgstr "Activé"
-
 msgid "Get prices online from?"
 msgstr "Récupérer les valeurs depuis?"
 
@@ -283,6 +280,9 @@ msgstr "Nom"
 msgid "No price available for share {name} ({main_code})"
 msgstr "Prix inconnu pour titre {name} ({main_code})"
 
+msgid "No value found"
+msgstr ""
+
 msgid "Period"
 msgstr "Période"
 
@@ -378,6 +378,9 @@ msgstr "Inconnu ou trop ancien"
 
 msgid "Value"
 msgstr "Valeur"
+
+#~ msgid "Enabled"
+#~ msgstr "Activé"
 
 #~ msgid "Foreign exchange"
 #~ msgstr "Conversion"

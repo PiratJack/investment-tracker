@@ -28,7 +28,6 @@ class Share(Base):
     name = Column(String(250), nullable=False)
     main_code = Column(String(250), nullable=True)
     sync_origin = Column(Enum(ShareDataOrigin, validate_strings=True), nullable=True)
-    enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)
 
     group_id = Column(Integer, ForeignKey("share_groups.id"), nullable=True)
@@ -51,8 +50,6 @@ class Share(Base):
     )
 
     def __init__(self, **kwargs):
-        if "enabled" not in kwargs:
-            kwargs["enabled"] = self.__table__.c.enabled.default.arg
         if "hidden" not in kwargs:
             kwargs["hidden"] = self.__table__.c.hidden.default.arg
         super().__init__(**kwargs)
@@ -127,8 +124,7 @@ class Share(Base):
             output += self.main_code + ", "
         if self.base_currency:
             output += self.base_currency.main_code + ", "
-        output += "synced, " if self.sync_origin else "unsynced, "
-        output += "enabled" if self.enabled else "disabled"
+        output += "synced" if self.sync_origin else "unsynced"
         output += ")"
         return output
 
