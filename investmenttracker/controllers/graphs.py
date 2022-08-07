@@ -222,6 +222,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         },
     }
     graph_type = "value"
+    display_markers = True
 
     all_accounts = {}
     all_shares = {}
@@ -274,7 +275,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     plots = {}
     markers = []
-    # TODO (minor): Add button to hide / display markers
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -410,6 +410,20 @@ class GraphsArea(pyqtgraph.PlotWidget):
             # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
 
             self.plot_graph()
+
+    def set_markers_visible(self, visible):
+        self.display_markers = visible
+
+        if visible:
+            for share_id in reversed(self.selected_shares):
+                self.add_markers(self.shares_graph_values[share_id])
+
+            for account_id in self.selected_accounts:
+                self.add_markers(self.accounts_graph_values[account_id])
+        else:
+            for marker in self.markers:
+                self.removeItem(marker)
+            self.markers = []
 
     def calculate_shares(self, shares):
         if not self.start_date or not self.end_date or not shares:
@@ -573,18 +587,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             )
 
             # Add markers
-            markers = list(zip(x, y))
-            markers = markers[:: len(markers) // 50] if len(markers) > 50 else markers
-            for x, y in markers:
-                if self.graph_type == "split":
-                    break
-                if self.graph_type == "value":
-                    marker = pyqtgraph.TextItem(format_number(y))
-                else:
-                    marker = pyqtgraph.TextItem("{:.1%}".format(y))
-                self.addItem(marker)
-                marker.setPos(x, y)
-                self.markers.append(marker)
+            self.add_markers(self.shares_graph_values[share_id])
 
             self.set_axis_range()
 
@@ -606,21 +609,29 @@ class GraphsArea(pyqtgraph.PlotWidget):
             )
 
             # Add markers
-            markers = list(zip(x, y))
-            markers = markers[:: len(markers) // 50] if len(markers) > 50 else markers
-            for x, y in markers:
-                if self.graph_type == "split":
-                    # It would always be 100%
-                    break
-                if self.graph_type == "value":
-                    marker = pyqtgraph.TextItem(format_number(y))
-                else:
-                    marker = pyqtgraph.TextItem("{:.1%}".format(y))
-                self.addItem(marker)
-                marker.setPos(x, y)
-                self.markers.append(marker)
+            self.add_markers(self.accounts_graph_values[account_id])
 
             self.set_axis_range()
+
+    def add_markers(self, values):
+        if not self.display_markers:
+            return
+
+        x = list(values.keys())
+        y = list(values.values())
+        markers = list(zip(x, y))
+        markers = markers[:: len(markers) // 30] if len(markers) > 30 else markers
+        for x, y in markers:
+            if self.graph_type == "split":
+                # It would always be 100%
+                break
+            if self.graph_type == "value":
+                marker = pyqtgraph.TextItem(format_number(y))
+            else:
+                marker = pyqtgraph.TextItem("{:.1%}".format(y))
+            self.addItem(marker)
+            marker.setPos(x, y)
+            self.markers.append(marker)
 
     def convert_raw_to_graph(self, element_type, element_id):
         # in "split" mode, the graph values are already calculated
@@ -881,6 +892,12 @@ class GraphsController:
         self.graph = GraphsArea(self)
         self.right_column.layout.addWidget(self.graph, 2, 0, 1, 7)
 
+        # Choose whether to display markers
+        self.markers_visible = QtWidgets.QCheckBox(_("Display markers?"))
+        self.markers_visible.setChecked(True)
+        self.markers_visible.stateChanged.connect(self.on_markers_change)
+        self.right_column.layout.addWidget(self.markers_visible, 3, 0)
+
         # Trigger date change once all dates are set
         self.on_change_dates()
 
@@ -955,6 +972,9 @@ class GraphsController:
             self.accounts_tree.on_select_item()
             self.shares_tree.on_select_item()
             self.on_change_dates()
+
+    def on_markers_change(self):
+        self.graph.set_markers_visible(self.markers_visible.isChecked())
 
     def reset_errors(self):
         self.errors = []
