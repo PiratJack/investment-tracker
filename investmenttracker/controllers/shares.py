@@ -8,12 +8,13 @@ import models.share
 import models.shareprice
 import controllers.sharegroup
 import controllers.share
+from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 # TODO (cosmetic): Double-click on tree opens edit window
 
 
-class SharesTree(QtWidgets.QTreeWidget):
+class SharesTree(basetreecontroller.BaseTreeController):
     columns = [
         {
             "name": _("Name"),
@@ -22,6 +23,11 @@ class SharesTree(QtWidgets.QTreeWidget):
         },
         {
             "name": _("ID"),
+            "size": 0,
+            "alignment": Qt.AlignRight,
+        },
+        {
+            "name": _("type"),
             "size": 0,
             "alignment": Qt.AlignRight,
         },
@@ -62,16 +68,7 @@ class SharesTree(QtWidgets.QTreeWidget):
         },
     ]
 
-    column_edit_button = 8
-
-    def __init__(self, parent_controller):
-        super().__init__()
-        self.parent_controller = parent_controller
-        self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([_(col["name"]) for col in self.columns])
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.AscendingOrder)
-        self.database = parent_controller.database
+    column_edit_button = 9
 
     def fill_groups(self, groups, shares_without_group):
         # Fill in the data
@@ -93,6 +90,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     child = [
                         share.name,
                         share.id,
+                        "share",
                         share.main_code,
                         format_number(
                             share.last_price.price, share.last_price.currency.main_code
@@ -109,6 +107,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                     child = [
                         share.name,
                         share.id,
+                        "share",
                         share.main_code,
                         "",
                         "",
@@ -133,6 +132,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                 child = [
                     share.name,
                     share.id,
+                    "share",
                     share.main_code,
                     format_number(
                         share.last_price.price, share.last_price.currency.main_code
@@ -149,6 +149,7 @@ class SharesTree(QtWidgets.QTreeWidget):
                 child = [
                     share.name,
                     share.id,
+                    "share",
                     share.main_code,
                     "",
                     "",
@@ -165,26 +166,9 @@ class SharesTree(QtWidgets.QTreeWidget):
         share_data = [_("Add new share"), 0, "", "", "", "", "", ""]
         self.add_share(share_data)
 
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-
-        for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
-                self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
-            else:
-                self.setColumnWidth(i, self.columns[i]["size"])
-
     def add_group(self, name, group_id):
         group_widget = QtWidgets.QTreeWidgetItem(
-            [name, str(group_id), "", "", "", "", "", ""]
+            [name, str(group_id), "group", "", "", "", "", "", ""]
         )
         self.addTopLevelItem(group_widget)
 
@@ -196,9 +180,7 @@ class SharesTree(QtWidgets.QTreeWidget):
             action_button = QtWidgets.QPushButton()
             action_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
             action_button.setProperty("class", "imagebutton")
-            action_button.clicked.connect(
-                lambda _, name=("group", group_id): self.on_click_edit_button(name)
-            )
+            action_button.clicked.connect(self.on_click_edit_button)
             self.setItemWidget(group_widget, self.column_edit_button, action_button)
 
         # Shares not grouped
@@ -216,9 +198,7 @@ class SharesTree(QtWidgets.QTreeWidget):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
-            create_button.clicked.connect(
-                lambda _, name=("group", 0): self.on_click_edit_button(name)
-            )
+            create_button.clicked.connect(self.on_click_edit_button)
             self.setItemWidget(group_widget, 0, create_button)
 
         return group_widget
@@ -247,9 +227,7 @@ class SharesTree(QtWidgets.QTreeWidget):
             edit_button = QtWidgets.QPushButton()
             edit_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
             edit_button.setProperty("class", "imagebutton")
-            edit_button.clicked.connect(
-                lambda _, name=("share", data[1]): self.on_click_edit_button(name)
-            )
+            edit_button.clicked.connect(self.on_click_edit_button)
             self.setItemWidget(share_widget, self.column_edit_button, edit_button)
         else:
             # Apply style
@@ -262,23 +240,21 @@ class SharesTree(QtWidgets.QTreeWidget):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
-            create_button.clicked.connect(
-                lambda _, name=("share", 0): self.on_click_edit_button(name)
-            )
+            create_button.clicked.connect(self.on_click_edit_button)
             self.setItemWidget(share_widget, 0, create_button)
 
         return share_widget
 
     def on_click_edit_button(self, item):
-        if item[0] == "group":
+        if item.text(2) == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
-                self.parent_controller, item[1]
+                self.parent_controller, item.text(1)
             )
             self.group_details.show_window()
             del self.group_details
-        elif item[0] == "share":
+        elif item.text(2) == "share":
             self.share_details = controllers.share.ShareController(
-                self.parent_controller, item[1]
+                self.parent_controller, item.text(1)
             )
             self.share_details.show_window()
             del self.share_details

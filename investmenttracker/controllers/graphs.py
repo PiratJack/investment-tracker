@@ -8,11 +8,12 @@ import pyqtgraph
 
 import models.share
 from models.base import NoPriceException, ValidationException, format_number
+from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 
 
-class AccountsSharesTree(QtWidgets.QTreeWidget):
+class AccountsSharesTree(basetreecontroller.BaseTreeController):
     columns = [
         {
             "name": _("Name"),
@@ -33,14 +34,7 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
     selected_accounts = []
 
     def __init__(self, parent_controller):
-        super().__init__()
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
-
-        self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([_(col["name"]) for col in self.columns])
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.AscendingOrder)
+        super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
@@ -55,22 +49,6 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
                 continue
             account_item = self.add_account(account)
             self.addTopLevelItem(account_item)
-
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-        for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
-                self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
-            else:
-                self.setColumnWidth(i, self.columns[i]["size"])
 
     def add_account(self, account):
         account_item = QtWidgets.QTreeWidgetItem(
@@ -111,7 +89,7 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
                 item.setSelected(True)
 
 
-class SharesTree(QtWidgets.QTreeWidget):
+class SharesTree(basetreecontroller.BaseTreeController):
     columns = [
         {
             "name": _("Name"),
@@ -131,14 +109,7 @@ class SharesTree(QtWidgets.QTreeWidget):
     ]
 
     def __init__(self, parent_controller):
-        super().__init__()
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
-
-        self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([_(col["name"]) for col in self.columns])
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.AscendingOrder)
+        super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
@@ -1003,6 +974,5 @@ class GraphsController:
                 )
             else:
                 raise error
-        print(self.errors)
         messages = set(messages)
         self.error_messages.setText("\n".join(messages))

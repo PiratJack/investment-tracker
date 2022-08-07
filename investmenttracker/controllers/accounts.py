@@ -5,12 +5,13 @@ from PyQt5.QtCore import Qt
 
 from models.base import NoPriceException, format_number
 import controllers.account
+from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 # TODO (cosmetic): Double-click on tree opens edit window
 
 
-class AccountsTree(QtWidgets.QTreeWidget):
+class AccountsTree(basetreecontroller.BaseTreeController):
     columns = [
         {
             "name": _("Name"),
@@ -55,15 +56,6 @@ class AccountsTree(QtWidgets.QTreeWidget):
     ]
 
     column_edit_button = 7
-
-    def __init__(self, parent_controller):
-        super().__init__()
-        self.parent_controller = parent_controller
-        self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([_(col["name"]) for col in self.columns])
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.AscendingOrder)
-        self.database = parent_controller.database
 
     def fill_accounts(self, accounts):
         tree_items = []
@@ -188,25 +180,9 @@ class AccountsTree(QtWidgets.QTreeWidget):
         create_button.clicked.connect(lambda _, name=0: self.on_click_edit_button(name))
         self.setItemWidget(new_account_widget, 0, create_button)
 
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-        for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
-                self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
-            else:
-                self.setColumnWidth(i, self.columns[i]["size"])
-
-    def on_click_edit_button(self, account_id):
+    def on_click_edit_button(self, tree_item):
         self.account_details = controllers.account.AccountController(
-            self.parent_controller, account_id
+            self.parent_controller, tree_item.text(1)
         )
         self.account_details.show_window()
 

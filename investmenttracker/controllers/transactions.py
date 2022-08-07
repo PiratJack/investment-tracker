@@ -5,13 +5,14 @@ from PyQt5.QtCore import Qt
 
 import controllers.transaction
 from models.base import format_number
+from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 # TODO (?): Link transactions ==> what would be the impacts?
 # TODO (minor): Copy transactions (would open the modify screen, but with new ID)
 
 
-class AccountsSharesTree(QtWidgets.QTreeWidget):
+class AccountsSharesTree(basetreecontroller.BaseTreeController):
     columns = [
         {
             "name": _("Name"),
@@ -33,16 +34,9 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
     selected_shares = {}
 
     def __init__(self, parent_controller):
-        super().__init__()
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
-
-        self.setColumnCount(len(self.columns))
-        self.setHeaderLabels([_(col["name"]) for col in self.columns])
+        super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, Qt.AscendingOrder)
 
     def fill_tree(self, accounts):
         for account in sorted(accounts, key=lambda a: a.name):
@@ -62,22 +56,6 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
                 shares.append(self.database.share_get_by_id(share_id))
             for share in sorted(shares, key=lambda a: a.name):
                 account_item.addChild(self.add_share(share, account_item))
-
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-        for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
-                self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
-            else:
-                self.setColumnWidth(i, self.columns[i]["size"])
 
     def add_account(self, account):
         account_item = QtWidgets.QTreeWidgetItem(
