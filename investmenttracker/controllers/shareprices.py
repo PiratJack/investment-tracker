@@ -111,7 +111,6 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             and index.row() != len(self.share_prices)
         ):
             return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
-        # TODO (cosmetic): Display colors if prices change too much
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
 

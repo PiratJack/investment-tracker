@@ -300,6 +300,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     plots = {}
     markers = []
+    # TODO (minor): Add button to hide / display markers
 
     def __init__(self, parent_controller):
         super().__init__()
@@ -748,7 +749,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return ranges_missing
 
     def get_share_value_as_of(self, share_id, start_date, currency):
-        # TODO (minor): Take into account foreign exchange
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -761,7 +761,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return self.shares_raw_values[share_id][max(share_values)]
 
     def get_share_value_in_range(self, share_id, start_date, end_date, currency):
-        # TODO (minor): Take into account foreign exchange
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -784,6 +783,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
 
 class GraphsController:
+    # TODO (major): Add table with % of evolution in a month / year (depending on graph range)
     name = "Graphs"
     display_hidden_accounts = False
     display_disabled_accounts = False

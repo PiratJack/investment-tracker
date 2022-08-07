@@ -5,7 +5,7 @@ An application to track your investment and get information about it.
 ## Why?
 I searched far and wide for an application that:
 - Would be free (open source if possible)
-- Allows for import/export of data through API or UI
+- Allows for import/export of data through UI
 - Displays graphs & statistics about my investments and transactions
 - Remains simple
 
@@ -23,9 +23,9 @@ Done:
 - Split view: how an account's composition changed over time
 
 What is remaining:
-- Create API to manage stocks, stock prices, transactions, accounts
+- Create API to manage stocks, stock prices, transactions, accounts (on pause, may be cancelled)
 - Add display of calculations in graphs (like variations over given periods)
-- Improve the graphs calculation engine performance - if possible
+- Add UI for dashboard: last import date, audits, import/export, ...
 
 ## What is NOT this project?
 

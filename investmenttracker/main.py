@@ -1,4 +1,5 @@
 import gettext
+import locale
 import PyQt5
 import sys
 import os
@@ -7,13 +8,16 @@ import controllers.mainwindow
 import models.database
 
 # Define some constants
-DATABASE_FILE = "data.sqlite"
+DATABASE_FILE = "sandbox.sqlite"
+# DATABASE_FILE = "prod.sqlite"
 LOCALE_FOLDER = "./locale"
 STYLESHEET_FILE = "./assets/style/app.css"
 
 # Setup translation
 gettext.bindtextdomain("messages", LOCALE_FOLDER)
 gettext.translation("messages", localedir=LOCALE_FOLDER).install()
+
+# TODO (major): when changes happen, clear all screens & reload data
 
 
 # Connect to database
