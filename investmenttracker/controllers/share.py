@@ -49,8 +49,8 @@ class ShareController(EditController):
             (g.name, g.id) for g in self.database.share_groups_get_all()
         ]
         self.fields["base_currency_id"]["excluded"] = self.share_id
-        if share_id:
-            self.item = self.database.share_get_by_id(share_id)
+        if self.share_id:
+            self.item = self.database.share_get_by_id(self.share_id)
         else:
             self.item = models.share.Share()
         self.fields["name"]["default"] = self.item.name
@@ -129,6 +129,3 @@ class ShareController(EditController):
                         "code_" + self.item.sync_origin.name,
                         None,
                     )
-
-    def close(self):
-        self.window.close()

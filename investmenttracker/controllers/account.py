@@ -40,7 +40,8 @@ class AccountController(EditController):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.account_id = int(account_id)
-        if account_id:
+
+        if self.account_id:
             self.item = self.database.accounts_get_by_id(account_id)
         else:
             self.item = models.account.Account()
@@ -51,6 +52,3 @@ class AccountController(EditController):
             self.item.base_currency.id if self.item.base_currency else 0
         )
         self.fields["enabled"]["default"] = self.item.enabled
-
-    def close(self):
-        self.window.close()
