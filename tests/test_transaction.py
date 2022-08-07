@@ -105,7 +105,7 @@ class TestTransaction(unittest.TestCase):
         )
 
         # Select through account
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         self.assertEqual(
             len(account.transactions),
             4,
@@ -178,7 +178,7 @@ class TestTransaction(unittest.TestCase):
         )
 
         # Database selects & filters
-        transactions = self.database.transaction_get_by_account_and_shares(
+        transactions = self.database.transactions_get_by_account_and_shares(
             [2], {1: [3]}
         )
         self.assertEqual(
@@ -328,7 +328,7 @@ class TestTransaction(unittest.TestCase):
         )
 
     def test_delete(self):
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         self.assertEqual(
             len(account.transactions),
             4,

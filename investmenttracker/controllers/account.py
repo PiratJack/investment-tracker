@@ -42,7 +42,7 @@ class AccountController(EditController):
         self.account_id = int(account_id)
 
         if self.account_id:
-            self.item = self.database.accounts_get_by_id(account_id)
+            self.item = self.database.account_get_by_id(account_id)
         else:
             self.item = models.account.Account()
 

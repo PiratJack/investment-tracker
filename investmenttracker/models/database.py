@@ -31,7 +31,7 @@ class Database:
             query = query.filter(account.Account.enabled == True)
         return query.all()
 
-    def accounts_get_by_id(self, account_id):
+    def account_get_by_id(self, account_id):
         return (
             self.session.query(account.Account)
             .filter(account.Account.id == account_id)
@@ -75,7 +75,7 @@ class Database:
 
     # The date filter will look for values within 2 weeks before
     # start_date and end_date expect a datetime.date object
-    def share_price_get(
+    def share_prices_get(
         self, share=None, currency=None, start_date=None, end_date=None
     ):
         query = self.session.query(shareprice.SharePrice)
@@ -111,7 +111,7 @@ class Database:
         )
 
     # Get transactions that are in some accounts OR combination of accounts + shares
-    def transaction_get_by_account_and_shares(self, accounts, account_shares):
+    def transactions_get_by_account_and_shares(self, accounts, account_shares):
         transactions = self.session.query(transaction.Transaction)
 
         conditions = []

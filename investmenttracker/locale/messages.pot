@@ -117,6 +117,9 @@ msgstr ""
 msgid "Display hidden shares?"
 msgstr ""
 
+msgid "Display markers?"
+msgstr ""
+
 msgid "Display shares"
 msgstr ""
 
@@ -350,6 +353,9 @@ msgid "Transfer - Cash out"
 msgstr ""
 
 msgid "Type"
+msgstr ""
+
+msgid "Unknown"
 msgstr ""
 
 msgid "Unknown or too old"

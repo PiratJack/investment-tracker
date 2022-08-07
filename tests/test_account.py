@@ -212,11 +212,11 @@ class TestAccount(unittest.TestCase):
         # Database selects & filters
         self.assertRaises(
             NoResultFound,
-            lambda _: self.database.accounts_get_by_id(0),
+            lambda _: self.database.account_get_by_id(0),
             "There should be no account with ID 0",
         )
         self.assertEqual(
-            type(self.database.accounts_get_by_id(1)),
+            type(self.database.account_get_by_id(1)),
             Account,
             "There should be 1 account with ID 1",
         )
@@ -242,7 +242,7 @@ class TestAccount(unittest.TestCase):
         )
 
         # Base currency
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         account.base_currency = self.database.share_get_by_id(6)
         self.assertEqual(
             account.base_currency.main_code,
@@ -251,7 +251,7 @@ class TestAccount(unittest.TestCase):
         )
 
         # String representation
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         self.assertEqual(
             str(account),
             "Account Main account (AUFE1, enabled, visible)",
@@ -271,7 +271,7 @@ class TestAccount(unittest.TestCase):
         )
 
         # Get balance
-        account = self.database.accounts_get_by_id(2)
+        account = self.database.account_get_by_id(2)
         transaction = Transaction(
             account_id=2,
             date=datetime.date(2020, 4, 10),
@@ -347,22 +347,22 @@ class TestAccount(unittest.TestCase):
 
         ##### Total value #####
         # Prices exist, either directly or through foreign exchange
-        total_value = self.database.accounts_get_by_id(1).total_value
+        total_value = self.database.account_get_by_id(1).total_value
         self.assertEqual(total_value, 4510, "Account value should be 4510")
 
         # No price exists, should raise an exception
         self.assertRaises(
             NoPriceException,
-            lambda _: self.database.accounts_get_by_id(4).total_value,
+            lambda _: self.database.account_get_by_id(4).total_value,
             "No price available, should raise an exception",
         )
 
         # Test buy base currency (should not happen, but at least it's handled)
-        total_value = self.database.accounts_get_by_id(3).total_value
+        total_value = self.database.account_get_by_id(3).total_value
         self.assertEqual(total_value, 0, "Account value should be 0")
 
         ##### Asset & cash balance per transaction #####
-        account = self.database.accounts_get_by_id(4)
+        account = self.database.account_get_by_id(4)
         transaction = account.transactions[1]
         balance = account.balance_after_transaction(transaction)
         self.assertEqual(
@@ -387,7 +387,7 @@ class TestAccount(unittest.TestCase):
             "This transaction is for another account",
         )
 
-        account2 = self.database.accounts_get_by_id(1)
+        account2 = self.database.account_get_by_id(1)
         self.assertRaises(
             ValueError,
             lambda _: account.balance_after_transaction(account2.transactions[0]),
@@ -395,7 +395,7 @@ class TestAccount(unittest.TestCase):
         )
 
         ##### Holdings #####
-        holdings = self.database.accounts_get_by_id(1).holdings
+        holdings = self.database.account_get_by_id(1).holdings
         expected_holdings = {
             datetime.date(2020, 1, 1): {
                 "cash": 10000,
@@ -462,7 +462,7 @@ class TestAccount(unittest.TestCase):
             ]
         )
 
-        holdings = self.database.accounts_get_by_id(50).holdings
+        holdings = self.database.account_get_by_id(50).holdings
         expected_holdings = {
             datetime.date(2020, 1, 1): {
                 "cash": 10000,
@@ -488,7 +488,7 @@ class TestAccount(unittest.TestCase):
             )
 
         ##### Start date #####
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         self.assertEqual(
             account.start_date,
             datetime.date(2020, 1, 1),
@@ -506,7 +506,7 @@ class TestAccount(unittest.TestCase):
                 ),
             ]
         )
-        account = self.database.accounts_get_by_id(27)
+        account = self.database.account_get_by_id(27)
         self.assertEqual(
             account.start_date,
             None,
@@ -514,14 +514,14 @@ class TestAccount(unittest.TestCase):
         )
 
         ##### Graph name #####
-        account = self.database.accounts_get_by_id(1)
+        account = self.database.account_get_by_id(1)
         self.assertEqual(
             account.graph_label,
             "Main account (Euro)",
             "Account graph label is wrong",
         )
 
-        account = self.database.accounts_get_by_id(27)
+        account = self.database.account_get_by_id(27)
         self.assertEqual(
             account.graph_label,
             "test (AXA)",

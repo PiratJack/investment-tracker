@@ -213,7 +213,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
     def set_filters(self, selected_accounts=None, selected_shares=None):
-        self.transactions = self.database.transaction_get_by_account_and_shares(
+        self.transactions = self.database.transactions_get_by_account_and_shares(
             selected_accounts, selected_shares
         )
         self.transactions = sorted(self.transactions, key=lambda t: (t.date, t.id))

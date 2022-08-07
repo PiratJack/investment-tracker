@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-07 14:04+0200\n"
+"PO-Revision-Date: 2022-08-07 16:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -131,6 +131,9 @@ msgstr "Afficher les comptes masqués?"
 
 msgid "Display hidden shares?"
 msgstr "Afficher les titres masqués?"
+
+msgid "Display markers?"
+msgstr "Afficher les marqueurs"
 
 msgid "Display shares"
 msgstr "Afficher les titres"
@@ -275,7 +278,7 @@ msgid "No price available for share {name} ({main_code})"
 msgstr "Prix inconnu pour titre {name} ({main_code})"
 
 msgid "No value found"
-msgstr ""
+msgstr "Aucune valeur trouvée"
 
 msgid "Period"
 msgstr "Période"
@@ -366,6 +369,9 @@ msgstr "Transfert sortant - Espèces"
 
 msgid "Type"
 msgstr "Type"
+
+msgid "Unknown"
+msgstr "Inconnu"
 
 msgid "Unknown or too old"
 msgstr "Inconnu ou trop ancien"

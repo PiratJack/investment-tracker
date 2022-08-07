@@ -123,7 +123,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         # Get from complex query
-        share_prices = self.database.share_price_get(
+        share_prices = self.database.share_prices_get(
             share=2, currency=5, start_date=datetime.datetime(2022, 1, 5)
         )
         self.assertEqual(
@@ -131,7 +131,7 @@ class TestSharePrice(unittest.TestCase):
             1,
             "Share Accenture has 1 price in USD 14 days prior to January 5th, 2022",
         )
-        share_prices = self.database.share_price_get(
+        share_prices = self.database.share_prices_get(
             share=2, currency=5, start_date=datetime.datetime(2022, 4, 5)
         )
         self.assertEqual(
@@ -139,7 +139,7 @@ class TestSharePrice(unittest.TestCase):
             0,
             "Share Accenture has 0 price in USD 14 days prior to April 5th, 2022",
         )
-        share_prices = self.database.share_price_get(
+        share_prices = self.database.share_prices_get(
             share=2, currency=5, start_date=datetime.datetime(2021, 12, 15)
         )
         self.assertEqual(
@@ -147,13 +147,13 @@ class TestSharePrice(unittest.TestCase):
             0,
             "Share Accenture has 0 price in USD 14 days prior to December 15th, 2021",
         )
-        share_prices = self.database.share_price_get(share=2, currency=5)
+        share_prices = self.database.share_prices_get(share=2, currency=5)
         self.assertEqual(
             len(share_prices),
             1,
             "Share Accenture has 1 price in USD (no date filter)",
         )
-        share_prices = self.database.share_price_get(share=2, currency=6)
+        share_prices = self.database.share_prices_get(share=2, currency=6)
         self.assertEqual(
             len(share_prices),
             1,
@@ -161,7 +161,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         usd_currency = self.database.share_get_by_id(5)
-        share_prices = self.database.share_price_get(share=2, currency=usd_currency)
+        share_prices = self.database.share_prices_get(share=2, currency=usd_currency)
         self.assertEqual(
             len(share_prices),
             1,
@@ -169,7 +169,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         accenture_share = self.database.share_get_by_id(2)
-        share_prices = self.database.share_price_get(
+        share_prices = self.database.share_prices_get(
             share=accenture_share, currency=usd_currency
         )
         self.assertEqual(

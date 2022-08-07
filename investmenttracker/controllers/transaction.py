@@ -194,12 +194,12 @@ class TransactionController(EditController):
         account_id = self.fields["account_id"]["widget"].currentData()
         if account_id == 0:
             return
-        account = self.database.accounts_get_by_id(account_id)
+        account = self.database.account_get_by_id(account_id)
         currency = account.base_currency
         if not currency:
             return
 
-        prices = self.database.share_price_get(
+        prices = self.database.share_prices_get(
             share=share_id, currency=currency, start_date=date
         )
         prices = sorted(prices, key=lambda price: price.date, reverse=True)
@@ -222,7 +222,7 @@ class TransactionController(EditController):
     # Raise warning if cash or asset balance becomes negative
     def on_validation_end(self):
         if not self.item.account:
-            account = self.database.accounts_get_by_id(self.item.account_id)
+            account = self.database.account_get_by_id(self.item.account_id)
         else:
             account = self.item.account
         balance = account.balance_before_staged_transaction(self.item)

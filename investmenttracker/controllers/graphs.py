@@ -439,7 +439,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 self.shares_raw_values[share_id] = {}
 
             for range_missing in ranges_missing:
-                values = self.database.share_price_get(
+                values = self.database.share_prices_get(
                     share, share.base_currency, *range_missing
                 )
                 self.shares_raw_values[share_id] |= {v.date: v.price for v in values}
@@ -818,7 +818,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
             table_row = [share.name]
             base_price = None
             for current_date in all_dates:
-                price = self.database.share_price_get(
+                price = self.database.share_prices_get(
                     share=share, start_date=current_date, currency=share.base_currency
                 )
                 if not price:
@@ -837,7 +837,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
             table_rows.append(table_row)
 
         for account_id in self.selected_accounts:
-            account = self.database.accounts_get_by_id(account_id)
+            account = self.database.account_get_by_id(account_id)
 
             table_row = [account.name]
             base_amount = None
@@ -850,7 +850,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                     holdings = account.holdings[holding_date]
                     total_amount = holdings["cash"]
                     for share_id, share_nb in holdings["shares"].items():
-                        price = self.database.share_price_get(
+                        price = self.database.share_prices_get(
                             share=share_id,
                             start_date=current_date,
                             currency=account.base_currency,
@@ -861,9 +861,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                         max_date = max(p.date for p in price)
                         max_price = [p for p in price if p.date == max_date][0]
                         total_amount += share_nb * max_price.price
-                        print(current_date, share_nb, max_price.price, max_price.date)
 
-                    print(current_date, total_amount, holdings)
                     data = format_number(total_amount, account.base_currency.main_code)
                     if base_amount:
                         evolution = (total_amount - base_amount) / base_amount
