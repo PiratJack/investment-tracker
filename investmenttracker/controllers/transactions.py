@@ -9,7 +9,6 @@ from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 # TODO (?): Link transactions ==> what would be the impacts?
-# TODO (minor): Copy transactions (would open the modify screen, but with new ID)
 
 
 class AccountsSharesTree(basetreecontroller.BaseTreeController):
