@@ -141,12 +141,6 @@ msgstr "Afficher les transactions"
 msgid "Display your accounts"
 msgstr "Afficher vos comptes"
 
-msgid "Displays additional information (for end users)"
-msgstr "Afficher plus de détails (utilisateurs finaux)"
-
-msgid "Displays detailed information (for debug purpose)"
-msgstr "Afficher plus de détails (debug)"
-
 msgid "Displays share prices"
 msgstr "Afficher les valeurs"
 
@@ -378,6 +372,15 @@ msgstr "Inconnu ou trop ancien"
 
 msgid "Value"
 msgstr "Valeur"
+
+msgid "type"
+msgstr ""
+
+#~ msgid "Displays additional information (for end users)"
+#~ msgstr "Afficher plus de détails (utilisateurs finaux)"
+
+#~ msgid "Displays detailed information (for debug purpose)"
+#~ msgstr "Afficher plus de détails (debug)"
 
 #~ msgid "Enabled"
 #~ msgstr "Activé"

@@ -139,12 +139,6 @@ msgstr ""
 msgid "Display your accounts"
 msgstr ""
 
-msgid "Displays additional information (for end users)"
-msgstr ""
-
-msgid "Displays detailed information (for debug purpose)"
-msgstr ""
-
 msgid "Displays share prices"
 msgstr ""
 
@@ -375,4 +369,7 @@ msgid "Unknown or too old"
 msgstr ""
 
 msgid "Value"
+msgstr ""
+
+msgid "type"
 msgstr ""
