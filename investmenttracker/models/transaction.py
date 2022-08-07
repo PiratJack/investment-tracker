@@ -221,6 +221,25 @@ class Transaction(Base):
             raise ValidationException(message, self, key, value)
         return value
 
+    def copy(self):
+        new_transaction = Transaction()
+        for attr in [
+            "date",
+            "label",
+            "type",
+            "quantity",
+            "unit_price",
+            "share_id",
+            "account_id",
+            "share",
+            "account",
+        ]:
+            if attr == "type":
+                new_transaction.type = self.type._name_
+            else:
+                setattr(new_transaction, attr, getattr(self, attr))
+        return new_transaction
+
     def __getattr__(self, attr):
         if attr == "cash_total":
             type_enum = (

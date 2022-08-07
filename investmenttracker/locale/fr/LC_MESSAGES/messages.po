@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-07-31 10:32+0200\n"
+"PO-Revision-Date: 2022-08-07 14:04+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -147,8 +147,8 @@ msgstr "Afficher les valeurs"
 msgid "Dividends"
 msgstr "Dividendes"
 
-msgid "Edit"
-msgstr "Modifier"
+msgid "Duplicate"
+msgstr "Copied"
 
 msgid "Get prices online from?"
 msgstr "Récupérer les valeurs depuis?"
@@ -374,13 +374,16 @@ msgid "Value"
 msgstr "Valeur"
 
 msgid "type"
-msgstr ""
+msgstr "type"
 
 #~ msgid "Displays additional information (for end users)"
 #~ msgstr "Afficher plus de détails (utilisateurs finaux)"
 
 #~ msgid "Displays detailed information (for debug purpose)"
 #~ msgstr "Afficher plus de détails (debug)"
+
+#~ msgid "Edit"
+#~ msgstr "Modifier"
 
 #~ msgid "Enabled"
 #~ msgstr "Activé"

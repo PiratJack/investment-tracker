@@ -196,18 +196,11 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 QtCore.QVariant(),
             ][col]
 
-        if (
-            role == Qt.DecorationRole
-            and col == len(self.columns) - 2
-            and index.row() != len(self.transactions)
-        ):
-            return QtCore.QVariant(QtGui.QIcon("assets/images/modify.png"))
-        if (
-            role == Qt.DecorationRole
-            and col == len(self.columns) - 1
-            and index.row() != len(self.transactions)
-        ):
-            return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
+        if role == Qt.DecorationRole and index.row() != len(self.transactions):
+            if col == len(self.columns) - 2:
+                return QtCore.QVariant(QtGui.QIcon("assets/images/add.png"))
+            elif col == len(self.columns) - 1:
+                return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
@@ -288,7 +281,7 @@ class TransactionsTableView(QtWidgets.QTableView):
             "alignment": Qt.AlignRight,
         },
         {
-            "name": _("Edit"),
+            "name": _("Duplicate"),
             "size": 80,
             "alignment": Qt.AlignCenter,
         },
@@ -345,8 +338,12 @@ class TransactionsTableView(QtWidgets.QTableView):
                 return
 
             transaction = self.model.get_transaction(index)
-            # Edit button
+            # Duplicate button
             if index.column() == len(self.columns) - 2:
+                transaction = transaction.copy()
+                self.database.session.add(transaction)
+                self.database.session.commit()
+
                 self.transaction_details = (
                     controllers.transaction.TransactionController(
                         self.parent_controller, transaction.id

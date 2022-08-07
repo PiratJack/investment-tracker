@@ -60,14 +60,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
             "size": 100,
             "alignment": Qt.AlignCenter,
         },
-        {
-            "name": _("Edit"),
-            "size": 50,
-            "alignment": Qt.AlignLeft,
-        },
     ]
-
-    column_edit_button = 9
 
     def fill_groups(self, groups, shares_without_group):
         # Fill in the data
@@ -100,7 +93,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
                         codes,
                         share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
-                        "",
                     ]
                 except NoPriceException:
                     child = [
@@ -113,7 +105,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
                         codes,
                         share.sync_origin.value["name"] if share.sync_origin else "",
                         share.hidden,
-                        "",
                     ]
 
                 group_widget.addChild(self.add_share(child, group_widget))
@@ -142,7 +133,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
                     codes,
                     share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
-                    "",
                 ]
             except NoPriceException:
                 child = [
@@ -155,14 +145,13 @@ class SharesTree(basetreecontroller.BaseTreeController):
                     codes,
                     share.sync_origin.value["name"] if share.sync_origin else "",
                     share.hidden,
-                    "",
                 ]
 
             group_widget.addChild(self.add_share(child, group_widget))
 
         # Add new elements
         self.add_group(_("Add new group"), 0)
-        share_data = [_("Add new share"), 0, "", "", "", "", "", ""]
+        share_data = [_("Add new share"), 0, "share", "", "", "", "", "", ""]
         self.add_share(share_data)
 
     def add_group(self, name, group_id):
@@ -173,14 +162,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         for i in range(len(self.columns)):
             group_widget.setTextAlignment(i, self.columns[i]["alignment"])
-
-        # Existing group that can be changed
-        if group_id > 0:
-            action_button = QtWidgets.QPushButton()
-            action_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
-            action_button.setProperty("class", "imagebutton")
-            action_button.clicked.connect(self.on_click_edit_button)
-            self.setItemWidget(group_widget, self.column_edit_button, action_button)
 
         # Shares not grouped
         if group_id <= 0:
@@ -197,7 +178,9 @@ class SharesTree(basetreecontroller.BaseTreeController):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
-            create_button.clicked.connect(self.on_click_edit_button)
+            create_button.clicked.connect(
+                lambda: self.on_click_edit_button(group_widget)
+            )
             self.setItemWidget(group_widget, 0, create_button)
 
         return group_widget
@@ -221,14 +204,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         for i in range(len(self.columns)):
             share_widget.setTextAlignment(i, self.columns[i]["alignment"])
 
-        if data[1] > 0:
-            # Add share edit button
-            edit_button = QtWidgets.QPushButton()
-            edit_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
-            edit_button.setProperty("class", "imagebutton")
-            edit_button.clicked.connect(self.on_click_edit_button)
-            self.setItemWidget(share_widget, self.column_edit_button, edit_button)
-        else:
+        if data[1] == 0:
             # Apply style
             font = share_widget.font(0)
             font.setItalic(True)
@@ -239,12 +215,15 @@ class SharesTree(basetreecontroller.BaseTreeController):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton align_left")
-            create_button.clicked.connect(self.on_click_edit_button)
+            create_button.clicked.connect(
+                lambda: self.on_click_edit_button(share_widget)
+            )
             self.setItemWidget(share_widget, 0, create_button)
 
         return share_widget
 
     def on_click_edit_button(self, item):
+        print(item, item.text(2))
         if item.text(2) == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, item.text(1)

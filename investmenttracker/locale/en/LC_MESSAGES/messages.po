@@ -145,7 +145,7 @@ msgstr ""
 msgid "Dividends"
 msgstr ""
 
-msgid "Edit"
+msgid "Duplicate"
 msgstr ""
 
 msgid "Get prices online from?"

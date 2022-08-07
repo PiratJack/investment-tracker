@@ -300,6 +300,33 @@ class TestTransaction(unittest.TestCase):
                 test_name + " - exception.invalid_value is wrong",
             )
 
+    def test_copy(self):
+        transaction = self.database.transaction_get_by_id(1)
+        transaction_copy = transaction.copy()
+        self.database.session.add(transaction_copy)
+        self.database.session.commit()
+        for attr in [
+            "date",
+            "label",
+            "type",
+            "quantity",
+            "unit_price",
+            "share_id",
+            "account_id",
+            "share",
+            "account",
+        ]:
+            self.assertEqual(
+                getattr(transaction, attr),
+                getattr(transaction_copy, attr),
+                "Transaction copy - " + attr + " is not copied properly",
+            )
+        self.assertNotEqual(
+            transaction.id,
+            transaction_copy.id,
+            "Transaction copy - ID is the same",
+        )
+
     def test_delete(self):
         account = self.database.accounts_get_by_id(1)
         self.assertEqual(

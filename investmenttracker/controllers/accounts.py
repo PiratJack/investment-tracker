@@ -47,14 +47,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
             "size": 0.1,
             "alignment": Qt.AlignRight,
         },
-        {
-            "name": _("Edit"),
-            "size": 50,
-            "alignment": Qt.AlignLeft,
-        },
     ]
-
-    column_edit_button = 7
 
     def fill_accounts(self, accounts):
         tree_items = []
@@ -76,7 +69,6 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                     value,
                     "",
                     format_number(account.total_invested),
-                    "",
                 ]
             )
             for i in range(len(self.columns)):
@@ -113,7 +105,6 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                             Qt.SystemLocaleShortDate
                         ),
                         "",
-                        "",
                     ]
                 except NoPriceException:
                     child = [
@@ -122,7 +113,6 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                         share.main_code,
                         format_number(account.shares[share.id]),
                         _("Unknown or too old"),
-                        "",
                         "",
                         "",
                     ]
@@ -147,7 +137,6 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                 "",
                 "",
                 "",
-                "",
             ]
         )
         font = new_account_widget.font(0)
@@ -159,25 +148,6 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
         # Put everything in the tree
         self.insertTopLevelItems(0, tree_items)
-
-        # Add Edit buttons
-        for i, account in enumerate(accounts):
-            tree_item = tree_items[i]
-            account_id = account.id
-
-            edit_button = QtWidgets.QPushButton()
-            edit_button.setIcon(QtGui.QIcon("assets/images/modify.png"))
-            edit_button.setProperty("class", "imagebutton")
-            edit_button.clicked.connect(
-                lambda _, name=account_id: self.on_click_edit_button(name)
-            )
-
-            self.setItemWidget(tree_item, self.column_edit_button, edit_button)
-
-        create_button = QtWidgets.QPushButton()
-        create_button.setProperty("class", "imagebutton align_left")
-        create_button.clicked.connect(lambda _, name=0: self.on_click_edit_button(name))
-        self.setItemWidget(new_account_widget, 0, create_button)
 
     def on_click_edit_button(self, tree_item):
         self.account_details = controllers.account.AccountController(
