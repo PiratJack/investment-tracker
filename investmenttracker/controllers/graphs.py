@@ -39,6 +39,8 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
 
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([_(col["name"]) for col in self.columns])
+        self.setSortingEnabled(True)
+        self.sortByColumn(0, Qt.AscendingOrder)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
@@ -136,6 +138,7 @@ class SharesTree(QtWidgets.QTreeWidget):
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([_(col["name"]) for col in self.columns])
         self.setSortingEnabled(True)
+        self.sortByColumn(0, Qt.AscendingOrder)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 

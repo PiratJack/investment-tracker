@@ -41,6 +41,8 @@ class AccountsSharesTree(QtWidgets.QTreeWidget):
         self.setHeaderLabels([_(col["name"]) for col in self.columns])
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
+        self.setSortingEnabled(True)
+        self.sortByColumn(0, Qt.AscendingOrder)
 
     def fill_tree(self, accounts):
         for account in sorted(accounts, key=lambda a: a.name):

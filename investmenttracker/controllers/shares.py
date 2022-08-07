@@ -70,6 +70,7 @@ class SharesTree(QtWidgets.QTreeWidget):
         self.setColumnCount(len(self.columns))
         self.setHeaderLabels([_(col["name"]) for col in self.columns])
         self.setSortingEnabled(True)
+        self.sortByColumn(0, Qt.AscendingOrder)
         self.database = parent_controller.database
 
     def fill_groups(self, groups, shares_without_group):
