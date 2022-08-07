@@ -796,10 +796,12 @@ class PerformanceTable(QtWidgets.QTableWidget):
     def reload_data(self):
         table_rows = []
 
-        # Set headers
+        # Determine dates & set headers
+        all_dates = []
         table_row = [""]
         current_date = datetime.date(self.start_date.year, self.start_date.month, 1)
         while current_date <= self.end_date:
+            all_dates.append(current_date)
             table_row.append(current_date.strftime("%x"))
             if current_date.month == 12:
                 current_date = datetime.date(current_date.year + 1, 1, 1)
@@ -815,41 +817,74 @@ class PerformanceTable(QtWidgets.QTableWidget):
 
             table_row = [share.name]
             base_price = None
-            current_date = datetime.date(self.start_date.year, self.start_date.month, 1)
-            while current_date <= self.end_date:
+            for current_date in all_dates:
                 price = self.database.share_price_get(
                     share=share, start_date=current_date, currency=share.base_currency
                 )
-                if price:
+                if not price:
+                    data = _("Unknown")
+                else:
                     max_date = max(p.date for p in price)
                     max_price = [p for p in price if p.date == max_date][0]
                     data = format_number(max_price.price, share.base_currency.main_code)
                     if base_price:
                         evolution = (max_price.price - base_price) / base_price
-                        data += "\n(" + locale.format_string("%.2f %%", evolution) + ")"
+                        data += "\n" + locale.format_string("%.2f %%", evolution)
                     else:
                         base_price = max_price.price
-                else:
-                    data = _("Unknown")
 
                 table_row.append(data)
-                if current_date.month == 12:
-                    current_date = datetime.date(current_date.year + 1, 1, 1)
+            table_rows.append(table_row)
+
+        for account_id in self.selected_accounts:
+            account = self.database.accounts_get_by_id(account_id)
+
+            table_row = [account.name]
+            base_amount = None
+
+            for current_date in all_dates:
+                holding_date = max(d for d in account.holdings if d <= current_date)
+                if not holding_date:
+                    data = _("Unknown")
                 else:
-                    current_date = datetime.date(
-                        current_date.year, current_date.month + 1, 1
-                    )
+                    holdings = account.holdings[holding_date]
+                    total_amount = holdings["cash"]
+                    for share_id, share_nb in holdings["shares"].items():
+                        price = self.database.share_price_get(
+                            share=share_id,
+                            start_date=current_date,
+                            currency=account.base_currency,
+                        )
+                        if not price:
+                            data = _("Unknown")
+                            break
+                        max_date = max(p.date for p in price)
+                        max_price = [p for p in price if p.date == max_date][0]
+                        total_amount += share_nb * max_price.price
+                        print(current_date, share_nb, max_price.price, max_price.date)
+
+                    print(current_date, total_amount, holdings)
+                    data = format_number(total_amount, account.base_currency.main_code)
+                    if base_amount:
+                        evolution = (total_amount - base_amount) / base_amount
+                        data += "\n" + locale.format_string("%.2f %%", evolution)
+                    else:
+                        base_amount = total_amount
+                table_row.append(data)
             table_rows.append(table_row)
 
         self.setRowCount(len(table_rows))
 
         for row, table_row in enumerate(table_rows):
             for column, value in enumerate(table_row):
+                # Skip name, will be added through headers
+                if column == 0:
+                    continue
                 item = QtWidgets.QTableWidgetItem(value)
-                if column > 0:
-                    item.setTextAlignment(Qt.AlignRight)
+                item.setTextAlignment(Qt.AlignRight)
                 self.setItem(row, column, item)
 
+        self.setVerticalHeaderLabels([a[0] for a in table_rows])
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
 
