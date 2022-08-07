@@ -11,7 +11,6 @@ import controllers.share
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
-# TODO (cosmetic): Double-click on tree opens edit window
 
 
 class SharesTree(basetreecontroller.BaseTreeController):

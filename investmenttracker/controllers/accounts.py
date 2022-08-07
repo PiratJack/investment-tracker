@@ -8,7 +8,6 @@ import controllers.account
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
-# TODO (cosmetic): Double-click on tree opens edit window
 
 
 class AccountsTree(basetreecontroller.BaseTreeController):
