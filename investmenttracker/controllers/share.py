@@ -13,8 +13,9 @@ class ShareController(EditController):
 
     fields = {
         "name": {
-            "label": _("Name"),  # TODO (cosmetic): Display a star in red
+            "label": _("Name"),
             "type": "text",
+            "mandatory": True,
         },
         "main_code": {
             "label": _("Main code"),

@@ -11,8 +11,9 @@ class AccountController(EditController):
 
     fields = {
         "name": {
-            "label": _("Name"),  # TODO (cosmetic): Display a star in red
+            "label": _("Name"),
             "type": "text",
+            "mandatory": True,
         },
         "code": {
             "label": _("Code"),
@@ -21,6 +22,7 @@ class AccountController(EditController):
         "base_currency_id": {
             "label": _("Currency"),
             "type": "sharelist",
+            "mandatory": True,
         },
         "enabled": {
             "label": _("Active"),

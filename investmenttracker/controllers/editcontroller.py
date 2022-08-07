@@ -41,6 +41,10 @@ class EditController:
         for field_id in self.fields:
             field = self.fields[field_id]
             label = QtWidgets.QLabel(_(field["label"]))
+            if field.get("mandatory", False):
+                label.setText(
+                    _(field["label"]) + '<span style="color:orange;"> *</span>'
+                )
 
             # Create the field widget
             if field["type"] == "text":

@@ -17,10 +17,12 @@ class TransactionController(EditController):
         "account_id": {
             "label": _("Account"),
             "type": "list",
+            "mandatory": True,
         },
         "date": {
             "label": _("Date"),
             "type": "date",
+            "mandatory": True,
         },
         "label": {
             "label": _("Label"),
@@ -29,18 +31,22 @@ class TransactionController(EditController):
         "type": {
             "label": _("Type"),
             "type": "list",
+            "mandatory": True,
         },
         "quantity": {
             "label": _("Asset delta"),
             "type": "positivefloat",
+            "mandatory": True,
         },
         "share_id": {
             "label": _("Share"),
             "type": "sharelist",
+            "mandatory": True,
         },
         "unit_price": {
             "label": _("Rate"),
             "type": "positivefloat",
+            "mandatory": True,
         },
         "known_unit_price": {
             "label": _("Known rate"),
@@ -49,6 +55,7 @@ class TransactionController(EditController):
         "currency_delta": {
             "label": _("Currency delta"),
             "type": "positivefloat",
+            "mandatory": True,
         },
     }
 
