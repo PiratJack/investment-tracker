@@ -20,11 +20,11 @@ Done:
 - UI to manage accounts, shares, share prices, share codes and transactions
 - Graph with absolute value (value in the base currency of the account or share)
 - Graph with a 100 baseline (on a date selected by the user)
+- Performance of shares or accounts over time (in graph view)
 - Split view: how an account's composition changed over time
 
 What is remaining:
 - Create API to manage stocks, stock prices, transactions, accounts (on pause, may be cancelled)
-- Add display of calculations in graphs (like variations over given periods)
 - Add UI for dashboard: last import date, audits, import/export, ...
 
 ## What is NOT this project?
