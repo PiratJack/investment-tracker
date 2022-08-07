@@ -475,6 +475,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 ranges_missing = self.find_missing_date_ranges(
                     self.accounts_raw_values, account_id, account.start_date
                 )
+                print(ranges_missing)
                 for range_missing in ranges_missing:
                     new_raw_values = {}
 
@@ -621,7 +622,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         x = list(values.keys())
         y = list(values.values())
         markers = list(zip(x, y))
-        markers = markers[:: len(markers) // 30] if len(markers) > 30 else markers
+        markers = markers[:: len(markers) // 20] if len(markers) > 30 else markers
         for x, y in markers:
             if self.graph_type == "split":
                 # It would always be 100%
@@ -843,10 +844,11 @@ class PerformanceTable(QtWidgets.QTableWidget):
             base_amount = None
 
             for current_date in all_dates:
-                holding_date = max(d for d in account.holdings if d <= current_date)
-                if not holding_date:
+                prior_dates = [d for d in account.holdings if d <= current_date]
+                if not prior_dates:
                     data = _("Unknown")
                 else:
+                    holding_date = max(prior_dates)
                     holdings = account.holdings[holding_date]
                     total_amount = holdings["cash"]
                     for share_id, share_nb in holdings["shares"].items():
