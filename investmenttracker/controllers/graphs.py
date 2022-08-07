@@ -1,5 +1,6 @@
 import gettext
 import datetime
+import locale
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
@@ -767,8 +768,93 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.parent_controller.add_error(exception)
 
 
+class PerformanceTable(QtWidgets.QTableWidget):
+    selected_shares = []
+    selected_accounts = []
+    start_date = None
+    end_date = None
+    baseline_date = None
+
+    def __init__(self, parent_controller):
+        super().__init__()
+        self.parent_controller = parent_controller
+        self.database = parent_controller.database
+
+    def set_dates(self, start_date, end_date):
+        self.start_date = start_date
+        self.end_date = end_date
+        self.reload_data()
+
+    def set_shares(self, selected_shares):
+        self.selected_shares = selected_shares
+        self.reload_data()
+
+    def set_accounts(self, selected_accounts):
+        self.selected_accounts = selected_accounts
+        self.reload_data()
+
+    def reload_data(self):
+        table_rows = []
+
+        # Set headers
+        table_row = [""]
+        current_date = datetime.date(self.start_date.year, self.start_date.month, 1)
+        while current_date <= self.end_date:
+            table_row.append(current_date.strftime("%x"))
+            if current_date.month == 12:
+                current_date = datetime.date(current_date.year + 1, 1, 1)
+            else:
+                current_date = datetime.date(
+                    current_date.year, current_date.month + 1, 1
+                )
+        self.setColumnCount(len(table_row))
+        self.setHorizontalHeaderLabels(table_row)
+
+        for share_id in self.selected_shares:
+            share = self.database.share_get_by_id(share_id)
+
+            table_row = [share.name]
+            base_price = None
+            current_date = datetime.date(self.start_date.year, self.start_date.month, 1)
+            while current_date <= self.end_date:
+                price = self.database.share_price_get(
+                    share=share, start_date=current_date, currency=share.base_currency
+                )
+                if price:
+                    max_date = max(p.date for p in price)
+                    max_price = [p for p in price if p.date == max_date][0]
+                    data = format_number(max_price.price, share.base_currency.main_code)
+                    if base_price:
+                        evolution = (max_price.price - base_price) / base_price
+                        data += "\n(" + locale.format_string("%.2f %%", evolution) + ")"
+                    else:
+                        base_price = max_price.price
+                else:
+                    data = _("Unknown")
+
+                table_row.append(data)
+                if current_date.month == 12:
+                    current_date = datetime.date(current_date.year + 1, 1, 1)
+                else:
+                    current_date = datetime.date(
+                        current_date.year, current_date.month + 1, 1
+                    )
+            table_rows.append(table_row)
+
+        self.setRowCount(len(table_rows))
+
+        for row, table_row in enumerate(table_rows):
+            for column, value in enumerate(table_row):
+                item = QtWidgets.QTableWidgetItem(value)
+                if column > 0:
+                    item.setTextAlignment(Qt.AlignRight)
+                self.setItem(row, column, item)
+
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+
+
 class GraphsController:
-    # TODO (major): Add table with % of evolution in a month / year (depending on graph range)
     name = "Graphs"
     display_hidden_accounts = False
     display_disabled_accounts = False
@@ -863,40 +949,43 @@ class GraphsController:
         self.right_column.layout.addWidget(self.end_date, 0, 2)
         self.end_date.setMinimumWidth(date_width * 2)
 
-        self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
-        self.split_enabled.stateChanged.connect(self.on_display_split_change)
-        self.right_column.layout.addWidget(self.split_enabled, 0, 3, Qt.AlignRight)
-        self.right_column.layout.setColumnStretch(3, 1)
-
         # Choose whether to display baseline (= one date equals 100%)
         self.baseline_enabled = QtWidgets.QCheckBox(_("Display evolution?"))
         self.baseline_enabled.stateChanged.connect(self.on_baseline_change)
-        self.baseline_enabled.setLayoutDirection(Qt.RightToLeft)
-        self.right_column.layout.addWidget(self.baseline_enabled, 0, 4, Qt.AlignRight)
+        self.right_column.layout.addWidget(self.baseline_enabled, 1, 0)
 
         self.baseline_label = QtWidgets.QLabel(_("Baseline date"))
-        self.right_column.layout.addWidget(self.baseline_label, 0, 5, Qt.AlignRight)
+        self.right_column.layout.addWidget(self.baseline_label, 1, 1, Qt.AlignRight)
 
         self.baseline_date = QtWidgets.QDateEdit()
         self.baseline_date.setDate(datetime.date.today() - datetime.timedelta(6 * 30))
         self.baseline_date.dateChanged.connect(self.on_baseline_change)
-        self.right_column.layout.addWidget(self.baseline_date, 0, 6)
+        self.right_column.layout.addWidget(self.baseline_date, 1, 2)
         self.baseline_date.setMinimumWidth(date_width * 2)
+
+        # Display account split?
+        self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
+        self.split_enabled.stateChanged.connect(self.on_display_split_change)
+        self.right_column.layout.addWidget(self.split_enabled, 1, 3)
 
         # Error messages
         self.error_messages = QtWidgets.QLabel()
         self.error_messages.setProperty("class", "validation_warning")
-        self.right_column.layout.addWidget(self.error_messages, 1, 0, 1, 7)
+        self.right_column.layout.addWidget(self.error_messages, 2, 0, 1, 5)
 
         # Add the graph
         self.graph = GraphsArea(self)
-        self.right_column.layout.addWidget(self.graph, 2, 0, 1, 7)
+        self.right_column.layout.addWidget(self.graph, 3, 0, 1, 5)
 
         # Choose whether to display markers
         self.markers_visible = QtWidgets.QCheckBox(_("Display markers?"))
         self.markers_visible.setChecked(True)
         self.markers_visible.stateChanged.connect(self.on_markers_change)
-        self.right_column.layout.addWidget(self.markers_visible, 3, 0)
+        self.right_column.layout.addWidget(self.markers_visible, 4, 0)
+
+        # Performance table
+        self.performance_table = PerformanceTable(self)
+        self.right_column.layout.addWidget(self.performance_table, 5, 0, 1, 5)
 
         # Trigger date change once all dates are set
         self.on_change_dates()
@@ -944,14 +1033,17 @@ class GraphsController:
             self.end_date.date().toString(Qt.ISODate)
         )
         self.graph.set_dates(start_date, end_date)
+        self.performance_table.set_dates(start_date, end_date)
 
     def on_change_account_selection(self, selected_accounts):
         self.reset_errors()
         self.graph.set_accounts(selected_accounts)
+        self.performance_table.set_accounts(selected_accounts)
 
     def on_change_share_selection(self, selected_shares):
         self.reset_errors()
         self.graph.set_shares(selected_shares)
+        self.performance_table.set_shares(selected_shares)
 
     def on_baseline_change(self):
         baseline_date = datetime.date.fromisoformat(
