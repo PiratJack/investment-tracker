@@ -223,7 +223,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
         return share_widget
 
     def on_click_edit_button(self, item):
-        print(item, item.text(2))
         if item.text(2) == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, item.text(1)

@@ -475,7 +475,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 ranges_missing = self.find_missing_date_ranges(
                     self.accounts_raw_values, account_id, account.start_date
                 )
-                print(ranges_missing)
                 for range_missing in ranges_missing:
                     new_raw_values = {}
 
