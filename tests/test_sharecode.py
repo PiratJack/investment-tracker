@@ -63,6 +63,41 @@ class TestShareCode(unittest.TestCase):
             "ShareCode representation is wrong",
         )
 
+        share = self.database.share_search("AXA")
+        self.assertEqual(
+            len(share),
+            1,
+            "Only 1 result found by searching 'AXA' (found through name)",
+        )
+        self.assertEqual(
+            share[0].id,
+            1,
+            "Share 1 found by searching 'AXA' (found through name)",
+        )
+
+        share = self.database.share_search("FR847238")
+        self.assertEqual(
+            len(share),
+            1,
+            "Only 1 result found by searching 'FR847238' (found through main code)",
+        )
+        self.assertEqual(
+            share[0].id,
+            1,
+            "Share 1 found by searching 'FR847238' (found through main code)",
+        )
+        share = self.database.share_search("FR4941")
+        self.assertEqual(
+            len(share),
+            1,
+            "Only 1 result found by searching 'FR4941' (found through code)",
+        )
+        self.assertEqual(
+            share[0].id,
+            1,
+            "Share 1 found by searching 'FR4941' (found through code)",
+        )
+
     def test_validations(self):
         share_code = self.database.share_get_by_id(1).codes[0]
 

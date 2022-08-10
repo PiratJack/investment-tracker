@@ -3,9 +3,11 @@ import datetime
 
 from . import account
 from . import share
+from . import sharecode
 from . import sharegroup
 from . import shareprice
 from . import transaction
+from . import config
 
 from .base import Base
 
@@ -50,6 +52,19 @@ class Database:
 
     def share_get_by_id(self, share_id):
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
+
+    def share_search(self, name):
+        query = self.session.query(share.Share).filter(
+            sqlalchemy.or_(share.Share.name == name, share.Share.main_code == name)
+        )
+        values = query.all()
+        query = (
+            self.session.query(share.Share)
+            .join(share.Share.codes, aliased=True)
+            .filter(share.Share.codes.any(sharecode.ShareCode.value == name))
+        )
+        values += query.all()
+        return values
 
     # Share groups
     def share_groups_get_all(self):
@@ -134,3 +149,12 @@ class Database:
     def transaction_delete(self, transaction):
         self.session.delete(transaction)
         self.session.commit()
+
+    # Configuration
+    def configs_get_all(self):
+        query = self.session.query(config.Config).all()
+        return {config.name: config.value for config in query}
+
+    def config_get_by_name(self, name):
+        query = self.session.query(config.Config).filter(config.Config.name == name)
+        return query.one() if query.count() == 1 else None
