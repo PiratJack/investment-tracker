@@ -30,6 +30,8 @@ class TestShareCode(unittest.TestCase):
                 ShareCode(share_id=1, origin="boursorama", value="1rACN"),
                 ShareCode(share_id=1, origin="quantalys", value="14587"),
                 ShareCode(share_id=1, origin="alphavantage", value="FR4941"),
+                ShareCode(share_id=2, origin="quantalys", value="478924"),
+                ShareCode(share_id=2, origin="alphavantage", value="NYSE:ACN"),
             ]
         )
         self.database.session.commit()
@@ -63,6 +65,7 @@ class TestShareCode(unittest.TestCase):
             "ShareCode representation is wrong",
         )
 
+        # Search shares by various fields
         share = self.database.share_search("AXA")
         self.assertEqual(
             len(share),
@@ -96,6 +99,13 @@ class TestShareCode(unittest.TestCase):
             share[0].id,
             1,
             "Share 1 found by searching 'FR4941' (found through code)",
+        )
+        # Check search returns a single share, even if it matches through different means
+        share = self.database.share_search("NYSE:ACN")
+        self.assertEqual(
+            len(share),
+            1,
+            "Only 1 result found by searching 'NYSE:ACN' (should not yield duplicates)",
         )
 
     def test_validations(self):

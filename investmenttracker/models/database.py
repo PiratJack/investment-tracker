@@ -64,7 +64,7 @@ class Database:
             .filter(share.Share.codes.any(sharecode.ShareCode.value == name))
         )
         values += query.all()
-        return values
+        return list(set(values))
 
     # Share groups
     def share_groups_get_all(self):
