@@ -64,7 +64,11 @@ class Database:
             .filter(share.Share.codes.any(sharecode.ShareCode.value == name))
         )
         values += query.all()
-        return list(set(values))
+        if values:
+            return list(set(values))
+        # Finally, search by ID (separately because it's really prone to errors)
+        query = self.session.query(share.Share).filter(share.Share.id == name)
+        return query.all()
 
     # Share groups
     def share_groups_get_all(self):
@@ -91,7 +95,7 @@ class Database:
     # The date filter will look for values within 2 weeks before
     # start_date and end_date expect a datetime.date object
     def share_prices_get(
-        self, share=None, currency=None, start_date=None, end_date=None
+        self, share=None, currency=None, start_date=None, end_date=None, exact_date=False
     ):
         query = self.session.query(shareprice.SharePrice)
         if share:
@@ -105,10 +109,14 @@ class Database:
             else:
                 query = query.filter(shareprice.SharePrice.currency == currency)
         if start_date:
-            two_weeks = datetime.timedelta(days=-31)
-            actual_start_date = start_date + two_weeks
+            two_weeks = datetime.timedelta(days=-14)
+            actual_start_date = start_date if exact_date else start_date + two_weeks
             if not end_date:
                 end_date = start_date
+            if type(actual_start_date) == datetime.datetime:
+                actual_start_date = datetime.date(actual_start_date.year, actual_start_date.month, actual_start_date.day)
+            if type(end_date) == datetime.datetime:
+                end_date = datetime.date(end_date.year, end_date.month, end_date.day)
             query = query.filter(shareprice.SharePrice.date >= actual_start_date)
             query = query.filter(shareprice.SharePrice.date <= end_date)
         return query.all()

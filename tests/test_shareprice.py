@@ -84,7 +84,7 @@ class TestSharePrice(unittest.TestCase):
         # Get from direct query (based on date)
         share_prices = self.database.share_price_query()
         share_prices = share_prices.filter(
-            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
+            SharePrice.date >= datetime.date(2022, 3, 1)
         )
 
         self.assertEqual(
@@ -94,21 +94,17 @@ class TestSharePrice(unittest.TestCase):
         )
 
         # Get from direct query (based on share)
-        share_prices = self.database.share_price_query()
-        share_prices = share_prices.filter(SharePrice.share_id == 3)
+        share_prices = self.database.share_prices_get(share=3)
         self.assertEqual(
-            len(share_prices.all()),
+            len(share_prices),
             4,
             "There are 4 prices for Workday",
         )
 
         # Get from direct query (based on share + date)
-        share_prices = self.database.share_price_query()
-        share_prices = share_prices.filter(SharePrice.share_id == 3).filter(
-            SharePrice.date >= datetime.datetime(2022, 3, 1).date()
-        )
+        share_prices = self.database.share_prices_get(share=3, start_date=datetime.datetime(2022, 3, 1), end_date=datetime.datetime(2999, 1, 1))
         self.assertEqual(
-            len(share_prices.all()),
+            len(share_prices),
             2,
             "There are 2 prices for Workday after March 1st, 2022",
         )
@@ -131,6 +127,7 @@ class TestSharePrice(unittest.TestCase):
             1,
             "Share Accenture has 1 price in USD 14 days prior to January 5th, 2022",
         )
+
         share_prices = self.database.share_prices_get(
             share=2, currency=5, start_date=datetime.datetime(2022, 4, 5)
         )
@@ -139,6 +136,7 @@ class TestSharePrice(unittest.TestCase):
             0,
             "Share Accenture has 0 price in USD 14 days prior to April 5th, 2022",
         )
+
         share_prices = self.database.share_prices_get(
             share=2, currency=5, start_date=datetime.datetime(2021, 12, 15)
         )
@@ -147,6 +145,24 @@ class TestSharePrice(unittest.TestCase):
             0,
             "Share Accenture has 0 price in USD 14 days prior to December 15th, 2021",
         )
+
+        share_prices = self.database.share_prices_get(
+            share=2, currency=5, start_date=datetime.datetime(2022, 4, 5), exact_date=True
+        )
+        self.assertEqual(
+            len(share_prices),
+            0,
+            "Share Accenture has 0 price in USD on April 5th, 2022",
+        )
+        share_prices = self.database.share_prices_get(
+            share=2, currency=5, start_date=datetime.datetime(2022, 4, 1), exact_date=True
+        )
+        self.assertEqual(
+            len(share_prices),
+            0,
+            "Share Accenture has 1 price in USD on April 5th, 2022",
+        )
+
         share_prices = self.database.share_prices_get(share=2, currency=5)
         self.assertEqual(
             len(share_prices),

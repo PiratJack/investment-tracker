@@ -12,3 +12,7 @@ QPushButton.imagebutton {
     color: orange;
     font-style: italic;
 }
+
+.warning {
+    color: orange;
+}

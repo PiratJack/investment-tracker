@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-07 16:45+0200\n"
+"PO-Revision-Date: 2022-08-12 20:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -82,6 +82,12 @@ msgstr "Dépôt"
 msgid "Cash withdrawal"
 msgstr "Retrait"
 
+msgid "Choose export file"
+msgstr "Choisir le fichier d'export"
+
+msgid "Choose file"
+msgstr "Choisir le fichier"
+
 msgid "Code"
 msgstr "Code"
 
@@ -102,14 +108,44 @@ msgstr "Financement employeur - Espèces"
 msgid "Could not display account {account} due to missing value for {share}"
 msgstr "Impossible d'afficher la valeur du compte {account}: valeur manquante pour {share}"
 
+msgid "Could not find currency in database"
+msgstr "Monnaie impossible à trouver dans la base de données"
+
+msgid "Could not find share in database"
+msgstr "Titre impossible à trouver dans la base de données"
+
 msgid "Currency"
 msgstr "Monnaie"
 
 msgid "Currency delta"
 msgstr "# Espèces"
 
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
 msgid "Date"
 msgstr "Date"
+
+msgid "Date (DD-MM-YYYY)"
+msgstr "Date (DD-MM-YYYY)"
+
+msgid "Date (DD/MM/YYYY)"
+msgstr "Date (DD/MM/YYYY)"
+
+msgid "Date (MM-DD-YYYY)"
+msgstr "Date (MM-DD-YYYY)"
+
+msgid "Date (MM/DD/YYYY)"
+msgstr "Date (MM/DD/YYYY)"
+
+msgid "Date (YYYY-MM-DD)"
+msgstr "Date (YYYY-MM-DD)"
+
+msgid "Date (YYYY/MM/DD)"
+msgstr "Date (YYYY/MM/DD)"
+
+msgid "Decimal point"
+msgstr "Séparateur décimal"
 
 msgid "Delete"
 msgstr "Supprimer"
@@ -153,6 +189,19 @@ msgstr "Dividendes"
 msgid "Duplicate"
 msgstr "Copied"
 
+#, python-brace-format
+msgid "Duplicate fields: {fields}"
+msgstr "Champs en double: {fields}"
+
+msgid "Export data"
+msgstr "Exporter les données"
+
+msgid "Export share list"
+msgstr "Exporter la liste des titres"
+
+msgid "Field delimiter"
+msgstr "Séparateur de champs"
+
 msgid "Get prices online from?"
 msgstr "Récupérer les valeurs depuis?"
 
@@ -171,6 +220,9 @@ msgstr "Masqué?"
 msgid "ID"
 msgstr "ID"
 
+msgid "Import share prices"
+msgstr "Importer les prix"
+
 msgid "Investment Tracker"
 msgstr "Suivi boursier"
 
@@ -179,6 +231,21 @@ msgstr "Taux connu"
 
 msgid "Label"
 msgstr "Libellé"
+
+msgid "Last import done on"
+msgstr "Dernier import le"
+
+msgid "Load data"
+msgstr "Charger les données"
+
+msgid "Load results"
+msgstr "Résultat du chargement"
+
+msgid "Load share prices from file"
+msgstr "Charger les données depuis le fichier"
+
+msgid "Loaded"
+msgstr "Chargé"
 
 msgid "Main code"
 msgstr "Code principal"
@@ -194,6 +261,12 @@ msgstr "La longueur maximale du code du compte est de 250 caractères"
 
 msgid "Max length for account name is 250 characters"
 msgstr "La longueur maximale du nom du compte est de 250 caractères"
+
+msgid "Max length for config name is 250 characters"
+msgstr "La longueur maximale du nom de la configuration est de 250 caractères"
+
+msgid "Max length for config value is 250 characters"
+msgstr "La longueur maximale de la valeur de la configuration est de 250 caractères"
 
 msgid "Max length for share code value is 250 characters"
 msgstr "La longueur maximale du code est de 250 caractères"
@@ -221,6 +294,16 @@ msgstr "Nom du compte manquant"
 
 msgid "Missing code for sync"
 msgstr "Code manquant pour la récupération"
+
+msgid "Missing config name"
+msgstr "Nom de configuration manquant"
+
+msgid "Missing config value"
+msgstr "Valeur manquante: valeur de la configuration"
+
+#, python-brace-format
+msgid "Missing fields: {fields}"
+msgstr "Champs manquants: {fields}"
 
 msgid "Missing share code origin"
 msgstr "Valeur manquante: origine du code"
@@ -286,6 +369,9 @@ msgstr "Période"
 msgid "Please confirm"
 msgstr "Veuillez confirmer"
 
+msgid "Please select a file before importing"
+msgstr "Veuillez choisir un fichier avant l'import"
+
 msgid "Price"
 msgstr "Prix"
 
@@ -343,6 +429,21 @@ msgstr "Taxes - en espèces"
 msgid "Taxes - in units"
 msgstr "Taxes - en titres"
 
+msgid "The date format is wrong"
+msgstr "Le format de date est incorrect"
+
+msgid "The file has headers"
+msgstr "Le fichier a un en-tête"
+
+msgid "The price is not a decimal number"
+msgstr "Le prix n'est pas un nombre décimal"
+
+msgid "There was an error reading this file. Please choose another file."
+msgstr "Il y a eu une erreur lors de la lecture du fichier. Veuillez en choisir un auter."
+
+msgid "Total"
+msgstr "Total"
+
 msgid "Total invested"
 msgstr "Total investi"
 
@@ -373,6 +474,9 @@ msgstr "Type"
 msgid "Unknown"
 msgstr "Inconnu"
 
+msgid "Unknown date format"
+msgstr "Format de date inconnu"
+
 msgid "Unknown or too old"
 msgstr "Inconnu ou trop ancien"
 
@@ -381,6 +485,9 @@ msgstr "Valeur"
 
 msgid "type"
 msgstr "type"
+
+#~ msgid "Could not find the share in DB"
+#~ msgstr "Could not find the share in DB"
 
 #~ msgid "Displays additional information (for end users)"
 #~ msgstr "Afficher plus de détails (utilisateurs finaux)"

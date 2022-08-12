@@ -107,6 +107,13 @@ class TestShareCode(unittest.TestCase):
             1,
             "Only 1 result found by searching 'NYSE:ACN' (should not yield duplicates)",
         )
+        # Check search returns a single share based on ID
+        share = self.database.share_search(2)
+        self.assertEqual(
+            len(share),
+            1,
+            "Only 1 result found by searching 2",
+        )
 
     def test_validations(self):
         share_code = self.database.share_get_by_id(1).codes[0]

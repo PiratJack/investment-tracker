@@ -80,6 +80,12 @@ msgstr ""
 msgid "Cash withdrawal"
 msgstr ""
 
+msgid "Choose export file"
+msgstr ""
+
+msgid "Choose file"
+msgstr ""
+
 msgid "Code"
 msgstr ""
 
@@ -100,13 +106,43 @@ msgstr ""
 msgid "Could not display account {account} due to missing value for {share}"
 msgstr ""
 
+msgid "Could not find currency in database"
+msgstr ""
+
+msgid "Could not find share in database"
+msgstr ""
+
 msgid "Currency"
 msgstr ""
 
 msgid "Currency delta"
 msgstr ""
 
+msgid "Dashboard"
+msgstr ""
+
 msgid "Date"
+msgstr ""
+
+msgid "Date (DD-MM-YYYY)"
+msgstr ""
+
+msgid "Date (DD/MM/YYYY)"
+msgstr ""
+
+msgid "Date (MM-DD-YYYY)"
+msgstr ""
+
+msgid "Date (MM/DD/YYYY)"
+msgstr ""
+
+msgid "Date (YYYY-MM-DD)"
+msgstr ""
+
+msgid "Date (YYYY/MM/DD)"
+msgstr ""
+
+msgid "Decimal point"
 msgstr ""
 
 msgid "Delete"
@@ -151,6 +187,19 @@ msgstr ""
 msgid "Duplicate"
 msgstr ""
 
+#, python-brace-format
+msgid "Duplicate fields: {fields}"
+msgstr ""
+
+msgid "Export data"
+msgstr ""
+
+msgid "Export share list"
+msgstr ""
+
+msgid "Field delimiter"
+msgstr ""
+
 msgid "Get prices online from?"
 msgstr ""
 
@@ -169,6 +218,9 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
+msgid "Import share prices"
+msgstr ""
+
 msgid "Investment Tracker"
 msgstr ""
 
@@ -176,6 +228,21 @@ msgid "Known rate"
 msgstr ""
 
 msgid "Label"
+msgstr ""
+
+msgid "Last import done on"
+msgstr ""
+
+msgid "Load data"
+msgstr ""
+
+msgid "Load results"
+msgstr ""
+
+msgid "Load share prices from file"
+msgstr ""
+
+msgid "Loaded"
 msgstr ""
 
 msgid "Main code"
@@ -191,6 +258,12 @@ msgid "Max length for account code is 250 characters"
 msgstr ""
 
 msgid "Max length for account name is 250 characters"
+msgstr ""
+
+msgid "Max length for config name is 250 characters"
+msgstr ""
+
+msgid "Max length for config value is 250 characters"
 msgstr ""
 
 msgid "Max length for share code value is 250 characters"
@@ -218,6 +291,16 @@ msgid "Missing account name"
 msgstr ""
 
 msgid "Missing code for sync"
+msgstr ""
+
+msgid "Missing config name"
+msgstr ""
+
+msgid "Missing config value"
+msgstr ""
+
+#, python-brace-format
+msgid "Missing fields: {fields}"
 msgstr ""
 
 msgid "Missing share code origin"
@@ -284,6 +367,9 @@ msgstr ""
 msgid "Please confirm"
 msgstr ""
 
+msgid "Please select a file before importing"
+msgstr ""
+
 msgid "Price"
 msgstr ""
 
@@ -341,6 +427,21 @@ msgstr ""
 msgid "Taxes - in units"
 msgstr ""
 
+msgid "The date format is wrong"
+msgstr ""
+
+msgid "The file has headers"
+msgstr ""
+
+msgid "The price is not a decimal number"
+msgstr ""
+
+msgid "There was an error reading this file. Please choose another file."
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
 msgid "Total invested"
 msgstr ""
 
@@ -369,6 +470,9 @@ msgid "Type"
 msgstr ""
 
 msgid "Unknown"
+msgstr ""
+
+msgid "Unknown date format"
 msgstr ""
 
 msgid "Unknown or too old"
