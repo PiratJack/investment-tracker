@@ -6,6 +6,7 @@ import controllers.shares
 import controllers.shareprices
 import controllers.transactions
 import controllers.graphs
+import controllers.dashboard
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -19,13 +20,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "Share Prices": controllers.shareprices.SharePricesController(self),
             "Transactions": controllers.transactions.TransactionsController(self),
             "Graphs": controllers.graphs.GraphsController(self),
-            # TODO (major): Add screen for audit & technical elements
-            # Audit: Most recent share price (~ last import date) + in red if too old
-            # Audit: Number of prices per share and per month => if < 10, display in red
-            # Audit: shares with price that change too much (in last 3 months)
-            # Load share price file
-            # Export share price list
-            # For import / export, keep in memory the last choices?
+            "Dashboard": controllers.dashboard.DashboardController(self),
         }
 
         self.setMinimumSize(800, 600)
