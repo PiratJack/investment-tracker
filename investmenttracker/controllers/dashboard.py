@@ -10,6 +10,10 @@ import models.config
 
 _ = gettext.gettext
 
+#TODO: Check if the configuration is updated when changes are made
+#TODO: Check if the configuration is restored when opening
+#TODO: Test a bunch of cases (share/currency via ID, name, main code, extra codes, ...)
+
 class SharePriceStatsTable(QtWidgets.QTableWidget):
     def __init__(self, parent_controller):
         super().__init__()
