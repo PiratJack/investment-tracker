@@ -95,7 +95,12 @@ class Database:
     # The date filter will look for values within 2 weeks before
     # start_date and end_date expect a datetime.date object
     def share_prices_get(
-        self, share=None, currency=None, start_date=None, end_date=None, exact_date=False
+        self,
+        share=None,
+        currency=None,
+        start_date=None,
+        end_date=None,
+        exact_date=False,
     ):
         query = self.session.query(shareprice.SharePrice)
         if share:
@@ -114,7 +119,11 @@ class Database:
             if not end_date:
                 end_date = start_date
             if type(actual_start_date) == datetime.datetime:
-                actual_start_date = datetime.date(actual_start_date.year, actual_start_date.month, actual_start_date.day)
+                actual_start_date = datetime.date(
+                    actual_start_date.year,
+                    actual_start_date.month,
+                    actual_start_date.day,
+                )
             if type(end_date) == datetime.datetime:
                 end_date = datetime.date(end_date.year, end_date.month, end_date.day)
             query = query.filter(shareprice.SharePrice.date >= actual_start_date)
@@ -166,3 +175,15 @@ class Database:
     def config_get_by_name(self, name):
         query = self.session.query(config.Config).filter(config.Config.name == name)
         return query.one() if query.count() == 1 else None
+
+    def config_set(self, key, value):
+        if type(value) == bool:
+            value = 1 if value else 0
+
+        config_data = self.config_get_by_name(key)
+        if config_data:
+            config_data.value = str(value)
+        else:
+            config_data = config.Config(name=str(key), value=str(value))
+            self.session.add(config_data)
+        self.session.commit()
