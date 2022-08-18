@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-18 20:59+0200\n"
+"PO-Revision-Date: 2022-08-18 22:23+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -302,8 +302,15 @@ msgid "Missing config value"
 msgstr "Valeur manquante: valeur de la configuration"
 
 #, python-brace-format
+msgid "Missing fields in this row - column {column}"
+msgstr "Champs manquants pour cette ligne - colonne {column}"
+
+#, python-brace-format
 msgid "Missing fields: {fields}"
 msgstr "Champs manquants: {fields}"
+
+msgid "Missing mandatory fields"
+msgstr "Champs obligatoires manquants"
 
 msgid "Missing share code origin"
 msgstr "Valeur manquante: origine du code"

@@ -300,7 +300,14 @@ msgid "Missing config value"
 msgstr ""
 
 #, python-brace-format
+msgid "Missing fields in this row - column {column}"
+msgstr ""
+
+#, python-brace-format
 msgid "Missing fields: {fields}"
+msgstr ""
+
+msgid "Missing mandatory fields"
 msgstr ""
 
 msgid "Missing share code origin"
