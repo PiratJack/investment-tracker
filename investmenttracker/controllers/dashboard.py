@@ -10,9 +10,9 @@ import models.config
 
 _ = gettext.gettext
 
-#TODO: Check if the configuration is updated when changes are made
-#TODO: Check if the configuration is restored when opening
-#TODO: Test a bunch of cases (share/currency via ID, name, main code, extra codes, ...)
+# TODO: Check if the configuration is updated when changes are made
+# TODO: Check if the configuration is restored when opening
+
 
 class SharePriceStatsTable(QtWidgets.QTableWidget):
     def __init__(self, parent_controller):
@@ -29,9 +29,9 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         table_row = [""]
         today = datetime.date.today()
         if today.month > 6:
-            start_date = datetime.date(today.year, today.month-6, 1)
+            start_date = datetime.date(today.year, today.month - 6, 1)
         else:
-            start_date = datetime.date(today.year-1, today.month+6, 1)
+            start_date = datetime.date(today.year - 1, today.month + 6, 1)
         current_date = start_date
         while current_date <= today:
             all_dates.append(current_date)
@@ -49,10 +49,18 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         for share in all_shares:
             table_row = [share.name]
             share_prices = self.database.share_prices_get(
-                share=share, start_date=start_date, end_date=current_date, currency=share.base_currency
+                share=share,
+                start_date=start_date,
+                end_date=current_date,
+                currency=share.base_currency,
             )
             for current_date in all_dates:
-                prices = [p for p in share_prices if p.date.year == current_date.year and p.date.month == current_date.month]
+                prices = [
+                    p
+                    for p in share_prices
+                    if p.date.year == current_date.year
+                    and p.date.month == current_date.month
+                ]
                 table_row.append(len(prices))
             table_rows.append(table_row)
 
@@ -64,8 +72,8 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
                 if column == 0:
                     continue
                 item = QtWidgets.QTableWidgetItem(str(value))
-                item.setTextAlignment(Qt.AlignRight)
-                if value <= 10 and column != len(table_row)-1:
+                item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                if value <= 10 and column != len(table_row) - 1:
                     item.setForeground(QtGui.QBrush(Qt.red))
                 self.setItem(row, column, item)
 
@@ -73,8 +81,9 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
 
+
 class ImportResultsDialog:
-    name = _('Load results')
+    name = _("Load results")
     shares = {}
     loading_results = {}
 
@@ -114,39 +123,51 @@ class ImportResultsDialog:
         self.window.show()
 
     def display_results(self):
-        self.results_table.setRowCount(len(self.loading_results)+1)
+        self.results_table.setRowCount(len(self.loading_results) + 1)
         self.results_table.setColumnCount(4)
 
-        for i, item in enumerate([_('Share'), _('Loaded'), _('Duplicate'), _('Code')]):
+        for i, item in enumerate([_("Share"), _("Loaded"), _("Duplicate"), _("Code")]):
             item = QtWidgets.QTableWidgetItem(item)
             self.results_table.setHorizontalHeaderItem(i, item)
 
         # Add data in table
         row = 0
-        for share_id, results in self.loading_results.items():
-            data = [self.shares[share_id].name, results['loaded'], results['duplicate'], self.shares[share_id].main_code]
+        result_keys = sorted(
+            self.loading_results.keys(), key=lambda s: self.shares[s].name
+        )
+        for share_id in result_keys:
+            results = self.loading_results[share_id]
+            data = [
+                self.shares[share_id].name,
+                results["loaded"],
+                results["duplicate"],
+                self.shares[share_id].main_code,
+            ]
             for column, info in enumerate(data):
                 item = QtWidgets.QTableWidgetItem(str(info))
                 if type(info) == int:
-                    item.setTextAlignment(Qt.AlignRight)
+                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    if info > 0:
+                        item.setBackground(QtGui.QBrush(Qt.darkCyan))
                 self.results_table.setItem(row, column, item)
             row += 1
-        total_loaded = sum(a['loaded'] for a in self.loading_results.values())
-        total_duplicate = sum(a['duplicate'] for a in self.loading_results.values())
-        data = [_('Total'), total_loaded, total_duplicate]
+        total_loaded = sum(a["loaded"] for a in self.loading_results.values())
+        total_duplicate = sum(a["duplicate"] for a in self.loading_results.values())
+        data = [_("Total"), total_loaded, total_duplicate]
         for column, info in enumerate(data):
             item = QtWidgets.QTableWidgetItem(str(info))
             if type(info) == int:
                 item.setTextAlignment(Qt.AlignRight)
+                if info > 0:
+                    item.setBackground(QtGui.QBrush(Qt.darkCyan))
             self.results_table.setItem(row, column, item)
 
         self.results_table.resizeColumnsToContents()
         self.results_table.resizeRowsToContents()
 
 
-
 class ImportDialog:
-    name = _('Import share prices')
+    name = _("Import share prices")
     delimiter = ";"
     decimal_dot = "."
     has_headers = False
@@ -154,32 +175,32 @@ class ImportDialog:
     mapping = {}
 
     required_fields = {
-        'share': _('Share'),
-        'date': _('Date'),
-        'price': _('Price'),
-        'currency': _('Currency'),
-        'source': _('Source'),
+        "share": _("Share"),
+        "date": _("Date"),
+        "price": _("Price"),
+        "currency": _("Currency"),
+        "source": _("Source"),
     }
     # Maps possible headers to field name
     header_to_field = {
-        'share': 'share',
-        'share_id': 'share',
-        'date': 'date',
-        'price': 'price',
-        'value': 'price',
-        'currency': 'currency',
-        'currency_id': 'currency',
-        'source': 'source',
+        "share": "share",
+        "share_id": "share",
+        "date": "date",
+        "price": "price",
+        "value": "price",
+        "currency": "currency",
+        "currency_id": "currency",
+        "source": "source",
     }
     # Maps field formats (when multiple ones are possible)
     field_formats = {
-        'date': {
-            '%d/%m/%Y': _('Date (DD/MM/YYYY)'),
-            '%m/%d/%Y': _('Date (MM/DD/YYYY)'),
-            '%Y/%m/%d': _('Date (YYYY/MM/DD)'),
-            '%d-%m-%Y': _('Date (DD-MM-YYYY)'),
-            '%m-%d-%Y': _('Date (MM-DD-YYYY)'),
-            '%Y-%m-%d': _('Date (YYYY-MM-DD)'),
+        "date": {
+            "%d/%m/%Y": _("Date (DD/MM/YYYY)"),
+            "%m/%d/%Y": _("Date (MM/DD/YYYY)"),
+            "%Y/%m/%d": _("Date (YYYY/MM/DD)"),
+            "%d-%m-%Y": _("Date (DD-MM-YYYY)"),
+            "%m-%d-%Y": _("Date (MM-DD-YYYY)"),
+            "%Y-%m-%d": _("Date (YYYY-MM-DD)"),
         }
     }
 
@@ -193,13 +214,13 @@ class ImportDialog:
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.config = parent_controller.config
-        self.delimiter = self.config.get('import.delimiter', self.delimiter)
-        self.decimal_dot = self.config.get('import.decimal_dot', self.decimal_dot)
-        self.has_headers = self.config.get('import.decimal_dot', self.decimal_dot)
+        self.delimiter = self.config.get("import.delimiter", self.delimiter)
+        self.decimal_dot = self.config.get("import.decimal_dot", self.decimal_dot)
+        self.has_headers = self.config.get("import.decimal_dot", self.decimal_dot)
 
-        mapping = self.config.get('import.mapping', '')
+        mapping = self.config.get("import.mapping", "")
         if mapping:
-            self.mapping = {column:i for column, i in mapping if i != ''}
+            self.mapping = {column: i for column, i in mapping if i != ""}
 
     def show_window(self):
         if hasattr(self, "window"):
@@ -219,7 +240,7 @@ class ImportDialog:
         self.layout.addWidget(self.delimiter_label, 0, 0)
 
         self.delimiter_widget = QtWidgets.QComboBox()
-        for delimiter in [',', ';', ':', 'Tab']:
+        for delimiter in [",", ";", ":", "Tab"]:
             self.delimiter_widget.addItem(delimiter)
         self.delimiter_widget.setCurrentText(self.delimiter)
         self.delimiter_widget.currentTextChanged.connect(self.set_delimiter)
@@ -230,7 +251,7 @@ class ImportDialog:
         self.layout.addWidget(self.decimal_dot_label, 1, 0)
 
         self.decimal_dot_widget = QtWidgets.QComboBox()
-        for decimal_dot in [',', '.']:
+        for decimal_dot in [",", "."]:
             self.decimal_dot_widget.addItem(decimal_dot)
         self.decimal_dot_widget.setCurrentText(self.decimal_dot)
         self.decimal_dot_widget.currentTextChanged.connect(self.set_decimal_dot)
@@ -257,7 +278,6 @@ class ImportDialog:
         buttonBox.accepted.connect(self.on_confirm_load)
         buttonBox.rejected.connect(self.window.close)
         self.layout.addWidget(buttonBox, 5, 1)
-
 
         self.process_data()
 
@@ -307,7 +327,7 @@ class ImportDialog:
             return
 
         for column, field in self.mapping.items():
-            if field == 'date':
+            if field == "date":
                 date_formats = self.parse_date_format(self.data, column)
                 if len(date_formats) == 1:
                     self.mapping[column] = date_formats[0]
@@ -315,10 +335,19 @@ class ImportDialog:
     # Check we have all fields needed & they appear only once
     def is_mapping_complete(self):
         # Convert format ID (in self.mapping) to a field list
-        mapped_fields = [self.header_to_field[f] for f in self.mapping.values() if f in self.header_to_field and f not in self.field_formats]
-        mapped_fields += [k for k in self.field_formats for f in self.mapping.values() if f in self.field_formats[k]]
+        mapped_fields = [
+            self.header_to_field[f]
+            for f in self.mapping.values()
+            if f in self.header_to_field and f not in self.field_formats
+        ]
+        mapped_fields += [
+            k
+            for k in self.field_formats
+            for f in self.mapping.values()
+            if f in self.field_formats[k]
+        ]
         missing = [f for f in self.required_fields if f not in mapped_fields]
-        duplicate = [f for f in self.required_fields if mapped_fields.count(f) >1]
+        duplicate = [f for f in self.required_fields if mapped_fields.count(f) > 1]
 
         if missing or duplicate:
             errors = []
@@ -349,7 +378,7 @@ class ImportDialog:
                     continue
                 field_id = self.mapping[column]
                 # Shares and currencies should exist in the DB
-                if field_id in ("share", 'currency'):
+                if field_id in ("share", "currency"):
                     share = self.database.share_search(value)
                     if len(share) != 1:
                         try:
@@ -369,19 +398,22 @@ class ImportDialog:
                 # Price should be a valid float
                 elif field_id == "price":
                     try:
-                        corrected_value = value.replace(self.decimal_dot, '.')
-                        corrected_value = corrected_value.replace(' ', '')
+                        corrected_value = value.replace(self.decimal_dot, ".")
+                        corrected_value = corrected_value.replace(" ", "")
                         corrected_value = float(corrected_value)
                     except:
                         errors[row][column] = _("The price is not a decimal number")
-                # No need to check "source": it's a free text field
+                # Source is mandatory
+                elif field_id == "source":
+                    if value == "":
+                        errors[row][column] = _("The source field is mandatory")
             if not errors[row]:
                 del errors[row]
         self.data_checked = True
         self.data_errors = errors
 
     def display_table(self):
-        self.data_table.setRowCount(len(self.data))
+        self.data_table.setRowCount(min(30, len(self.data)))
         self.data_table.setColumnCount(self.nb_columns)
 
         # Define all possible options
@@ -408,7 +440,9 @@ class ImportDialog:
                 self.map_fields[column].setCurrentIndex(known_index)
             self.data_table.setCellWidget(0, column, self.map_fields[column])
 
-            self.map_fields[column].currentIndexChanged.connect(lambda index, c=column: self.on_change_header(c, possible_values[index]))
+            self.map_fields[column].currentIndexChanged.connect(
+                lambda index, c=column: self.on_change_header(c, possible_values[index])
+            )
 
         # Add data in table
         for row, table_row in enumerate(self.data):
@@ -420,13 +454,13 @@ class ImportDialog:
                 if row in self.data_errors:
                     item.setIcon(QtGui.QIcon("assets/images/ko.png"))
                     item.setToolTip("/n".join(self.data_errors[row].values()))
-                self.data_table.setVerticalHeaderItem(row+1, item)
+                self.data_table.setVerticalHeaderItem(row + 1, item)
 
             for column, field in enumerate(table_row):
                 item = QtWidgets.QTableWidgetItem(str(field))
                 if row in self.data_errors and column in self.data_errors[row]:
                     item.setBackground(Qt.red)
-                self.data_table.setItem(row+1, column, item)
+                self.data_table.setItem(row + 1, column, item)
 
         self.data_table.resizeColumnsToContents()
         self.data_table.resizeRowsToContents()
@@ -452,21 +486,20 @@ class ImportDialog:
         # Check if the data is at the right format
         if not self.is_mapping_complete():
             return
-        self.check_data(float('inf'))
+        self.check_data(float("inf"))
 
         # Get all shares that are synchronized
-        shares = self.database.shares_get()
-        shares = {s.id:s for s in shares if s.sync_origin}
-        load_results = {s: {'loaded': 0, 'duplicate': 0} for s in shares}
+        all_shares = self.database.shares_get(with_hidden=True)
+        synced_shares = {s.id: s for s in all_shares if s.sync_origin}
+        load_results = {s: {"loaded": 0, "duplicate": 0} for s in synced_shares}
         ready_to_load = {}
         search_results = {}
         for row, fields in enumerate(self.data):
             if row in self.data_errors:
-                #TODO: check if this filters properly (wrong_data in SQL?)
                 continue
             share_price = SharePrice()
             for column, field_id in self.mapping.items():
-                if field_id == 'share':
+                if field_id == "share":
                     # Stored in 'cache' to avoid repetitive calls to DB
                     if fields[column] in search_results:
                         share_price.share_id = search_results[fields[column]].id
@@ -474,15 +507,19 @@ class ImportDialog:
 
                     share = self.database.share_search(fields[column])
                     if len(share) != 1:
-                        self.data_errors[row] = {column: _("Could not find share in database")}
+                        self.data_errors[row] = {
+                            column: _("Could not find share in database")
+                        }
                         break
                     search_results[fields[column]] = share[0]
                     share_price.share_id = share[0].id
-                elif field_id in self.field_formats['date']:
-                    share_price.date = datetime.datetime.strptime(fields[column], field_id)
-                elif field_id == 'price':
+                elif field_id in self.field_formats["date"]:
+                    share_price.date = datetime.datetime.strptime(
+                        fields[column], field_id
+                    )
+                elif field_id == "price":
                     share_price.price = float(fields[column])
-                elif field_id == 'currency':
+                elif field_id == "currency":
                     # Stored in 'cache' to avoid repetitive calls to DB
                     if fields[column] in search_results:
                         share_price.currency_id = search_results[fields[column]].id
@@ -490,33 +527,44 @@ class ImportDialog:
 
                     share = self.database.share_search(fields[column])
                     if len(share) != 1:
-                        self.data_errors[row] = {column: _("Could not find currency in database")}
+                        self.data_errors[row] = {
+                            column: _("Could not find currency in database")
+                        }
                         break
                     search_results[fields[column]] = share[0]
                     share_price.currency_id = share[0].id
-                elif field_id == 'source':
+                elif field_id == "source":
                     share_price.source = fields[column]
 
             # Check for duplicates
-            existing = self.database.share_prices_get(share=share_price.share_id, currency=share_price.currency_id, start_date=share_price.date, exact_date=True)
+            existing = self.database.share_prices_get(
+                share=share_price.share_id,
+                currency=share_price.currency_id,
+                start_date=share_price.date,
+                exact_date=True,
+            )
+            # Share is not synced yet still in the file
+            if share_price.share_id not in load_results:
+                load_results[share_price.share_id] = {"loaded": 0, "duplicate": 0}
             if existing:
-                load_results[share_price.share_id]['duplicate'] += 1
+                load_results[share_price.share_id]["duplicate"] += 1
             else:
-                load_results[share_price.share_id]['loaded'] += 1
+                load_results[share_price.share_id]["loaded"] += 1
                 ready_to_load[row] = share_price
 
         # Load data
         self.database.session.add_all(ready_to_load.values())
         self.database.session.commit()
 
-
-        self.results = ImportResultsDialog(self.parent_controller, shares, load_results)
+        self.results = ImportResultsDialog(
+            self.parent_controller, all_shares, load_results
+        )
         self.results.show_window()
 
     def parse_date_format(self, table_rows, column):
-        data_to_check = [i[column] for i in table_rows if i[column] != ''][:50]
+        data_to_check = [i[column] for i in table_rows if i[column] != ""][:50]
         possible_formats = []
-        for possible_format in self.field_formats['date']:
+        for possible_format in self.field_formats["date"]:
             try:
                 [datetime.datetime.strptime(d, possible_format) for d in data_to_check]
                 possible_formats.append(possible_format)
@@ -526,17 +574,18 @@ class ImportDialog:
 
     def set_delimiter(self, new_delimiter):
         if new_delimiter == self.decimal_dot:
-            self.delimiter_choice.setCurrentText('Tab')
+            self.delimiter_choice.setCurrentText("Tab")
             return
         self.delimiter = new_delimiter
         self.process_data()
 
     def set_decimal_dot(self, new_decimal_dot):
         if new_decimal_dot == self.delimiter:
-            self.decimal_dot_choice.setCurrentText('.')
+            self.decimal_dot_choice.setCurrentText(".")
             return
         self.decimal_dot = new_decimal_dot
         self.process_data()
+
 
 class DashboardController:
     name = "Dashboard"
@@ -549,7 +598,9 @@ class DashboardController:
 
     def get_toolbar_button(self):
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/dashboard.png"), _("Dashboard"), self.parent_window
+            QtGui.QIcon("assets/images/dashboard.png"),
+            _("Dashboard"),
+            self.parent_window,
         )
         button.setStatusTip(_("Dashboard"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))
@@ -565,11 +616,11 @@ class DashboardController:
         )
 
         # Export shares to file
-        self.export_file_label = QtWidgets.QLabel(_('Export share list'))
+        self.export_file_label = QtWidgets.QLabel(_("Export share list"))
         self.display_widget.layout.addWidget(self.export_file_label, 0, 0)
 
         self.export_file_path = QtWidgets.QLineEdit()
-        self.export_file_path.setText(self.config.get('export.filename', ''))
+        self.export_file_path.setText(self.config.get("export.filename", ""))
         self.export_file_path.setEnabled(False)
         self.display_widget.layout.addWidget(self.export_file_path, 0, 1)
 
@@ -581,13 +632,12 @@ class DashboardController:
         self.export_file.clicked.connect(self.on_export_shares)
         self.display_widget.layout.addWidget(self.export_file, 0, 3)
 
-
         # Load transactions from file
-        self.load_from_file_label = QtWidgets.QLabel(_('Load share prices from file'))
+        self.load_from_file_label = QtWidgets.QLabel(_("Load share prices from file"))
         self.display_widget.layout.addWidget(self.load_from_file_label, 1, 0)
 
         self.load_from_file_path = QtWidgets.QLineEdit()
-        self.load_from_file_path.setText(self.config.get('import.filename', ''))
+        self.load_from_file_path.setText(self.config.get("import.filename", ""))
         self.load_from_file_path.setEnabled(False)
         self.display_widget.layout.addWidget(self.load_from_file_path, 1, 1)
 
@@ -600,10 +650,10 @@ class DashboardController:
         self.display_widget.layout.addWidget(self.load_from_file, 1, 3)
 
         # Last file import
-        self.last_import_label = QtWidgets.QLabel(_('Last import done on'))
+        self.last_import_label = QtWidgets.QLabel(_("Last import done on"))
         self.display_widget.layout.addWidget(self.last_import_label, 2, 0)
 
-        last_import_date = self.config.get('import.last', '')
+        last_import_date = self.config.get("import.last", "")
         self.last_import = QtWidgets.QLabel()
         if last_import_date:
             last_import_date = datetime.datetime.strptime(last_import_date, "%Y-%m-%d")
@@ -625,7 +675,6 @@ class DashboardController:
 
         # TODO (major) - Audit: shares with price that change too much (in last 3 months)
 
-
         self.parent_window.setCentralWidget(self.display_widget)
 
         return self.display_widget
@@ -637,7 +686,7 @@ class DashboardController:
         dialog = QtWidgets.QFileDialog(self.parent_window)
 
         # Re-open last folder (if any)
-        config = self.database.config_get_by_name('export.filename')
+        config = self.database.config_get_by_name("export.filename")
         if config:
             dialog.setDirectory(os.path.dirname(config.value))
 
@@ -646,11 +695,11 @@ class DashboardController:
             self.export_file_path.setText(target)
 
             # Update DB
-            config = self.database.config_get_by_name('export.filename')
+            config = self.database.config_get_by_name("export.filename")
             if config:
                 config.value = target
             else:
-                config = models.config.Config(name='export.filename', value=target)
+                config = models.config.Config(name="export.filename", value=target)
             self.database.session.add(config)
             self.database.session.commit()
             # Update cache
@@ -658,14 +707,14 @@ class DashboardController:
 
     def on_export_shares(self):
         # TODO: Actually export the shares
-        print('export shares')
+        print("export shares")
         return
 
     def on_choose_load_file(self):
         dialog = QtWidgets.QFileDialog(self.parent_window)
 
         # Re-open last folder (if any)
-        config = self.database.config_get_by_name('import.filename')
+        config = self.database.config_get_by_name("import.filename")
         if config:
             dialog.setDirectory(os.path.dirname(config.value))
 
@@ -674,11 +723,11 @@ class DashboardController:
             self.load_from_file_path.setText(target)
 
             # Update DB
-            config = self.database.config_get_by_name('import.filename')
+            config = self.database.config_get_by_name("import.filename")
             if config:
                 config.value = target
             else:
-                config = models.config.Config(name='import.filename', value=target)
+                config = models.config.Config(name="import.filename", value=target)
             self.database.session.add(config)
             self.database.session.commit()
             # Update cache
@@ -689,12 +738,14 @@ class DashboardController:
         if not file_path:
             self.error_label.setText(_("Please select a file before importing"))
             return
-        self.error_label.setText('')
+        self.error_label.setText("")
 
         import_dialog = ImportDialog(self)
         try:
             import_dialog.set_file(file_path)
         except UnicodeDecodeError:
-            self.error_label.setText(_("There was an error reading this file. Please choose another file."))
+            self.error_label.setText(
+                _("There was an error reading this file. Please choose another file.")
+            )
             return
         import_dialog.show_window()

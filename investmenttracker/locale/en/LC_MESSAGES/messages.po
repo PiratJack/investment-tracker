@@ -436,6 +436,9 @@ msgstr ""
 msgid "The price is not a decimal number"
 msgstr ""
 
+msgid "The source field is mandatory"
+msgstr ""
+
 msgid "There was an error reading this file. Please choose another file."
 msgstr ""
 

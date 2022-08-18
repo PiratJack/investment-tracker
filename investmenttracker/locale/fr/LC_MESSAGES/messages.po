@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-12 20:06+0200\n"
+"PO-Revision-Date: 2022-08-18 20:59+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -169,7 +169,7 @@ msgid "Display hidden shares?"
 msgstr "Afficher les titres masqués?"
 
 msgid "Display markers?"
-msgstr "Afficher les marqueurs"
+msgstr "Afficher les marqueurs?"
 
 msgid "Display shares"
 msgstr "Afficher les titres"
@@ -187,7 +187,7 @@ msgid "Dividends"
 msgstr "Dividendes"
 
 msgid "Duplicate"
-msgstr "Copied"
+msgstr "Doublon"
 
 #, python-brace-format
 msgid "Duplicate fields: {fields}"
@@ -437,6 +437,9 @@ msgstr "Le fichier a un en-tête"
 
 msgid "The price is not a decimal number"
 msgstr "Le prix n'est pas un nombre décimal"
+
+msgid "The source field is mandatory"
+msgstr "Le champ source est obligatoire"
 
 msgid "There was an error reading this file. Please choose another file."
 msgstr "Il y a eu une erreur lors de la lecture du fichier. Veuillez en choisir un auter."
