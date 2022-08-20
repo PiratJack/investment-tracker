@@ -25,7 +25,7 @@ class ShareComboBox(QtWidgets.QComboBox):
 
         # Shares without group
         shares_without_group = (
-            self.database.shares_query().filter(models.share.Share.group == None).all()
+            self.database.shares_query().filter(models.share.Share.group is None).all()
         )
         values.append((_("Shares without group"), -1, False))
         for share in shares_without_group:

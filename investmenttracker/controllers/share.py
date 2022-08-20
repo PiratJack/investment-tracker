@@ -110,7 +110,7 @@ class ShareController(EditController):
             sync_origin = [
                 v
                 for v in models.share.ShareDataOrigin
-                if v.name == self.item.sync_origin or v == self.item.sync_origin
+                if self.item.sync_origin in (v, v.name)
             ]
             if not sync_origin:
                 self.item.sync_origin = None

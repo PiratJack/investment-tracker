@@ -1,3 +1,4 @@
+import gettext
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QSize
 
@@ -8,10 +9,12 @@ import controllers.transactions
 import controllers.graphs
 import controllers.dashboard
 
+_ = gettext.gettext
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, database):
-        super(MainWindow, self).__init__()
+        super().__init__()
         self.database = database
 
         self.elements = {
@@ -34,8 +37,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def create_layout(self):
         self.layout = QtWidgets.QStackedLayout()
 
-        for element in self.elements:
-            element_window = self.elements[element].get_display_widget()
+        for element in self.elements.values():
+            element_window = element.get_display_widget()
             if element_window:
                 self.layout.addWidget(element_window)
 
@@ -56,8 +59,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addToolBar(Qt.LeftToolBarArea, self.toolbar)
 
         # Add buttons
-        for element in self.elements:
-            button = self.elements[element].get_toolbar_button()
+        for element in self.elements.values():
+            button = element.get_toolbar_button()
             if button:
                 self.toolbar.addAction(button)
 

@@ -94,9 +94,9 @@ class TransactionController(EditController):
         )
         self.fields["unit_price"]["default"] = self.item.unit_price
 
-        for field_id in self.fields:
-            if self.fields[field_id].get("default", 0) == None:
-                del self.fields[field_id]["default"]
+        for field in self.fields.values():
+            if field.get("default", 0) is None:
+                del field["default"]
 
         # Add triggers (hide/show fields, calculations, ...)
         self.fields["account_id"]["onchange"] = self.on_change_any_value
@@ -174,7 +174,7 @@ class TransactionController(EditController):
         try:
             unit_price = self.get_currency_delta() / self.get_quantity()
             self.fields["unit_price"]["widget"].setValue(unit_price)
-        except:
+        except ZeroDivisionError:
             pass
 
         self.on_change_any_value()
@@ -200,7 +200,7 @@ class TransactionController(EditController):
             return
 
         prices = self.database.share_prices_get(
-            share=share_id, currency=currency, start_date=date
+            share_id=share_id, currency=currency, start_date=date
         )
         prices = sorted(prices, key=lambda price: price.date, reverse=True)
 
@@ -214,7 +214,7 @@ class TransactionController(EditController):
     # User selects a known share price => update unit price
     def on_change_known_unit_price(self):
         chosen_price = self.fields["known_unit_price"]["widget"].currentData()
-        if chosen_price and not type(chosen_price) == int:
+        if chosen_price and not isinstance(chosen_price, int):
             self.fields["unit_price"]["widget"].setValue(chosen_price.price)
 
         self.on_change_any_value()

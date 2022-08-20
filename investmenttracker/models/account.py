@@ -77,7 +77,7 @@ class Account(Base):
         if attr == "start_date":
             try:
                 return min([t.date for t in self.transactions])
-            except:
+            except ValueError:
                 return None
 
         # Display in graph
@@ -97,7 +97,7 @@ class Account(Base):
                         transaction.type.value["impact_asset"] * transaction.quantity
                     )
             # Remove zeroes to avoid further issues
-            shares = {a: shares[a] for a in shares if abs(shares[a]) >= 10**-8}
+            shares = {k: v for k, v in shares.items() if abs(v) >= 10**-8}
             return shares
 
         if attr == "total_invested":
@@ -193,11 +193,13 @@ class Account(Base):
         return output
 
     def balance_after_transaction(self, transaction):
-        if type(transaction) == int:
+        if isinstance(transaction, int):
             try:
                 transaction = [i for i in self.transactions if i.id == transaction][0]
-            except IndexError:
-                raise ValueError("Transaction doesn't exist in that account")
+            except IndexError as exception:
+                raise ValueError(
+                    "Transaction doesn't exist in that account"
+                ) from exception
         elif transaction not in self.transactions:
             raise ValueError("Transaction doesn't exist in that account")
 

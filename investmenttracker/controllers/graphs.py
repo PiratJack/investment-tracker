@@ -56,8 +56,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             [account.name, "account", str(account.id)]
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
-        for i in range(len(self.columns)):
-            account_item.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            account_item.setTextAlignment(i, column["alignment"])
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)
@@ -119,10 +119,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
             for share in group.shares:
-                if (
-                    share.hidden
-                    and self.parent_controller.display_hidden_shares == False
-                ):
+                if share.hidden and not self.parent_controller.display_hidden_shares:
                     continue
                 group_widget.addChild(
                     self.add_share([share.name, "Share", share.id], group_widget)
@@ -145,19 +142,19 @@ class SharesTree(basetreecontroller.BaseTreeController):
         )
 
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
+            if column["size"] == 0:
                 self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
+            elif column["size"] < 1:
+                self.setColumnWidth(i, int(grid_width * column["size"]))
             else:
-                self.setColumnWidth(i, self.columns[i]["size"])
+                self.setColumnWidth(i, column["size"])
 
     def add_group(self, name, group_id):
         group_widget = QtWidgets.QTreeWidgetItem([name, "Group", str(group_id)])
         self.addTopLevelItem(group_widget)
 
-        for i in range(len(self.columns)):
-            group_widget.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            group_widget.setTextAlignment(i, column["alignment"])
 
         # Shares not grouped
         if group_id <= 0:
@@ -175,8 +172,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         else:
             self.addTopLevelItem(share_widget)
 
-        for i in range(len(self.columns)):
-            share_widget.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            share_widget.setTextAlignment(i, column["alignment"])
 
         return share_widget
 
@@ -198,14 +195,14 @@ class PercentageAxisItem(pyqtgraph.AxisItem):
         if self.logMode:
             return super().tickStrings(values, scale, spacing)
 
-        if any([v * scale > 3 for v in values]):
+        if any(value * scale > 3 for value in values):
             return super().tickStrings(values, scale, spacing)
 
         strings = []
-        for v in values:
-            vs = v * scale
-            vstr = ("%%0.%df" % 1) % (vs * 100) + "%"
-            strings.append(vstr)
+        for value in values:
+            value_scaled = value * scale
+            value_label = f"{value_scaled:.1%}"
+            strings.append(value_label)
         return strings
 
 
@@ -295,18 +292,18 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.plots["legend"] = self.addLegend()
 
-    def set_accounts(self, selected_accounts=[]):
-        self.selected_accounts = selected_accounts
+    def set_accounts(self, selected_accounts=None):
+        self.selected_accounts = selected_accounts if selected_accounts else []
         if selected_accounts:
             self.calculate_accounts(selected_accounts)
         try:
             self.set_account_split()
-        except (UserWarning, NoPriceException) as e:
-            self.add_error(e)
+        except (UserWarning, NoPriceException) as exception:
+            self.add_error(exception)
         self.plot_graph()
 
-    def set_shares(self, selected_shares=[]):
-        self.selected_shares = selected_shares
+    def set_shares(self, selected_shares=None):
+        self.selected_shares = selected_shares if selected_shares else []
         if selected_shares:
             self.calculate_shares(selected_shares)
         if not self.graph_type == "split":
@@ -346,71 +343,73 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if self.graph_type == "split" and len(self.selected_accounts) != 1:
             raise UserWarning("Only 1 account can be displayed in this mode")
 
-        if self.graph_type == "split":
-            # Get raw calculations for everything we need
-            self.calculate_accounts(self.selected_accounts)
-            account_id = self.selected_accounts[0]
-            account = self.all_accounts[account_id]
-            held_shares = set(
-                [
-                    d
-                    for date in self.accounts_holdings[account_id]
-                    for d in self.accounts_holdings[account_id][date]["shares"]
-                ]
-            )
-            self.calculate_shares(held_shares)
+        if not self.graph_type == "split":
+            return
 
-            # Now convert to percentages
-            holdings = self.accounts_holdings[account_id]
-            self.shares_graph_values = {}
-            holdings = {
-                d: holdings[d]
-                for d in holdings
-                if d >= self.start_date and d <= self.end_date
-            }
-            self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
+        # Get raw calculations for everything we need
+        self.calculate_accounts(self.selected_accounts)
+        account_id = self.selected_accounts[0]
+        account = self.all_accounts[account_id]
+        held_shares = set(
+            d
+            for date in self.accounts_holdings[account_id]
+            for d in self.accounts_holdings[account_id][date]["shares"]
+        )
+        self.calculate_shares(held_shares)
 
-            for share_id in held_shares:
-                try:
-                    self.shares_graph_values[share_id] = {
-                        date: (
-                            holdings[date]["shares"][share_id]
-                            * self.get_share_value_as_of(
-                                share_id, date, account.base_currency
-                            )
-                            / self.accounts_raw_values[account_id][date]
-                            if share_id in holdings[date]["shares"]
-                            else 0
+        # Now convert to percentages
+        holdings = self.accounts_holdings[account_id]
+        self.shares_graph_values = {}
+        holdings = {
+            d: holdings[d] for d in holdings if self.start_date <= d <= self.end_date
+        }
+        self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
+
+        if not held_shares:
+            return
+        for share_id in held_shares:
+            try:
+                self.shares_graph_values[share_id] = {
+                    date: (
+                        holdings[date]["shares"][share_id]
+                        * self.get_share_value_as_of(
+                            share_id, date, account.base_currency
                         )
-                        + sum(
-                            self.shares_graph_values[s][date]
-                            for s in self.shares_graph_values
-                        )
-                        for date in holdings
-                    }
-                except (KeyError, NoPriceException):
-                    e = NoPriceException(_("No value found"), self.all_shares[share_id])
-                    e.account = account
-                    raise e
-
-            self.selected_shares = list(held_shares) + [account.base_currency.id]
-            self.calculate_shares([account.base_currency.id])
-
-            # This should yield 1 for each date (because it contains the sum of everything)
-            self.shares_graph_values[account.base_currency.id] = {
-                date: (
-                    holdings[date]["cash"] / self.accounts_raw_values[account_id][date]
-                    if "cash" in holdings[date]
-                    else 0
+                        / self.accounts_raw_values[account_id][date]
+                        if share_id in holdings[date]["shares"]
+                        else 0
+                    )
+                    + sum(
+                        self.shares_graph_values[s][date]
+                        for s in self.shares_graph_values
+                    )
+                    for date in holdings
+                }
+            except (KeyError, NoPriceException) as initial_exception:
+                exception = NoPriceException(
+                    _("No value found"), self.all_shares[share_id]
                 )
-                + self.shares_graph_values[share_id][date]
-                # share_id contains the last share from the loop, thus everything except cash
-                for date in holdings
-            }
+                exception.account = account
+                raise exception from initial_exception
 
-            # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
+        self.selected_shares = list(held_shares) + [account.base_currency.id]
+        self.calculate_shares([account.base_currency.id])
 
-            self.plot_graph()
+        # This should yield 1 for each date (because it contains the sum of everything)
+        self.shares_graph_values[account.base_currency.id] = {
+            date: (
+                holdings[date]["cash"] / self.accounts_raw_values[account_id][date]
+                if "cash" in holdings[date]
+                else 0
+            )
+            + (self.shares_graph_values[share_id][date] if share_id else 0)
+            # share_id contains the last share from the loop, thus everything except cash
+            for date in holdings
+        }
+
+        # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
+
+        self.plot_graph()
 
     def set_markers_visible(self, visible):
         self.display_markers = visible
@@ -543,7 +542,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                                 for d in new_raw_values
                                 if d not in share_values
                                 # and d not in holdings
-                                and d > transaction_date and d < next_transaction_date
+                                and transaction_date < d < next_transaction_date
                             ]
                             for missing_date in missing_dates:
                                 holdings[missing_date] = holdings[transaction_date]
@@ -555,9 +554,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
                                 )
 
                     self.accounts_raw_values[account_id] |= new_raw_values
-            except NoPriceException as e:
-                e.account = self.all_accounts[account_id]
-                self.add_error(e)
+            except NoPriceException as exception:
+                exception.account = self.all_accounts[account_id]
+                self.add_error(exception)
 
     def plot_graph(self):
         self.clear_plots()
@@ -576,11 +575,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
             # For splits, the first share to display will fill via "fillLevel" and "brush"
             brush = share_color if self.graph_type == "split" else None
 
-            x = list(self.shares_graph_values[share_id].keys())
-            y = list(self.shares_graph_values[share_id].values())
+            x_values = list(self.shares_graph_values[share_id].keys())
+            y_values = list(self.shares_graph_values[share_id].values())
             self.plots["share_" + str(share_id)] = self.plot(
-                x=x,
-                y=y,
+                x=x_values,
+                y=y_values,
                 name=share.graph_label,
                 pen=share_color,
                 fillLevel=0,
@@ -598,11 +597,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
             # Prepare legend and plot
             account = self.all_accounts[account_id]
-            x = list(self.accounts_graph_values[account_id].keys())
-            y = list(self.accounts_graph_values[account_id].values())
+            x_values = list(self.accounts_graph_values[account_id].keys())
+            y_values = list(self.accounts_graph_values[account_id].values())
             self.plots["account_" + str(account_id)] = self.plot(
-                x=x,
-                y=y,
+                x=x_values,
+                y=y_values,
                 name=account.graph_label,
                 pen=pyqtgraph.mkPen(
                     width=2, color=color_set[account_id % len(color_set)]
@@ -618,20 +617,20 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if not self.display_markers:
             return
 
-        x = list(values.keys())
-        y = list(values.values())
-        markers = list(zip(x, y))
+        x_values = list(values.keys())
+        y_values = list(values.values())
+        markers = list(zip(x_values, y_values))
         markers = markers[:: len(markers) // 20] if len(markers) > 30 else markers
-        for x, y in markers:
+        for marker_x, marker_y in markers:
             if self.graph_type == "split":
                 # It would always be 100%
                 break
             if self.graph_type == "value":
-                marker = pyqtgraph.TextItem(format_number(y))
+                marker = pyqtgraph.TextItem(format_number(marker_y))
             else:
-                marker = pyqtgraph.TextItem("{:.1%}".format(y))
+                marker = pyqtgraph.TextItem(f"{marker_y:.1%}")
             self.addItem(marker)
-            marker.setPos(x, y)
+            marker.setPos(marker_x, marker_y)
             self.markers.append(marker)
 
     def convert_raw_to_graph(self, element_type, element_id):
@@ -654,8 +653,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             if dates_before:
                 baseline_value = raw[element_id][max(dates_before)]
             else:
-                all_dates = [d for d in raw[element_id]]
-                baseline_value = raw[element_id][min(all_dates)]
+                baseline_value = raw[element_id][min(raw[element_id].keys())]
 
             converted[element_id] = {
                 datetime.datetime(d.year, d.month, d.day).timestamp(): raw[element_id][
@@ -663,7 +661,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 ]
                 / baseline_value
                 for d in sorted(raw[element_id])
-                if d >= self.start_date and d <= self.end_date
+                if self.start_date <= d <= self.end_date
             }
         else:
             # pyqtgraph accepts only timestamps for date axis
@@ -672,16 +670,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
                     d
                 ]
                 for d in sorted(raw[element_id])
-                if d >= self.start_date and d <= self.end_date
+                if self.start_date <= d <= self.end_date
             }
 
     def clear_plots(self):
-        for plot in self.plots:
-            if plot == "legend":
+        for plot_id, plot in self.plots.items():
+            if plot_id == "legend":
                 continue
 
-            self.removeItem(self.plots[plot])
-            self.plots[plot].clear()
+            self.removeItem(plot)
+            plot.clear()
         self.plots = {"legend": self.plots["legend"]}
 
         for marker in self.markers:
@@ -734,6 +732,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         return ranges_missing
 
+    # TODO: Make sure the currency is taken into account
     def get_share_value_as_of(self, share_id, start_date, currency):
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
@@ -752,14 +751,18 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if share_id not in self.shares_raw_values:
             raise NoPriceException("No value found", self.all_shares[share_id])
 
-        first_date = [d for d in self.shares_raw_values[share_id] if d <= start_date]
+        first_date = [
+            d
+            for d in self.shares_raw_values[share_id]
+            if d <= start_date and d.currency == currency
+        ]
         if not first_date:
             raise NoPriceException("No value found", self.all_shares[share_id])
         share_values = {start_date: self.shares_raw_values[share_id][max(first_date)]}
         share_values |= {
             d: self.shares_raw_values[share_id][d]
             for d in self.shares_raw_values[share_id]
-            if d > start_date and d < end_date
+            if start_date < d < end_date
         }
 
         return share_values
@@ -819,7 +822,9 @@ class PerformanceTable(QtWidgets.QTableWidget):
             base_price = None
             for current_date in all_dates:
                 price = self.database.share_prices_get(
-                    share=share, start_date=current_date, currency=share.base_currency
+                    share_id=share,
+                    start_date=current_date,
+                    currency=share.base_currency,
                 )
                 if not price:
                     data = _("Unknown")
@@ -852,7 +857,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                     total_amount = holdings["cash"]
                     for share_id, share_nb in holdings["shares"].items():
                         price = self.database.share_prices_get(
-                            share=share_id,
+                            share_id=share_id,
                             start_date=current_date,
                             currency=account.base_currency,
                         )
@@ -1092,8 +1097,8 @@ class GraphsController:
         self.baseline_date.setEnabled(not self.split_enabled.isChecked())
         try:
             self.graph.set_account_split(self.split_enabled.isChecked())
-        except (UserWarning, NoPriceException) as e:
-            self.add_error(e)
+        except (UserWarning, NoPriceException) as exception:
+            self.add_error(exception)
         if not self.split_enabled.isChecked():
             self.accounts_tree.on_select_item()
             self.shares_tree.on_select_item()
@@ -1110,9 +1115,9 @@ class GraphsController:
         self.errors.append(exception)
         messages = []
         for error in self.errors:
-            if type(error) == UserWarning:
+            if isinstance(error, UserWarning):
                 messages.append(str(error))
-            elif type(error) == NoPriceException:
+            elif isinstance(error, NoPriceException):
                 messages.append(
                     _(
                         "Could not display account {account} due to missing value for {share}"

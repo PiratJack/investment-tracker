@@ -39,7 +39,7 @@ class AccountController(EditController):
     def __init__(self, parent_controller, account_id=0):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
-        self.account_id = int(account_id)
+        self.account_id = int(account_id) if account_id else 0
 
         if self.account_id:
             self.item = self.database.account_get_by_id(account_id)

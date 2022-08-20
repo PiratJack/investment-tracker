@@ -38,8 +38,7 @@ class EditController:
         self.window.layout.addWidget(form_group)
 
         # Create the fields
-        for field_id in self.fields:
-            field = self.fields[field_id]
+        for field in self.fields.values():
             label = QtWidgets.QLabel(_(field["label"]))
             if field.get("mandatory", False):
                 label.setText(
@@ -78,12 +77,16 @@ class EditController:
                 field["widget"].setMinimumWidth(width * 2)
 
                 try:
-                    field["widget"].setDate(QtCore.QDate.fromString(field["default"]))
-                except:
+                    field["widget"].setDate(
+                        QtCore.QDate.fromString(field["default"], "yyyy-MM-dd")
+                    )
+                except (ValueError, TypeError):
                     try:
                         field["widget"].setDate(QtCore.QDate(field["default"]))
-                    except:
+                    except (ValueError, TypeError):
                         field["widget"].setDate(QtCore.QDate.currentDate())
+                except KeyError:
+                    field["widget"].setDate(QtCore.QDate.currentDate())
 
                 if "onchange" in field:
                     field["widget"].dateChanged.connect(field["onchange"])
@@ -109,7 +112,7 @@ class EditController:
                 )
 
                 if "default" in field:
-                    if type(field["default"]) == int:
+                    if isinstance(field["default"], int):
                         index = field["widget"].findData(field["default"])
                         field["widget"].setCurrentIndex(index)
                     else:
@@ -127,18 +130,17 @@ class EditController:
             self.form_layout.addRow(label, field["widget"])
 
         # Trigger onchange events to ensure consistency
-        for field_id in self.fields:
-            field = self.fields[field_id]
+        for field in self.fields.values():
             if "onchange" in field:
                 field["onchange"]()
 
         # Create the validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        buttonBox = QtWidgets.QDialogButtonBox(buttons)
-        buttonBox.accepted.connect(self.save)
-        buttonBox.rejected.connect(self.close)
+        button_box = QtWidgets.QDialogButtonBox(buttons)
+        button_box.accepted.connect(self.save)
+        button_box.rejected.connect(self.close)
 
-        self.window.layout.addWidget(buttonBox)
+        self.window.layout.addWidget(button_box)
         # Size & Move to center
         self.window.setMinimumSize(300, 200)
         self.window.resize(self.window.layout.sizeHint())
@@ -154,17 +156,16 @@ class EditController:
         self.clear_errors()
 
         # Apply user entry
-        for field_id in self.fields:
+        for field_id, field in self.fields.items():
+            field_widget = field["widget"]
             try:
-                field_widget = self.fields[field_id]["widget"]
-
                 self.set_value(field_id)
-            except ValidationException as e:
-                self.add_error_field(e.message, field_widget)
+            except ValidationException as exception:
+                self.add_error_field(exception.message, field_widget)
 
                 has_error = True
-            except ValidationWarningException as e:
-                self.add_error_field(e.message, field_widget, True)
+            except ValidationWarningException as exception:
+                self.add_error_field(exception.message, field_widget, True)
 
                 if field_id not in self.seen_warnings:
                     has_new_warnings = True
@@ -179,21 +180,21 @@ class EditController:
                 self.on_validation_end()
             except AttributeError:
                 pass
-            except ValidationException as e:
-                field_widget = self.fields[e.key]["widget"]
-                self.add_error_field(e.message, field_widget)
+            except ValidationException as exception:
+                field_widget = self.fields[exception.key]["widget"]
+                self.add_error_field(exception.message, field_widget)
 
                 has_error = True
-            except ValidationWarningException as e:
-                field_widget = self.fields[e.key]["widget"]
-                self.add_error_field(e.message, field_widget, True)
+            except ValidationWarningException as exception:
+                field_widget = self.fields[exception.key]["widget"]
+                self.add_error_field(exception.message, field_widget, True)
 
-                if e.key not in self.seen_warnings:
+                if exception.key not in self.seen_warnings:
                     has_new_warnings = True
-                    self.seen_warnings.append(e.key)
+                    self.seen_warnings.append(exception.key)
                 else:
                     self.item.ignore_warnings = True
-                    self.set_value(e.key)
+                    self.set_value(exception.key)
                     self.item.ignore_warnings = False
 
         return has_error or has_new_warnings
@@ -227,15 +228,15 @@ class EditController:
         elif self.fields[field_id]["type"] == "date":
             value = field_widget.date
 
-            if type(value) == QtCore.QDate:
+            if isinstance(value, QtCore.QDate):
                 value = datetime.date.fromisoformat(value.toString(Qt.ISODate))
             elif callable(value):
                 value = datetime.date.fromisoformat(value().toString(Qt.ISODate))
-            elif type(value) == datetime.date:
-                value = value
-            elif type(value) == str:
+            elif isinstance(value, datetime.date):
+                pass
+            elif isinstance(value, str):
                 value = datetime.date.fromisoformat(value)
-            elif type(value) == int:
+            elif isinstance(value, int):
                 value = datetime.date.fromtimestamp(value)
             else:
                 value = ""
@@ -254,21 +255,21 @@ class EditController:
                 self.after_item_save()
             except AttributeError:
                 pass
-            except ValidationException as e:
-                field_widget = self.fields[e.key]["widget"]
-                self.add_error_field(e.message, field_widget)
+            except ValidationException as exception:
+                field_widget = self.fields[exception.key]["widget"]
+                self.add_error_field(exception.message, field_widget)
 
                 has_error = True
-            except ValidationWarningException as e:
-                field_widget = self.fields[e.key]["widget"]
-                self.add_error_field(e.message, field_widget, True)
+            except ValidationWarningException as exception:
+                field_widget = self.fields[exception.key]["widget"]
+                self.add_error_field(exception.message, field_widget, True)
 
-                if e.key not in self.seen_warnings:
+                if exception.key not in self.seen_warnings:
                     has_new_warnings = True
-                    self.seen_warnings.append(e.key)
+                    self.seen_warnings.append(exception.key)
                 else:
                     self.item.ignore_warnings = True
-                    self.set_value(e.key)
+                    self.set_value(exception.key)
                     self.item.ignore_warnings = False
 
             if has_error or has_new_warnings:

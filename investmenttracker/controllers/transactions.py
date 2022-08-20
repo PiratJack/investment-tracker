@@ -9,6 +9,7 @@ from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
 # TODO (?): Link transactions ==> what would be the impacts?
+# TODO (?): Allow modification of transaction by double-click?
 
 
 class AccountsSharesTree(basetreecontroller.BaseTreeController):
@@ -61,8 +62,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             [account.name, "account", str(account.id)]
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
-        for i in range(len(self.columns)):
-            account_item.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            account_item.setTextAlignment(i, column["alignment"])
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)
@@ -87,8 +88,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         else:
             self.addTopLevelItem(share_item)
 
-        for i in range(len(self.columns)):
-            share_item.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            share_item.setTextAlignment(i, column["alignment"])
 
         return share_item
 
@@ -198,11 +199,13 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         if role == Qt.DecorationRole and index.row() != len(self.transactions):
             if col == len(self.columns) - 2:
                 return QtCore.QVariant(QtGui.QIcon("assets/images/add.png"))
-            elif col == len(self.columns) - 1:
+            if col == len(self.columns) - 1:
                 return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
 
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
+
+        return QtCore.QVariant()
 
     def headerData(self, column, orientation, role):
         if role != Qt.DisplayRole:
@@ -280,7 +283,7 @@ class TransactionsTableView(QtWidgets.QTableView):
             "alignment": Qt.AlignRight,
         },
         {
-            "name": _("Duplicate"),
+            "name": _("Copy"),
             "size": 80,
             "alignment": Qt.AlignCenter,
         },
@@ -315,12 +318,12 @@ class TransactionsTableView(QtWidgets.QTableView):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
+            if column["size"] == 0:
                 self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
+            elif column["size"] < 1:
+                self.setColumnWidth(i, int(grid_width * column["size"]))
             else:
-                self.setColumnWidth(i, self.columns[i]["size"])
+                self.setColumnWidth(i, column["size"])
 
     def on_table_clicked(self, index):
         self.parent_controller.store_tree_item_selection()

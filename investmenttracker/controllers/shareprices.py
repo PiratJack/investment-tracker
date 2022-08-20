@@ -114,6 +114,8 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
 
+        return QtCore.QVariant()
+
     def setData(self, index, value, role):
         col = index.column()
         if role == Qt.EditRole:
@@ -146,12 +148,12 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             except (sqlalchemy.exc.IntegrityError, ValidationException):
                 self.database.session.rollback()
                 return True
+        return False
 
     def flags(self, index):
         if index.column() in (1, 6):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled
-        else:
-            return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+        return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     def headerData(self, column, orientation, role):
         if role != Qt.DisplayRole:
@@ -171,7 +173,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             self.share = None
 
         if self.share:
-            if type(self.share) == int:
+            if isinstance(self.share, int):
                 self.query = self.query.filter(
                     SharePriceDatabaseModel.share_id == self.share
                 )
@@ -182,13 +184,13 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
 
         if date:
             # Convert to datetime.datetime object
-            if type(date) == QtCore.QDate:
+            if isinstance(date, QtCore.QDate):
                 self.date = datetime.datetime.fromisoformat(date.toString(Qt.ISODate))
-            elif type(date) == datetime.datetime:
+            elif isinstance(date, datetime.datetime):
                 self.date = date
-            elif type(date) == str:
+            elif isinstance(date, str):
                 self.date = datetime.datetime.fromisoformat(date)
-            elif type(date) == int:
+            elif isinstance(date, int):
                 self.date = datetime.datetime.fromtimestamp(date)
             else:
                 self.date = None
@@ -292,12 +294,12 @@ class SharePricesTableView(QtWidgets.QTableView):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
         for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
+            if column["size"] == 0:
                 self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
+            elif column["size"] < 1:
+                self.setColumnWidth(i, int(grid_width * column["size"]))
             else:
-                self.setColumnWidth(i, self.columns[i]["size"])
+                self.setColumnWidth(i, column["size"])
 
     def on_table_clicked(self, index):
         self.model.on_table_clicked(index)

@@ -89,6 +89,9 @@ msgstr ""
 msgid "Company funding - Cash"
 msgstr ""
 
+msgid "Copy"
+msgstr ""
+
 #, python-brace-format
 msgid "Could not display account {account} due to missing value for {share}"
 msgstr ""

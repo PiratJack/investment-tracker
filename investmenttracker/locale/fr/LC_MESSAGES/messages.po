@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-12 20:06+0200\n"
+"PO-Revision-Date: 2022-08-19 19:06+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -104,6 +104,9 @@ msgstr "Financement employeur - Titre"
 msgid "Company funding - Cash"
 msgstr "Financement employeur - Espèces"
 
+msgid "Copy"
+msgstr "Copier"
+
 #, python-brace-format
 msgid "Could not display account {account} due to missing value for {share}"
 msgstr "Impossible d'afficher la valeur du compte {account}: valeur manquante pour {share}"
@@ -169,7 +172,7 @@ msgid "Display hidden shares?"
 msgstr "Afficher les titres masqués?"
 
 msgid "Display markers?"
-msgstr "Afficher les marqueurs"
+msgstr "Afficher les marqueurs?"
 
 msgid "Display shares"
 msgstr "Afficher les titres"
@@ -187,7 +190,7 @@ msgid "Dividends"
 msgstr "Dividendes"
 
 msgid "Duplicate"
-msgstr "Copied"
+msgstr "Doublon"
 
 #, python-brace-format
 msgid "Duplicate fields: {fields}"

@@ -17,9 +17,6 @@ class ShareCode(Base):
     value = Column(String(250), nullable=False)
     share = sqlalchemy.orm.relationship(Share, back_populates="codes")
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
         self.validate_missing_field(key, value, _("Missing share code share ID"))

@@ -1,5 +1,5 @@
-import sqlalchemy
 import datetime
+import sqlalchemy
 
 from . import account
 from . import share
@@ -18,8 +18,7 @@ class Database:
         self.metadata = sqlalchemy.MetaData()
         self.create_tables()
 
-        Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.session = sqlalchemy.orm.sessionmaker(bind=self.engine)()
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
@@ -95,30 +94,34 @@ class Database:
     # The date filter will look for values within 2 weeks before
     # start_date and end_date expect a datetime.date object
     def share_prices_get(
-        self, share=None, currency=None, start_date=None, end_date=None, exact_date=False
+        self,
+        share_id=None,
+        currency=None,
+        start_date=None,
+        end_date=None,
+        exact_date=False,
     ):
         query = self.session.query(shareprice.SharePrice)
-        if share:
-            if type(share) == int:
-                query = query.filter(shareprice.SharePrice.share_id == share)
+        if share_id:
+            if isinstance(share_id, int):
+                query = query.filter(shareprice.SharePrice.share_id == share_id)
             else:
-                query = query.filter(shareprice.SharePrice.share == share)
+                query = query.filter(shareprice.SharePrice.share == share_id)
         if currency:
-            if type(currency) == int:
+            if isinstance(currency, int):
                 query = query.filter(shareprice.SharePrice.currency_id == currency)
             else:
                 query = query.filter(shareprice.SharePrice.currency == currency)
         if start_date:
             two_weeks = datetime.timedelta(days=-14)
-            actual_start_date = start_date if exact_date else start_date + two_weeks
-            if not end_date:
-                end_date = start_date
-            if type(actual_start_date) == datetime.datetime:
-                actual_start_date = datetime.date(actual_start_date.year, actual_start_date.month, actual_start_date.day)
-            if type(end_date) == datetime.datetime:
-                end_date = datetime.date(end_date.year, end_date.month, end_date.day)
-            query = query.filter(shareprice.SharePrice.date >= actual_start_date)
-            query = query.filter(shareprice.SharePrice.date <= end_date)
+            start = start_date if exact_date else start_date + two_weeks
+            end = end_date if end_date else start_date
+            if isinstance(start, datetime.datetime):
+                start = datetime.date(start.year, start.month, start.day)
+            if isinstance(end, datetime.datetime):
+                end = datetime.date(end.year, end.month, end.day)
+            query = query.filter(shareprice.SharePrice.date >= start)
+            query = query.filter(shareprice.SharePrice.date <= end)
         return query.all()
 
     def delete(self, item):
@@ -154,8 +157,8 @@ class Database:
 
         return transactions.all()
 
-    def transaction_delete(self, transaction):
-        self.session.delete(transaction)
+    def transaction_delete(self, transaction_item):
+        self.session.delete(transaction_item)
         self.session.commit()
 
     # Configuration

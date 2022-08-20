@@ -212,7 +212,7 @@ class Transaction(Base):
     def validate_share_id(self, key, value):
         if self.type:
             type_value = TransactionTypes[self.type].value
-            if type_value["impact_asset"] and (value == -1 or value == 0):
+            if type_value["impact_asset"] and value in (-1, 0):
                 raise ValidationException("Missing transaction share", self, key, value)
         return value
 
@@ -243,19 +243,19 @@ class Transaction(Base):
     def __getattr__(self, attr):
         if attr == "cash_total":
             type_enum = (
-                TransactionTypes[self.type] if type(self.type) == str else self.type
+                TransactionTypes[self.type] if isinstance(self.type, str) else self.type
             )
             return type_enum.value["impact_currency"] * self.quantity * self.unit_price
         if attr == "asset_total":
             type_enum = (
-                TransactionTypes[self.type] if type(self.type) == str else self.type
+                TransactionTypes[self.type] if isinstance(self.type, str) else self.type
             )
             return type_enum.value["impact_asset"] * self.quantity
 
         raise AttributeError("'Transaction' object has no attribute '" + attr + "'")
 
     def __repr__(self):
-        type_str = self.type if type(self.type) == str else self.type.value["name"]
+        type_str = self.type if isinstance(self.type, str) else self.type.value["name"]
         account_str = self.account.name if self.account else ""
         share_str = self.share.name if self.share else ""
 

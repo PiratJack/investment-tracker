@@ -58,7 +58,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                 value = format_number(
                     account.total_value, account.base_currency.main_code
                 )
-            except:
+            except (AttributeError, NoPriceException):
                 value = _("Unknown or too old")
             account_widget = QtWidgets.QTreeWidgetItem(
                 [
@@ -71,8 +71,8 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                     format_number(account.total_invested),
                 ]
             )
-            for i in range(len(self.columns)):
-                account_widget.setTextAlignment(i, self.columns[i]["alignment"])
+            for column, value in enumerate(self.columns):
+                account_widget.setTextAlignment(column, value["alignment"])
 
             if not account.enabled:
                 font = account_widget.font(0)
@@ -121,8 +121,8 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
             for child in children:
                 child_widget = QtWidgets.QTreeWidgetItem(child)
-                for i in range(len(self.columns)):
-                    child_widget.setTextAlignment(i, self.columns[i]["alignment"])
+                for column, value in enumerate(self.columns):
+                    child_widget.setTextAlignment(column, value["alignment"])
                 account_widget.addChild(child_widget)
 
             tree_items.append(account_widget)

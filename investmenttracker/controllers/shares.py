@@ -69,7 +69,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
             # Add shares
             for share in group.shares:
-                if share.hidden and self.parent_controller.display_hidden == False:
+                if share.hidden and not self.parent_controller.display_hidden:
                     continue
                 # Try to display the last price
                 codes = ", ".join(
@@ -160,8 +160,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         )
         self.addTopLevelItem(group_widget)
 
-        for i in range(len(self.columns)):
-            group_widget.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            group_widget.setTextAlignment(i, column["alignment"])
 
         # Shares not grouped
         if group_id <= 0:
@@ -194,15 +194,15 @@ class SharesTree(basetreecontroller.BaseTreeController):
             self.addTopLevelItem(share_widget)
         # Add checkboxes
         for col, field in enumerate(data):
-            if type(field) != bool:
+            if not isinstance(field, bool):
                 continue
 
             val = Qt.Checked if field else Qt.Unchecked
             share_widget.setCheckState(col, val)
             share_widget.setText(col, "")
 
-        for i in range(len(self.columns)):
-            share_widget.setTextAlignment(i, self.columns[i]["alignment"])
+        for i, column in enumerate(self.columns):
+            share_widget.setTextAlignment(i, column["alignment"])
 
         if data[1] == 0:
             # Apply style
@@ -222,16 +222,16 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         return share_widget
 
-    def on_click_edit_button(self, item):
-        if item.text(2) == "group":
+    def on_click_edit_button(self, tree_item):
+        if tree_item.text(2) == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
-                self.parent_controller, item.text(1)
+                self.parent_controller, tree_item.text(1)
             )
             self.group_details.show_window()
             del self.group_details
-        elif item.text(2) == "share":
+        elif tree_item.text(2) == "share":
             self.share_details = controllers.share.ShareController(
-                self.parent_controller, item.text(1)
+                self.parent_controller, tree_item.text(1)
             )
             self.share_details.show_window()
             del self.share_details
