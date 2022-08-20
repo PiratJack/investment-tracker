@@ -71,7 +71,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
                 if column == 0:
                     continue
                 item = QtWidgets.QTableWidgetItem(str(value))
-                item.setTextAlignment(Qt.AlignRight)
+                item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 if value <= 10 and column != len(table_row) - 1:
                     item.setForeground(QtGui.QBrush(Qt.red))
                 self.setItem(row, column, item)
@@ -131,19 +131,28 @@ class ImportResultsDialog:
 
         # Add data in table
         row = 0
-        for share_id, results in self.loading_results.items():
+        result_keys = sorted(
+            self.loading_results.keys(), key=lambda s: self.shares[s].name
+        )
+        for share_id in result_keys:
+            results = self.loading_results[share_id]
             data = [
                 self.shares[share_id].name,
                 results["loaded"],
                 results["duplicate"],
                 self.shares[share_id].main_code,
             ]
+
             for column, info in enumerate(data):
                 item = QtWidgets.QTableWidgetItem(str(info))
                 if isinstance(info, int):
-                    item.setTextAlignment(Qt.AlignRight)
+                    item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    if info > 0:
+                        item.setBackground(QtGui.QBrush(Qt.darkCyan))
                 self.results_table.setItem(row, column, item)
             row += 1
+
+        # Calculate & display totals
         total_loaded = sum(a["loaded"] for a in self.loading_results.values())
         total_duplicate = sum(a["duplicate"] for a in self.loading_results.values())
         data = [_("Total"), total_loaded, total_duplicate]
@@ -151,6 +160,8 @@ class ImportResultsDialog:
             item = QtWidgets.QTableWidgetItem(str(info))
             if isinstance(info, int):
                 item.setTextAlignment(Qt.AlignRight)
+                if info > 0:
+                    item.setBackground(QtGui.QBrush(Qt.darkCyan))
             self.results_table.setItem(row, column, item)
 
         self.results_table.resizeColumnsToContents()
@@ -195,8 +206,9 @@ class ImportDialog:
         }
     }
 
-    data = []
+    map_fields = {}
     nb_columns = 0
+    data = []
     data_errors = {}
     data_checked = False
 
@@ -206,12 +218,16 @@ class ImportDialog:
         self.database = parent_controller.database
         self.config = parent_controller.config
         self.delimiter = self.config.get("import.delimiter", self.delimiter)
+        self.delimiter = "\t" if self.delimiter == "Tab" else self.delimiter
         self.decimal_dot = self.config.get("import.decimal_dot", self.decimal_dot)
-        self.has_headers = self.config.get("import.decimal_dot", self.decimal_dot)
+        self.has_headers = self.config.get("import.has_headers", self.has_headers)
+        self.has_headers = False if self.has_headers == "0" else self.has_headers
 
         mapping = self.config.get("import.mapping", "")
         if mapping:
-            self.mapping = {column: i for column, i in mapping if i != ""}
+            self.mapping = {
+                i: val for i, val in enumerate(mapping.split(";")) if val != ""
+            }
 
     def show_window(self):
         if hasattr(self, "window"):
@@ -233,7 +249,8 @@ class ImportDialog:
         self.delimiter_widget = QtWidgets.QComboBox()
         for delimiter in [",", ";", ":", "Tab"]:
             self.delimiter_widget.addItem(delimiter)
-        self.delimiter_widget.setCurrentText(self.delimiter)
+        delimiter = "Tab" if self.delimiter == "\t" else self.delimiter
+        self.delimiter_widget.setCurrentText(delimiter)
         self.delimiter_widget.currentTextChanged.connect(self.set_delimiter)
         self.layout.addWidget(self.delimiter_widget, 0, 1)
 
@@ -281,6 +298,9 @@ class ImportDialog:
         self.file_contents = open(file_path, "r+", encoding="UTF-8").read().splitlines()
 
     def process_data(self):
+        self.data_errors = {}
+        self.data_checked = False
+
         self.parse_headers()
         if self.has_headers:
             self.has_headers_widget.setCheckState(Qt.Checked)
@@ -305,6 +325,7 @@ class ImportDialog:
 
     def load_file_in_memory(self):
         self.data = []
+        self.nb_columns = 0
         for row, line in enumerate(self.file_contents):
             if self.has_headers and row == 0:
                 continue
@@ -364,6 +385,9 @@ class ImportDialog:
             if row > nb_rows:
                 break
             errors[row] = {}
+            if len(fields) <= max(self.mapping.keys()):
+                errors[row][-1] = _("Missing mandatory fields")
+                continue
             for column, value in enumerate(fields):
                 if column not in self.mapping:
                     continue
@@ -394,14 +418,18 @@ class ImportDialog:
                         corrected_value = float(corrected_value)
                     except ValueError:
                         errors[row][column] = _("The price is not a decimal number")
-                # No need to check "source": it's a free text field
+                # Source is mandatory
+                elif field_id == "source":
+                    if value == "":
+                        errors[row][column] = _("The source field is mandatory")
             if not errors[row]:
                 del errors[row]
         self.data_checked = True
         self.data_errors = errors
 
     def display_table(self):
-        self.data_table.setRowCount(len(self.data))
+        self.data_table.clear()
+        self.data_table.setRowCount(min(31, len(self.data) + 1))  # +1 due to headers
         self.data_table.setColumnCount(self.nb_columns)
 
         # Define all possible options
@@ -415,6 +443,10 @@ class ImportDialog:
                 possible_values.append((label, field_id))
 
         # Add headers (dropdown for choice)
+        if self.map_fields:
+            indexes = list(self.map_fields.keys())
+            for column in indexes:
+                del self.map_fields[column]
         self.map_fields = {}
         for column in range(self.nb_columns):
             self.map_fields[column] = QtWidgets.QComboBox()
@@ -476,18 +508,40 @@ class ImportDialog:
             return
         self.check_data(float("inf"))
 
+        # Save the preferences
+        delimiter = "Tab" if self.delimiter == "\t" else self.delimiter
+        self.database.config_set("import.delimiter", delimiter)
+        self.database.config_set("import.decimal_dot", self.decimal_dot)
+        self.database.config_set("import.has_headers", self.has_headers)
+        mapping = ""
+        for column in range(self.nb_columns):
+            if column in self.mapping:
+                mapping += self.mapping[column]
+            mapping += ";"
+        mapping = mapping[:-1]
+        self.database.config_set("import.mapping", mapping)
+        self.database.config_set(
+            "import.last", datetime.datetime.now().strftime("%Y-%m-%d")
+        )
+
         # Get all shares that are synchronized
-        shares = self.database.shares_get()
-        shares = {s.id: s for s in shares if s.sync_origin}
-        load_results = {s: {"loaded": 0, "duplicate": 0} for s in shares}
+        all_shares = {s.id: s for s in self.database.shares_get(with_hidden=True)}
+        synced_shares = {s.id: s for s in all_shares.values() if s.sync_origin}
+        load_results = {s: {"loaded": 0, "duplicate": 0} for s in synced_shares}
         ready_to_load = {}
         search_results = {}
         for row, fields in enumerate(self.data):
             if row in self.data_errors:
-                # TODO: check if this filters properly (wrong_data in SQL?)
                 continue
             share_price = SharePrice()
             for column, field_id in self.mapping.items():
+                if column > len(fields):
+                    self.data_errors[row] = {
+                        -1: _("Missing fields in this row - column {column}").format(
+                            column=column
+                        )
+                    }
+                    break
                 if field_id == "share":
                     # Stored in 'cache' to avoid repetitive calls to DB
                     if fields[column] in search_results:
@@ -525,6 +579,10 @@ class ImportDialog:
                 elif field_id == "source":
                     share_price.source = fields[column]
 
+            # Remove errors
+            if row in self.data_errors:
+                continue
+
             # Check for duplicates
             existing = self.database.share_prices_get(
                 share_id=share_price.share_id,
@@ -532,6 +590,9 @@ class ImportDialog:
                 start_date=share_price.date,
                 exact_date=True,
             )
+            # Share is not synced yet still in the file
+            if share_price.share_id not in load_results:
+                load_results[share_price.share_id] = {"loaded": 0, "duplicate": 0}
             if existing:
                 load_results[share_price.share_id]["duplicate"] += 1
             else:
@@ -542,7 +603,9 @@ class ImportDialog:
         self.database.session.add_all(ready_to_load.values())
         self.database.session.commit()
 
-        self.results = ImportResultsDialog(self.parent_controller, shares, load_results)
+        self.results = ImportResultsDialog(
+            self.parent_controller, all_shares, load_results
+        )
         self.results.show_window()
 
     def parse_date_format(self, table_rows, column):
@@ -560,16 +623,18 @@ class ImportDialog:
 
     def set_delimiter(self, new_delimiter):
         if new_delimiter == self.decimal_dot:
-            self.delimiter_choice.setCurrentText("Tab")
+            self.delimiter_widget.setCurrentText("Tab")
             return
-        self.delimiter = new_delimiter
+        self.delimiter = "\t" if new_delimiter == "Tab" else new_delimiter
+        self.mapping = {}
         self.process_data()
 
     def set_decimal_dot(self, new_decimal_dot):
         if new_decimal_dot == self.delimiter:
-            self.decimal_dot_choice.setCurrentText(".")
+            self.decimal_dot_widget.setCurrentText(".")
             return
         self.decimal_dot = new_decimal_dot
+        self.mapping = {}
         self.process_data()
 
 

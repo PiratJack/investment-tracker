@@ -169,3 +169,15 @@ class Database:
     def config_get_by_name(self, name):
         query = self.session.query(config.Config).filter(config.Config.name == name)
         return query.one() if query.count() == 1 else None
+
+    def config_set(self, key, value):
+        if type(value) == bool:
+            value = 1 if value else 0
+
+        config_data = self.config_get_by_name(key)
+        if config_data:
+            config_data.value = str(value)
+        else:
+            config_data = config.Config(name=str(key), value=str(value))
+            self.session.add(config_data)
+        self.session.commit()
