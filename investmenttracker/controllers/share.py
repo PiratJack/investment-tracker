@@ -42,8 +42,7 @@ class ShareController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, share_id=0):
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
+        super().__init__(parent_controller)
         self.share_id = int(share_id)
         self.fields["group_id"]["possible_values"] = [
             (g.name, g.id) for g in self.database.share_groups_get_all()

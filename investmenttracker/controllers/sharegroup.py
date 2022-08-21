@@ -20,8 +20,7 @@ class ShareGroupController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, group_id=0):
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
+        super().__init__(parent_controller)
         self.group_id = int(group_id)
         if self.group_id:
             self.item = self.database.share_group_get_by_id(self.group_id)

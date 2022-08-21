@@ -37,6 +37,7 @@ class AccountController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, account_id=0):
+        super().__init__(parent_controller)
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.account_id = int(account_id) if account_id else 0

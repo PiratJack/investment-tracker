@@ -62,8 +62,7 @@ class TransactionController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, transaction_id=0):
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
+        super().__init__(parent_controller)
         self.transaction_id = int(transaction_id)
 
         # Define list of values

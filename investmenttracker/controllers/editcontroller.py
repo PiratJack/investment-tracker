@@ -14,12 +14,19 @@ _ = gettext.gettext
 class EditController:
     name = ""
     fields = {}
+
     error_widgets = []
     seen_warnings = []
 
+    def __init__(self, parent_controller):
+        self.parent_controller = parent_controller
+        self.database = parent_controller.database
+        self.item = None
+        self.window = None
+
     def show_window(self):
         # Discard previous ones
-        if hasattr(self, "window"):
+        if self.window:
             self.window.close()
             self.window = None
 
