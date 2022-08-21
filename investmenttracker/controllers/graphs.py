@@ -691,7 +691,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             datetime.datetime(d.year, d.month, d.day).timestamp()
             for d in (self.start_date, self.end_date)
         )
-        self.setXRange(start, end, padding=0)
+        self.setXRange(min=start, max=end, padding=0)
 
         self.enableAutoRange(axis="y")
 
@@ -707,7 +707,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         elif "max" in self.graph_types[self.graph_type]:
             ymin = self.getAxis("left").range[0]
             ymax = self.graph_types[self.graph_type]["max"]
-        self.setYRange(ymin, ymax, padding=0)
+        self.setYRange(min=ymin, max=ymax, padding=0)
 
     # First date is the "start of the world" so nothing can be before
     def find_missing_date_ranges(self, raw_values, element_id, first_date=None):

@@ -171,7 +171,7 @@ class Database:
         return query.one() if query.count() == 1 else None
 
     def config_set(self, key, value):
-        if type(value) == bool:
+        if isinstance(value, bool):
             value = 1 if value else 0
 
         config_data = self.config_get_by_name(key)
