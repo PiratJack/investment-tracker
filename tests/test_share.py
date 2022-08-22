@@ -98,7 +98,7 @@ class TestShare(unittest.TestCase):
         # String representation
         share = self.database.share_get_by_id(1)
         self.assertEqual(
-            share.short_name(),
+            share.short_name,
             "AXA (FR847238)",
             "Share short name is wrong",
         )
@@ -110,7 +110,7 @@ class TestShare(unittest.TestCase):
             hidden=True,
         )
         self.assertEqual(
-            share.short_name(),
+            share.short_name,
             "Hidden share (FEFZE)",
             "Share short name is wrong",
         )

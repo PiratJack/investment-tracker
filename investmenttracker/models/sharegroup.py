@@ -1,3 +1,10 @@
+"""SQLAlchemy-based classes for handling share groups.
+
+Classes
+----------
+ShareGroup
+    Database class for handling share groups
+"""
 import gettext
 import sqlalchemy.orm
 
@@ -9,6 +16,28 @@ _ = gettext.gettext
 
 
 class ShareGroup(Base):
+    """Database class for handling share groups
+
+    Share groups help users organize their shares. They have no specific meaning.
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    name : str
+        The name of the group to display
+    shares : list of models.share.Share
+        List of shares within that group
+
+    Methods
+    -------
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "share_groups"
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)

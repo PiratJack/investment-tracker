@@ -1,3 +1,13 @@
+"""SQLAlchemy-based classes for handling transactions.
+
+Classes
+----------
+TransactionTypes
+    The different types for transactions. Also defines the cash & asset impacts.
+
+Transaction
+    Database class for handling transactions
+"""
 import enum
 import gettext
 import sqlalchemy.orm
@@ -10,6 +20,23 @@ _ = gettext.gettext
 
 
 class TransactionTypes(enum.Enum):
+    """The different types for transactions. Also defines the cash & asset impacts.
+
+    The attributes are:
+    - impact_currency:
+        1 if the account cash balance increased as a consequence of this transaction
+        -1 if the account cash balance decreased as a consequence of this transaction
+        0 otherwise
+    - impact_asset:
+        1 if the account asset balance increased as a consequence of this transaction
+        -1 if the account asset balance decreased as a consequence of this transaction
+        0 otherwise
+    - has_asset:
+        1 if the transaction is linked to an asset
+        0 otherwise
+        This may be 1 even if impact_asset=0: for example to record asset buying fees
+    """
+
     arbitrage_buy = {
         "name": _("Arbitrage - Buy"),
         "impact_currency": 0,
@@ -145,6 +172,48 @@ class TransactionTypes(enum.Enum):
 
 
 class Transaction(Base):
+    """Database class for handling transactions
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    date : datetime.datetime
+        Record date
+    label : str, optional
+        Free text label (limited to 250 characters)
+    type : TransactionTypes enum
+        Type (also defines the impact of the transaction)
+    quantity : float
+        Number of assets or amount in cash
+    unit_price : float
+        Unit price (for asset transactions)
+    share_id : int, optional
+        ID of the related share (if transaction has one)
+    share : models.share.Share, optional
+        Related share (if transaction has one)
+    account_id : int
+        ID of the account
+    account : models.share.Account
+        Account which includes the transaction
+
+    cash_total
+        Returns the total cash change due to this transaction (may be negative)
+    asset_total
+        Returns the total asset change due to this transaction (may be negative)
+
+    Methods
+    -------
+    copy ()
+        Returns a copy of the transaction
+
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "transactions"
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
@@ -217,11 +286,42 @@ class Transaction(Base):
         return value
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
 
+    @property
+    def cash_total(self):
+        """Returns the total cash change due to this transaction (may be negative)"""
+        type_enum = (
+            TransactionTypes[self.type] if isinstance(self.type, str) else self.type
+        )
+        return type_enum.value["impact_currency"] * self.quantity * self.unit_price
+
+    @property
+    def asset_total(self):
+        """Returns the total asset change due to this transaction (may be negative)"""
+        type_enum = (
+            TransactionTypes[self.type] if isinstance(self.type, str) else self.type
+        )
+        return type_enum.value["impact_asset"] * self.quantity
+
     def copy(self):
+        """Returns a copy of the transaction"""
         new_transaction = Transaction()
         for attr in [
             "date",
@@ -239,20 +339,6 @@ class Transaction(Base):
             else:
                 setattr(new_transaction, attr, getattr(self, attr))
         return new_transaction
-
-    def __getattr__(self, attr):
-        if attr == "cash_total":
-            type_enum = (
-                TransactionTypes[self.type] if isinstance(self.type, str) else self.type
-            )
-            return type_enum.value["impact_currency"] * self.quantity * self.unit_price
-        if attr == "asset_total":
-            type_enum = (
-                TransactionTypes[self.type] if isinstance(self.type, str) else self.type
-            )
-            return type_enum.value["impact_asset"] * self.quantity
-
-        raise AttributeError("'Transaction' object has no attribute '" + attr + "'")
 
     def __repr__(self):
         type_str = self.type if isinstance(self.type, str) else self.type.value["name"]

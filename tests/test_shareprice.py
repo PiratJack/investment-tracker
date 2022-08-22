@@ -122,7 +122,7 @@ class TestSharePrice(unittest.TestCase):
 
         # Get from complex query
         share_prices = self.database.share_prices_get(
-            share_id=2, currency=5, start_date=datetime.datetime(2022, 1, 5)
+            share_id=2, currency_id=5, start_date=datetime.datetime(2022, 1, 5)
         )
         self.assertEqual(
             len(share_prices),
@@ -131,7 +131,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         share_prices = self.database.share_prices_get(
-            share_id=2, currency=5, start_date=datetime.datetime(2022, 4, 5)
+            share_id=2, currency_id=5, start_date=datetime.datetime(2022, 4, 5)
         )
         self.assertEqual(
             len(share_prices),
@@ -140,7 +140,7 @@ class TestSharePrice(unittest.TestCase):
         )
 
         share_prices = self.database.share_prices_get(
-            share_id=2, currency=5, start_date=datetime.datetime(2021, 12, 15)
+            share_id=2, currency_id=5, start_date=datetime.datetime(2021, 12, 15)
         )
         self.assertEqual(
             len(share_prices),
@@ -150,7 +150,7 @@ class TestSharePrice(unittest.TestCase):
 
         share_prices = self.database.share_prices_get(
             share_id=2,
-            currency=5,
+            currency_id=5,
             start_date=datetime.datetime(2022, 4, 5),
             exact_date=True,
         )
@@ -161,7 +161,7 @@ class TestSharePrice(unittest.TestCase):
         )
         share_prices = self.database.share_prices_get(
             share_id=2,
-            currency=5,
+            currency_id=5,
             start_date=datetime.datetime(2022, 4, 1),
             exact_date=True,
         )
@@ -171,13 +171,13 @@ class TestSharePrice(unittest.TestCase):
             "Share Accenture has 1 price in USD on April 5th, 2022",
         )
 
-        share_prices = self.database.share_prices_get(share_id=2, currency=5)
+        share_prices = self.database.share_prices_get(share_id=2, currency_id=5)
         self.assertEqual(
             len(share_prices),
             1,
             "Share Accenture has 1 price in USD (no date filter)",
         )
-        share_prices = self.database.share_prices_get(share_id=2, currency=6)
+        share_prices = self.database.share_prices_get(share_id=2, currency_id=6)
         self.assertEqual(
             len(share_prices),
             1,
@@ -185,7 +185,9 @@ class TestSharePrice(unittest.TestCase):
         )
 
         usd_currency = self.database.share_get_by_id(5)
-        share_prices = self.database.share_prices_get(share_id=2, currency=usd_currency)
+        share_prices = self.database.share_prices_get(
+            share_id=2, currency_id=usd_currency
+        )
         self.assertEqual(
             len(share_prices),
             1,
@@ -194,7 +196,7 @@ class TestSharePrice(unittest.TestCase):
 
         accenture_share = self.database.share_get_by_id(2)
         share_prices = self.database.share_prices_get(
-            share_id=accenture_share, currency=usd_currency
+            share_id=accenture_share, currency_id=usd_currency
         )
         self.assertEqual(
             len(share_prices),
@@ -210,7 +212,7 @@ class TestSharePrice(unittest.TestCase):
             "Share price representation is wrong",
         )
         self.assertEqual(
-            share_price.short_name(),
+            share_price.short_name,
             "458.0 EUR on 2022-01-01",
             "Share price short name is wrong",
         )
@@ -227,7 +229,7 @@ class TestSharePrice(unittest.TestCase):
             "Share price representation is wrong",
         )
         self.assertEqual(
-            share_price.short_name(),
+            share_price.short_name,
             "Unknown on 2022-04-01 00:00:00",
             "Share price short name is wrong",
         )
@@ -243,7 +245,7 @@ class TestSharePrice(unittest.TestCase):
             "Share price representation is wrong",
         )
         self.assertEqual(
-            share_price.short_name(),
+            share_price.short_name,
             "Unknown",
             "Share price short name is wrong",
         )

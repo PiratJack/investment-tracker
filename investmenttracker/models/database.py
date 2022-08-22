@@ -1,3 +1,10 @@
+"""SQLAlchemy-based class acting as entry point for most queries
+
+Classes
+----------
+Database
+    Holds different methods for most queries used in the rest of the application
+"""
 import datetime
 import sqlalchemy
 
@@ -13,8 +20,76 @@ from .base import Base
 
 
 class Database:
-    def __init__(self, DATABASE_FILE):
-        self.engine = sqlalchemy.create_engine("sqlite:///" + DATABASE_FILE)
+    """Point of entry class for queries into the database
+
+    Attributes
+    ----------
+    engine : sqlalchemy.Engine
+        The database engine
+    metadata : sqlalchemy.MetaData
+        SQLAlchemy medatada object
+    session : sqlalchemy.orm.Session
+        Database session
+
+    Methods
+    -------
+    __init__ (self, database_file)
+        Loads (or creates) the database from the provided file
+
+    create_tables (self)
+        Creates all the DB tables
+
+    accounts_get (self, with_hidden=False, with_disabled=False)
+        Returns a list of all accounts (with or without hidden / disabled accounts)
+    account_get_by_id (self, account_id)
+        Returns a account based on its ID
+
+    shares_query (self)
+        Returns a query for shares
+    shares_get (self, with_hidden=False)
+        Returns all shares (with or without hidden ones)
+    share_get_by_id (self, share_id)
+        Returns a share based on its ID
+    share_search (self, name)
+        Searches for shares based on the provided name
+
+    share_groups_get_all (self)
+        Returns all share groups
+    share_group_get_by_id (self, share_group_id)
+        Returns a share group based on its ID
+
+    share_price_query (self)
+        Returns a query for share prices
+    share_price_get_by_id (self, share_price_id)
+        Returns a share price based on its ID
+    share_prices_get (
+            self,
+            share_id=None,
+            currency_id=None,
+            start_date=None,
+            end_date=None,
+            exact_date=False,
+        )
+        Returns share prices based on various filters
+
+    transaction_get_by_id (self, transaction_id):
+        Returns a transaction based on its ID
+    transactions_get_by_account_and_shares(self, accounts, account_shares)
+        Returns transactions based on various filters
+
+    configs_get_all (self)
+        Returns all configuration items
+    config_get_by_name (self, name)
+        Returns a configuration item based on its *name*
+    config_set (self, name, value)
+        Sets a configuration based on the name & value
+
+    delete (self, item)
+        Deletes the provided item
+    """
+
+    def __init__(self, database_file):
+        self.engine = sqlalchemy.create_engine("sqlite:///" + database_file)
         self.metadata = sqlalchemy.MetaData()
         self.create_tables()
 
@@ -53,6 +128,20 @@ class Database:
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
 
     def share_search(self, name):
+        """Searches a share based on the provided name
+
+        The criteria used are, in descending order of preference:
+        - The main_code of the share, or one of its codes
+        - The share ID (never displayed to the user, hence its lower priority)
+
+        Parameters
+        ----------
+        name : str
+            The string to search for
+
+        Returns
+        -------
+        A list of corresponding shares"""
         query = self.session.query(share.Share).filter(
             sqlalchemy.or_(share.Share.name == name, share.Share.main_code == name)
         )
@@ -96,22 +185,44 @@ class Database:
     def share_prices_get(
         self,
         share_id=None,
-        currency=None,
+        currency_id=None,
         start_date=None,
         end_date=None,
         exact_date=False,
     ):
+        """Searches share prices based on various filters
+
+        The criteria used are, in descending order of preference:
+        - The main_code of the share, or one of its codes
+        - The share ID (never displayed to the user, hence its lower priority)
+
+        Parameters
+        ----------
+        share_id : int or share.Share
+            The share for which prices are needed
+        currency_id : int or share.Share
+            The currency in which prices are required
+        start_date : datetime.date or datetime.datetime
+            The start date of prices to look for
+        end_date : datetime.date or datetime.datetime
+            The end date of prices to look for
+        exact_date : bool
+            If False, prices 14 days prior to start_date will be included.
+
+        Returns
+        -------
+        A list of corresponding share prices"""
         query = self.session.query(shareprice.SharePrice)
         if share_id:
             if isinstance(share_id, int):
                 query = query.filter(shareprice.SharePrice.share_id == share_id)
             else:
                 query = query.filter(shareprice.SharePrice.share == share_id)
-        if currency:
-            if isinstance(currency, int):
-                query = query.filter(shareprice.SharePrice.currency_id == currency)
+        if currency_id:
+            if isinstance(currency_id, int):
+                query = query.filter(shareprice.SharePrice.currency_id == currency_id)
             else:
-                query = query.filter(shareprice.SharePrice.currency == currency)
+                query = query.filter(shareprice.SharePrice.currency == currency_id)
         if start_date:
             two_weeks = datetime.timedelta(days=-14)
             start = start_date if exact_date else start_date + two_weeks
@@ -138,6 +249,18 @@ class Database:
 
     # Get transactions that are in some accounts OR combination of accounts + shares
     def transactions_get_by_account_and_shares(self, accounts, account_shares):
+        """Returns transactions for the chosen account and shares
+
+        Parameters
+        ----------
+        accounts : list or set of int
+            The list of account IDs to filter for
+        account_shares : dict of dict of int
+            The list of shares to use, in the form {account_id:[share_id]}
+
+        Returns
+        -------
+        A list of corresponding transactions"""
         transactions = self.session.query(transaction.Transaction)
 
         conditions = []
@@ -157,10 +280,6 @@ class Database:
 
         return transactions.all()
 
-    def transaction_delete(self, transaction_item):
-        self.session.delete(transaction_item)
-        self.session.commit()
-
     # Configuration
     def configs_get_all(self):
         query = self.session.query(config.Config).all()
@@ -170,14 +289,14 @@ class Database:
         query = self.session.query(config.Config).filter(config.Config.name == name)
         return query.one() if query.count() == 1 else None
 
-    def config_set(self, key, value):
+    def config_set(self, name, value):
         if isinstance(value, bool):
             value = 1 if value else 0
 
-        config_data = self.config_get_by_name(key)
+        config_data = self.config_get_by_name(name)
         if config_data:
             config_data.value = str(value)
         else:
-            config_data = config.Config(name=str(key), value=str(value))
+            config_data = config.Config(name=str(name), value=str(value))
             self.session.add(config_data)
         self.session.commit()

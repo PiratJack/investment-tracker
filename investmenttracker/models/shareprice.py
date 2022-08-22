@@ -1,3 +1,10 @@
+"""SQLAlchemy-based classes for handling share prices.
+
+Classes
+----------
+SharePrice
+    Database class for handling share prices
+"""
 import gettext
 import sqlalchemy.orm
 
@@ -9,6 +16,41 @@ _ = gettext.gettext
 
 
 class SharePrice(Base):
+    """Database class for handling share prices
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    date : datetime.datetime
+        Date for this price
+    price : float
+        Asset's unit price
+    share_id : int
+        ID of the related share
+    share : models.share.Share
+        Related share
+    currency_id : int
+        ID of the currency
+    currency : models.share.Share
+        Currency
+    source : str
+        Where the price was found (free text)
+
+    Properties
+    -------
+    short_name
+        A short name for display where space is at a premium
+
+    Methods
+    -------
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "share_prices"
     id = Column(Integer, primary_key=True)
     share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
@@ -81,6 +123,7 @@ class SharePrice(Base):
         ]
         return "".join(output)
 
+    @property
     def short_name(self):
         output = [
             str(self.price)

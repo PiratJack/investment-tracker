@@ -1,3 +1,10 @@
+"""SQLAlchemy-based classes for handling basic configuration settings
+
+Classes
+----------
+Config
+    Database class for handling basic configuration settings
+"""
 import gettext
 import sqlalchemy.orm
 
@@ -9,9 +16,31 @@ _ = gettext.gettext
 
 
 class Config(Base):
+    """Database class for handling basic configuration settings
+
+    Configuration items are simple key:value pairs stored in database
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    name : str
+        Name of the configuration item. Must be unique
+    value : str
+        Value of the configuration item
+
+    Methods
+    -------
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "config"
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False, unique = True)
+    name = Column(String(250), nullable=False, unique=True)
     value = Column(String(250), nullable=False)
 
     @sqlalchemy.orm.validates("name")

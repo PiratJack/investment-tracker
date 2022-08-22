@@ -1,3 +1,13 @@
+"""SQLAlchemy-based classes for handling shares
+
+Classes
+----------
+ShareDataOrigin
+    The origin of share prices (website, app, ...)
+
+Share
+    Database class for handling shares
+"""
 import enum
 import gettext
 import datetime
@@ -11,6 +21,8 @@ _ = gettext.gettext
 
 
 class ShareDataOrigin(enum.Enum):
+    """The different websites / apps usable as origin of share prices"""
+
     alphavantage = {
         "name": "Alphavantage",
     }
@@ -23,6 +35,49 @@ class ShareDataOrigin(enum.Enum):
 
 
 class Share(Base):
+    """Database class for handling transactions
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    name : str
+        Name of the share
+    main_code : str, optional
+        Main code to display in various screens
+    sync_origin : ShareDataOrigin enum
+        Where share prices should be taken from
+    hidden : bool
+        Whether the share should be hidden by default
+    group_id : int, optional
+        ID of the group the share belongs to
+    group : models.sharegroup.ShareGroup, optional
+        Group the share belongs to
+    base_currency_id : int, optional
+        ID of main currency in which the share should be evaluated
+    base_currency : models.share.Share, optional
+        Main currency in which the share should be evaluated
+
+    Properties
+    -------
+    last_price
+        Most recent price available
+
+    graph_label
+        Label for graph display (assumes there is a base currency)
+
+    short_name
+        A short name for display where space is at a premium
+
+    Methods
+    -------
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "shares"
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
@@ -53,32 +108,6 @@ class Share(Base):
         if "hidden" not in kwargs:
             kwargs["hidden"] = self.__table__.c.hidden.default.arg
         super().__init__(**kwargs)
-
-    def __getattr__(self, attr):
-        if attr == "last_price":
-            try:
-                prices = [
-                    price
-                    for price in self.prices
-                    if price.date
-                    >= datetime.date.today() + datetime.timedelta(days=-31)
-                ]
-                return sorted(prices, key=lambda price: price.date)[-1]
-            except IndexError:
-                raise NoPriceException(
-                    _("No price available for share {name} ({main_code})").format(
-                        name=self.name, main_code=self.main_code
-                    ),
-                    self,
-                ) from None
-
-        # Display in graph
-        if attr == "graph_label":
-            return self.name + (
-                " (" + self.base_currency.name + ")" if self.base_currency else ""
-            )
-
-        raise AttributeError("'Share' object has no attribute '" + attr + "'")
 
     @sqlalchemy.orm.validates("main_code")
     def validate_main_code(self, key, value):
@@ -118,6 +147,38 @@ class Share(Base):
             raise ValidationException(message, self, key, value)
         return value
 
+    @property
+    def last_price(self):
+        """Most recent price available"""
+        try:
+            prices = [
+                price
+                for price in self.prices
+                if price.date >= datetime.date.today() + datetime.timedelta(days=-31)
+            ]
+            return sorted(prices, key=lambda price: price.date)[-1]
+        except IndexError:
+            raise NoPriceException(
+                _("No price available for share {name} ({main_code})").format(
+                    name=self.name, main_code=self.main_code
+                ),
+                self,
+            ) from None
+
+    @property
+    def graph_label(self):
+        """Returns a label for graph display (assumes there is a base currency)"""
+        return self.name + (
+            " (" + self.base_currency.name + ")" if self.base_currency else ""
+        )
+
+    @property
+    def short_name(self):
+        output = self.name
+        if self.main_code:
+            output += " (" + self.main_code + ")"
+        return output
+
     def __repr__(self):
         output = "Share " + self.name + " ("
         if self.main_code:
@@ -126,10 +187,4 @@ class Share(Base):
             output += self.base_currency.main_code + ", "
         output += "synced" if self.sync_origin else "unsynced"
         output += ")"
-        return output
-
-    def short_name(self):
-        output = self.name
-        if self.main_code:
-            output += " (" + self.main_code + ")"
         return output

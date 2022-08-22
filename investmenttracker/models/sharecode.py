@@ -1,3 +1,10 @@
+"""SQLAlchemy-based classes for handling share codes.
+
+Classes
+----------
+ShareCode
+    Database class for handling share codes
+"""
 import gettext
 import sqlalchemy.orm
 
@@ -10,6 +17,33 @@ _ = gettext.gettext
 
 
 class ShareCode(Base):
+    """Database class for handling share codes
+
+    Share codes are the IDs used by various stock price websites, apps, ...
+    For example, the CAC40 index could be "1rCAC" on one site, "CAC40" on another, ...
+
+    Attributes
+    ----------
+    id : int
+        Unique ID
+    share_id : int
+        ID of the related share
+    share : models.share.Share
+        Related share
+    origin : share.ShareDataOrigin
+        The origin of this code (name of website, app, ...)
+    value : str
+        The actual code
+
+    Methods
+    -------
+    validate_* (self, key, value)
+        Validator for the corresponding field
+
+    validate_missing_field (self, key, value, message)
+        Raises a ValidationException if the corresponding field is empty
+    """
+
     __tablename__ = "share_codes"
     id = Column(Integer, primary_key=True)
     share_id = Column(Integer, ForeignKey("shares.id"), nullable=False)
