@@ -21,7 +21,7 @@ class ShareComboBox(QtWidgets.QComboBox):
         for group in groups:
             values.append((group.name, -1, False))
             for share in group.shares:
-                values.append((share.short_name(), share.id, True))
+                values.append((share.short_name, share.id, True))
 
         # Shares without group
         shares_without_group = (
@@ -29,13 +29,13 @@ class ShareComboBox(QtWidgets.QComboBox):
         )
         values.append((_("Shares without group"), -1, False))
         for share in shares_without_group:
-            values.append((share.short_name(), share.id, True))
+            values.append((share.short_name, share.id, True))
 
         # Actually add to the dropdown
-        for i, value in enumerate(values):
+        for index, value in enumerate(values):
             self.addItem(value[0], value[1])
             if not value[2]:
-                self.model().item(i).setEnabled(False)
+                self.model().item(index).setEnabled(False)
 
         # Make placeholder unselectable
         if not include_choice_all:

@@ -199,14 +199,14 @@ class TransactionController(EditController):
             return
 
         prices = self.database.share_prices_get(
-            share_id=share_id, currency=currency, start_date=date
+            share_id=share_id, currency_id=currency, start_date=date
         )
         prices = sorted(prices, key=lambda price: price.date, reverse=True)
 
         self.fields["known_unit_price"]["widget"].clear()
         self.fields["known_unit_price"]["widget"].addItem("", -1)
         for price in prices:
-            self.fields["known_unit_price"]["widget"].addItem(price.short_name(), price)
+            self.fields["known_unit_price"]["widget"].addItem(price.short_name, price)
 
         self.on_change_any_value()
 

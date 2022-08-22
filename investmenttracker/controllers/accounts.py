@@ -71,8 +71,8 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                     format_number(account.total_invested),
                 ]
             )
-            for column, value in enumerate(self.columns):
-                account_widget.setTextAlignment(column, value["alignment"])
+            for column, field in enumerate(self.columns):
+                account_widget.setTextAlignment(column, field["alignment"])
 
             if not account.enabled:
                 font = account_widget.font(0)
@@ -121,8 +121,8 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
             for child in children:
                 child_widget = QtWidgets.QTreeWidgetItem(child)
-                for column, value in enumerate(self.columns):
-                    child_widget.setTextAlignment(column, value["alignment"])
+                for column, field in enumerate(self.columns):
+                    child_widget.setTextAlignment(column, field["alignment"])
                 account_widget.addChild(child_widget)
 
             tree_items.append(account_widget)

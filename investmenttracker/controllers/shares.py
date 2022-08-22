@@ -160,8 +160,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         )
         self.addTopLevelItem(group_widget)
 
-        for i, column in enumerate(self.columns):
-            group_widget.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            group_widget.setTextAlignment(column, field["alignment"])
 
         # Shares not grouped
         if group_id <= 0:
@@ -201,8 +201,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
             share_widget.setCheckState(col, val)
             share_widget.setText(col, "")
 
-        for i, column in enumerate(self.columns):
-            share_widget.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            share_widget.setTextAlignment(column, field["alignment"])
 
         if data[1] == 0:
             # Apply style

@@ -72,7 +72,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
                 price.id,
                 QtCore.QDate(price.date) if price.date else QtCore.QVariant(),
                 format_number(price.price),
-                price.currency.short_name() if price.currency else QtCore.QVariant(),
+                price.currency.short_name if price.currency else QtCore.QVariant(),
                 price.source,
                 QtCore.QVariant(),
             ][col]
@@ -293,13 +293,13 @@ class SharePricesTableView(QtWidgets.QTableView):
         grid_width = (
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
-        for i, column in enumerate(self.columns):
-            if column["size"] == 0:
-                self.hideColumn(i)
-            elif column["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * column["size"]))
+        for column, field in enumerate(self.columns):
+            if field["size"] == 0:
+                self.hideColumn(column)
+            elif field["size"] < 1:
+                self.setColumnWidth(column, int(grid_width * field["size"]))
             else:
-                self.setColumnWidth(i, column["size"])
+                self.setColumnWidth(column, field["size"])
 
     def on_table_clicked(self, index):
         self.model.on_table_clicked(index)

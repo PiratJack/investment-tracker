@@ -56,8 +56,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             [account.name, "account", str(account.id)]
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
-        for i, column in enumerate(self.columns):
-            account_item.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            account_item.setTextAlignment(column, field["alignment"])
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)
@@ -141,20 +141,20 @@ class SharesTree(basetreecontroller.BaseTreeController):
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
 
-        for i, column in enumerate(self.columns):
-            if column["size"] == 0:
-                self.hideColumn(i)
-            elif column["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * column["size"]))
+        for column, field in enumerate(self.columns):
+            if field["size"] == 0:
+                self.hideColumn(column)
+            elif field["size"] < 1:
+                self.setColumnWidth(column, int(grid_width * field["size"]))
             else:
-                self.setColumnWidth(i, column["size"])
+                self.setColumnWidth(column, field["size"])
 
     def add_group(self, name, group_id):
         group_widget = QtWidgets.QTreeWidgetItem([name, "Group", str(group_id)])
         self.addTopLevelItem(group_widget)
 
-        for i, column in enumerate(self.columns):
-            group_widget.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            group_widget.setTextAlignment(column, field["alignment"])
 
         # Shares not grouped
         if group_id <= 0:
@@ -172,8 +172,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         else:
             self.addTopLevelItem(share_widget)
 
-        for i, column in enumerate(self.columns):
-            share_widget.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            share_widget.setTextAlignment(column, field["alignment"])
 
         return share_widget
 
@@ -691,7 +691,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             datetime.datetime(d.year, d.month, d.day).timestamp()
             for d in (self.start_date, self.end_date)
         )
-        self.setXRange(min=start, max=end, padding=0)
+        self.setXRange(start, end, padding=0)
 
         self.enableAutoRange(axis="y")
 
@@ -707,7 +707,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         elif "max" in self.graph_types[self.graph_type]:
             ymin = self.getAxis("left").range[0]
             ymax = self.graph_types[self.graph_type]["max"]
-        self.setYRange(min=ymin, max=ymax, padding=0)
+        self.setYRange(ymin, ymax, padding=0)
 
     # First date is the "start of the world" so nothing can be before
     def find_missing_date_ranges(self, raw_values, element_id, first_date=None):
@@ -824,7 +824,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                 price = self.database.share_prices_get(
                     share_id=share,
                     start_date=current_date,
-                    currency=share.base_currency,
+                    currency_id=share.base_currency,
                 )
                 if not price:
                     data = _("Unknown")
@@ -859,7 +859,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                         price = self.database.share_prices_get(
                             share_id=share_id,
                             start_date=current_date,
-                            currency=account.base_currency,
+                            currency_id=account.base_currency,
                         )
                         if not price:
                             data = _("Unknown")

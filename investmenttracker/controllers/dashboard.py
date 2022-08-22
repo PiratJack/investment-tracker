@@ -51,7 +51,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
                 share_id=share,
                 start_date=start_date,
                 end_date=current_date,
-                currency=share.base_currency,
+                currency_id=share.base_currency,
             )
             for current_date in all_dates:
                 prices = [
@@ -125,9 +125,10 @@ class ImportResultsDialog:
         self.results_table.setRowCount(len(self.loading_results) + 1)
         self.results_table.setColumnCount(4)
 
-        for i, item in enumerate([_("Share"), _("Loaded"), _("Duplicate"), _("Code")]):
-            item = QtWidgets.QTableWidgetItem(item)
-            self.results_table.setHorizontalHeaderItem(i, item)
+        columns = enumerate([_("Share"), _("Loaded"), _("Duplicate"), _("Code")])
+        for column, field in columns:
+            item = QtWidgets.QTableWidgetItem(field)
+            self.results_table.setHorizontalHeaderItem(column, item)
 
         # Add data in table
         row = 0
@@ -226,7 +227,7 @@ class ImportDialog:
         mapping = self.config.get("import.mapping", "")
         if mapping:
             self.mapping = {
-                i: val for i, val in enumerate(mapping.split(";")) if val != ""
+                col: val for col, val in enumerate(mapping.split(";")) if val != ""
             }
 
     def show_window(self):
@@ -451,10 +452,10 @@ class ImportDialog:
         for column in range(self.nb_columns):
             self.map_fields[column] = QtWidgets.QComboBox()
             known_index = 0
-            for index, element in enumerate(possible_values):
-                self.map_fields[column].addItem(*element)
+            for index, possible_value in enumerate(possible_values):
+                self.map_fields[column].addItem(*possible_value)
                 # Is header mapping known?
-                if column in self.mapping and self.mapping[column] == element[1]:
+                if column in self.mapping and self.mapping[column] == possible_value[1]:
                     known_index = index
             if known_index:
                 self.map_fields[column].setCurrentIndex(known_index)
@@ -586,7 +587,7 @@ class ImportDialog:
             # Check for duplicates
             existing = self.database.share_prices_get(
                 share_id=share_price.share_id,
-                currency=share_price.currency_id,
+                currency_id=share_price.currency_id,
                 start_date=share_price.date,
                 exact_date=True,
             )

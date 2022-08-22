@@ -62,8 +62,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             [account.name, "account", str(account.id)]
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
-        for i, column in enumerate(self.columns):
-            account_item.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            account_item.setTextAlignment(column, field["alignment"])
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)
@@ -88,8 +88,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         else:
             self.addTopLevelItem(share_item)
 
-        for i, column in enumerate(self.columns):
-            share_item.setTextAlignment(i, column["alignment"])
+        for column, field in enumerate(self.columns):
+            share_item.setTextAlignment(column, field["alignment"])
 
         return share_item
 
@@ -183,7 +183,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.type.value["name"],
                 transaction.label,
                 format_number(transaction.asset_total),
-                transaction.share.short_name() if transaction.share else "-",
+                transaction.share.short_name if transaction.share else "-",
                 format_number(balance[1])
                 if transaction.type.value["has_asset"]
                 else "-",
@@ -317,13 +317,13 @@ class TransactionsTableView(QtWidgets.QTableView):
         grid_width = (
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
-        for i, column in enumerate(self.columns):
-            if column["size"] == 0:
-                self.hideColumn(i)
-            elif column["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * column["size"]))
+        for column, field in enumerate(self.columns):
+            if field["size"] == 0:
+                self.hideColumn(column)
+            elif field["size"] < 1:
+                self.setColumnWidth(column, int(grid_width * field["size"]))
             else:
-                self.setColumnWidth(i, column["size"])
+                self.setColumnWidth(column, field["size"])
 
     def on_table_clicked(self, index):
         self.parent_controller.store_tree_item_selection()
@@ -365,7 +365,7 @@ class TransactionsTableView(QtWidgets.QTableView):
 
                 if messagebox == QtWidgets.QMessageBox.Yes:
                     if transaction.id:
-                        self.database.transaction_delete(transaction)
+                        self.database.delete(transaction)
                     self.model.beginRemoveRows(index, index.row(), index.row())
                     self.set_filters()  # Reload the data
                     self.model.endRemoveRows()

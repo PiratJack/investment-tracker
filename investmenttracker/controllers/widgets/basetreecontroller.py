@@ -32,13 +32,13 @@ class BaseTreeController(QtWidgets.QTreeWidget):
         grid_width = (
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )
-        for i, column in enumerate(self.columns):
-            if self.columns[i]["size"] == 0:
-                self.hideColumn(i)
-            elif self.columns[i]["size"] < 1:
-                self.setColumnWidth(i, int(grid_width * self.columns[i]["size"]))
+        for column, field in enumerate(self.columns):
+            if field["size"] == 0:
+                self.hideColumn(column)
+            elif field["size"] < 1:
+                self.setColumnWidth(column, int(grid_width * field["size"]))
             else:
-                self.setColumnWidth(i, self.columns[i]["size"])
+                self.setColumnWidth(column, field["size"])
 
     # If this is not implemented in child class, use default behavior
     def on_click_edit_button(self, tree_item):
