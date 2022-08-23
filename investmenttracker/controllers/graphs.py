@@ -132,23 +132,6 @@ class SharesTree(basetreecontroller.BaseTreeController):
                 self.add_share([share.name, "Share", share.id], group_widget)
             )
 
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-
-        for column, field in enumerate(self.columns):
-            if field["size"] == 0:
-                self.hideColumn(column)
-            elif field["size"] < 1:
-                self.setColumnWidth(column, int(grid_width * field["size"]))
-            else:
-                self.setColumnWidth(column, field["size"])
-
     def add_group(self, name, group_id):
         group_widget = QtWidgets.QTreeWidgetItem([name, "Group", str(group_id)])
         self.addTopLevelItem(group_widget)

@@ -1,3 +1,12 @@
+"""Various delegates for display in tables
+
+Classes
+----------
+DateDelegate
+    Displays an editable date
+ShareDelegate
+    Displays a dropdown of shares
+"""
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
@@ -5,6 +14,8 @@ from .sharecombobox import ShareComboBox
 
 
 class DateDelegate(QtWidgets.QItemDelegate):
+    """Delegate for dates"""
+
     def createEditor(self, parent, option, index):
         widget = QtWidgets.QDateEdit(parent)
         widget.setCalendarPopup(True)
@@ -27,6 +38,8 @@ class DateDelegate(QtWidgets.QItemDelegate):
 
 
 class ShareDelegate(QtWidgets.QItemDelegate):
+    """Delegate for shares. Uses controllers.widgets.sharecombobox as base"""
+
     def __init__(self, parent, database):
         super().__init__(parent)
         self.database = database

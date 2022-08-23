@@ -1,3 +1,10 @@
+"""Controller for creating or editing a single share
+
+Classes
+----------
+AccountController
+    Controller for creating or editing a single share
+"""
 import gettext
 
 import models.share
@@ -9,6 +16,24 @@ _ = gettext.gettext
 
 
 class ShareController(EditController):
+    """Controller for creating or editing a single share
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    fields : dict of fields
+        Which fields to display for edition.
+        Refer to widgets.EditController for the dict format
+    error_widgets : dict
+        Which fields have errors
+        Format: {field_id: "error message"}
+    share_id : int
+        The ID of the share to edit. 0 for new shares.
+    item : models.share.Share
+        The share being edited or created
+    """
+
     name = _("Share")
 
     fields = {
@@ -42,6 +67,11 @@ class ShareController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, share_id=0):
+        """Sets up all data required to display the fields
+
+        For each fields, sets up the "default" value, based on existing database data
+        If needed, set up the "possible_values" for dropdowns.
+        """
         super().__init__(parent_controller)
         self.share_id = int(share_id)
         self.fields["group_id"]["possible_values"] = [
@@ -81,6 +111,11 @@ class ShareController(EditController):
                 self.fields["code_" + code.origin.name]["default"] = code.value
 
     def after_item_save(self):
+        """Saves the share codes & ensures we have a code for the selected sync origin
+
+        As share codes are a separate model, EditController won't handle it
+        Raises a warning if the sync is enabled and the corresponding code is missing
+        """
         # This refreshes the data from DB, so that self.item.id is set
         self.database.session.flush()
 

@@ -1,3 +1,10 @@
+"""Main window for display. Displays a toolbar to access the different screens
+
+Classes
+----------
+MainWindow
+    Main window for display. Displays a toolbar to access the different screens
+"""
 import gettext
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QSize
@@ -13,6 +20,18 @@ _ = gettext.gettext
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """Main window for display. Displays a toolbar to access the different screens
+
+    Attributes
+    ----------
+    elements : dict of Controllers
+        The different screens of the app
+    layout : QtWidgets.QStackedLayout
+        The main layout of the window
+    toolbar : QtWidgets.QToolBar
+        The toolbar displayed on the left
+    """
+
     def __init__(self, database):
         super().__init__()
         self.database = database
@@ -31,12 +50,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle(_("Investment Tracker"))
 
+        self.layout = QtWidgets.QStackedLayout()
+        self.toolbar = QtWidgets.QToolBar(_("My main toolbar"))
+
         self.create_layout()
         self.layout.setCurrentIndex(0)
 
     def create_layout(self):
-        self.layout = QtWidgets.QStackedLayout()
-
         for element in self.elements.values():
             element_window = element.get_display_widget()
             if element_window:
@@ -50,7 +70,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_toolbar(self):
         # Create the toolbar itself
-        self.toolbar = QtWidgets.QToolBar(_("My main toolbar"))
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
         self.toolbar.setOrientation(Qt.Vertical)

@@ -1,3 +1,10 @@
+"""Controller for creating or editing a single account
+
+Classes
+----------
+AccountController
+    Controller for creating or editing a single account
+"""
 import gettext
 
 import models.account
@@ -7,6 +14,24 @@ _ = gettext.gettext
 
 
 class AccountController(EditController):
+    """Controller for creating or editing a single transaction
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    fields : dict of fields
+        Which fields to display for edition.
+        Refer to widgets.EditController for the dict format
+    error_widgets : dict
+        Which fields have errors
+        Format: {field_id: "error message"}
+    account_id : int
+        The ID of the account to edit. 0 for new accounts.
+    item : models.account.Account
+        The account being edited or created
+    """
+
     name = _("Account")
 
     fields = {
@@ -37,9 +62,11 @@ class AccountController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, account_id=0):
+        """Sets up all data required to display the fields
+
+        For each fields, sets up the "default" value, based on existing database data
+        """
         super().__init__(parent_controller)
-        self.parent_controller = parent_controller
-        self.database = parent_controller.database
         self.account_id = int(account_id) if account_id else 0
 
         if self.account_id:

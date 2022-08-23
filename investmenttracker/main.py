@@ -1,3 +1,4 @@
+"""Main application module"""
 import gettext
 import sys
 import os

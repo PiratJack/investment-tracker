@@ -1,3 +1,10 @@
+"""QComboBox for list of shares, grouped by their groups
+
+Classes
+----------
+ShareComboBox
+    QComboBox for list of shares, grouped by their groups
+"""
 import gettext
 
 from PyQt5 import QtWidgets
@@ -8,7 +15,29 @@ _ = gettext.gettext
 
 
 class ShareComboBox(QtWidgets.QComboBox):
+    """QComboBox for list of shares, grouped by their groups
+
+    Attributes
+    ----------
+    database : models.database.Database
+        A reference to the application database
+    """
+
     def __init__(self, database, parent=None, include_choice_all=0):
+        """Defines the QComboBox contents
+
+        Parameters
+        ----------
+        database : models.database.Database
+            A reference to the application database
+        parent : QtWidgets.QWidget (or child classes)
+            The parent of this combobox
+        include_choice_all : bool
+            Whether value "All" should be included
+
+        Returns
+        -------
+        None"""
         super().__init__(parent)
         self.database = database
 

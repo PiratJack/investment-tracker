@@ -1,13 +1,38 @@
+"""Helper class for trees - adds sorting, headers, ...
+
+Classes
+----------
+BaseTreeController
+    Helper class for trees - adds sorting, headers, ...
+"""
 import gettext
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
+from controllers.widgets import autoresize
 
 _ = gettext.gettext
 
 
-class BaseTreeController(QtWidgets.QTreeWidget):
+class BaseTreeController(QtWidgets.QTreeWidget, autoresize.AutoResize):
+    """Helper class for trees - adds sorting, headers, ...
+
+    Attributes
+    ----------
+    columns : list of dicts
+        Columns to display. The name key is the only one used here (for headers)
+    parent_controller : TransactionsController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
+
+    Methods
+    -------
+    on_click_edit_button (self, tree_item)
+        Handler for clicks on tree items. By default, expands the item.
+    """
+
     columns = {}
 
     def __init__(self, parent_controller):
@@ -23,22 +48,6 @@ class BaseTreeController(QtWidgets.QTreeWidget):
 
         self.itemDoubleClicked.connect(self.on_click_edit_button)
         self.setExpandsOnDoubleClick(False)
-
-    def resizeEvent(self, event):
-        QtWidgets.QMainWindow.resizeEvent(self, event)
-        self.set_column_sizes(event)
-
-    def set_column_sizes(self, event):
-        grid_width = (
-            self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
-        )
-        for column, field in enumerate(self.columns):
-            if field["size"] == 0:
-                self.hideColumn(column)
-            elif field["size"] < 1:
-                self.setColumnWidth(column, int(grid_width * field["size"]))
-            else:
-                self.setColumnWidth(column, field["size"])
 
     # If this is not implemented in child class, use default behavior
     def on_click_edit_button(self, tree_item):

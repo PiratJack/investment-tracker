@@ -1,3 +1,13 @@
+"""Displays accounts, held shares & various metrics
+
+Classes
+----------
+AccountsTree
+    The tree displaying the accounts
+
+AccountsController
+    Handles user interactions and links all displayed widgets
+"""
 import gettext
 
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -11,6 +21,26 @@ _ = gettext.gettext
 
 
 class AccountsTree(basetreecontroller.BaseTreeController):
+    """Display of accounts & shares for user selection
+
+    Attributes
+    ----------
+    columns : list of dicts
+        Columns to display. Each column should have a name and size key
+    selected_accounts : list of int
+        The account IDs for filtering the list of transactions
+    account_details : controllers.account.AccountController
+        The controller for creating/editing a single account
+
+    Methods
+    -------
+    fill_accounts (self, accounts)
+        Fills the tree with accounts data (& their children)
+
+    on_click_edit_button (self)
+        Handles a click on the Edit button: displays edit dialog
+    """
+
     columns = [
         {
             "name": _("Name"),
@@ -48,8 +78,21 @@ class AccountsTree(basetreecontroller.BaseTreeController):
             "alignment": Qt.AlignRight,
         },
     ]
+    account_details = None
 
     def fill_accounts(self, accounts):
+        """Fills the tree based on provided accounts & held shares
+
+        The items are directly added to the tree
+
+        Parameters
+        ----------
+        accounts : list of models.account.Account
+            The list of accounts to display
+
+        Returns
+        -------
+        None"""
         tree_items = []
 
         # Fill in the data
@@ -157,14 +200,66 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
 
 class AccountsController:
+    """Controller for display & interactions on transactions list
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    display_hidden_accounts : bool
+        Whether to display hidden accounts
+    display_disabled_accounts : bool
+        Whether to display disabled accounts
+
+    accounts : list of models.account.Account
+        List of accounts to display in the tree
+
+    parent_window : QtWidgets.QMainWindow
+        The parent window
+    database : models.database.Database
+        A reference to the application database
+
+    display_widget : QtWidgets.QWidget
+        The main display for this controller
+    tree : controllers.widgets.AccountsSharesTree
+        A tree displaying the accounts & shares
+    checkbox_hidden_accounts : bool
+        The checkbox to display hidden accounts
+    checkbox_disabled_accounts : bool
+        The checkbox to display disabled accounts
+
+    Methods
+    -------
+    get_toolbar_button (self)
+        Returns a QtWidgets.QAction for display in the main window toolbar
+    get_display_widget (self)
+        Returns the main QtWidgets.QWidget for this controller
+    reload_data (self)
+        Reloads the list of accounts/shares
+
+    on_click_checkbox_hidden (self)
+        User clicks on 'display hidden accounts' checkbox => reload tree
+    on_click_checkbox_disabled (self)
+        User clicks on 'display disabled accounts' checkbox => reload tree
+    """
+
     name = "Accounts"
-    display_hidden = False
-    display_disabled = False
+    display_hidden_accounts = False
+    display_disabled_accounts = False
 
     def __init__(self, parent_window):
         self.parent_window = parent_window
         self.database = parent_window.database
         self.accounts = self.database.accounts_get()
+
+        self.display_widget = QtWidgets.QWidget()
+        self.tree = AccountsTree(self)
+        self.checkbox_hidden_accounts = QtWidgets.QCheckBox(
+            _("Display hidden accounts?")
+        )
+        self.checkbox_disabled_accounts = QtWidgets.QCheckBox(
+            _("Display disabled accounts?")
+        )
 
     def get_toolbar_button(self):
         button = QtWidgets.QAction(
@@ -175,21 +270,22 @@ class AccountsController:
         return button
 
     def get_display_widget(self):
-        self.display_widget = QtWidgets.QWidget()
+        """Returns the main QtWidgets.QWidget for this controller"""
         self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
-        self.tree = AccountsTree(self)
         self.tree.fill_accounts(self.accounts)
         self.display_widget.layout.addWidget(self.tree)
 
-        self.checkbox_hidden = QtWidgets.QCheckBox(_("Display hidden accounts?"))
-        self.checkbox_hidden.stateChanged.connect(self.on_click_checkbox_hidden)
-        self.display_widget.layout.addWidget(self.checkbox_hidden)
+        self.checkbox_hidden_accounts.stateChanged.connect(
+            self.on_click_checkbox_hidden
+        )
+        self.display_widget.layout.addWidget(self.checkbox_hidden_accounts)
 
-        self.checkbox_disabled = QtWidgets.QCheckBox(_("Display disabled accounts?"))
-        self.checkbox_disabled.stateChanged.connect(self.on_click_checkbox_disabled)
-        self.display_widget.layout.addWidget(self.checkbox_disabled)
+        self.checkbox_disabled_accounts.stateChanged.connect(
+            self.on_click_checkbox_disabled
+        )
+        self.display_widget.layout.addWidget(self.checkbox_disabled_accounts)
 
         self.parent_window.setCentralWidget(self.display_widget)
 
@@ -197,17 +293,18 @@ class AccountsController:
 
     def reload_data(self):
         self.accounts = self.database.accounts_get(
-            with_hidden=self.display_hidden, with_disabled=self.display_disabled
+            with_hidden=self.display_hidden_accounts,
+            with_disabled=self.display_disabled_accounts,
         )
         self.tree.clear()
         self.tree.fill_accounts(self.accounts)
 
     def on_click_checkbox_hidden(self):
-        self.display_hidden = self.checkbox_hidden.isChecked()
+        self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
-        self.checkbox_hidden.clearFocus()
+        self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_checkbox_disabled(self):
-        self.display_disabled = self.checkbox_disabled.isChecked()
+        self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
-        self.checkbox_disabled.clearFocus()
+        self.checkbox_disabled_accounts.clearFocus()

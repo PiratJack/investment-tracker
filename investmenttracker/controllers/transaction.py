@@ -1,3 +1,10 @@
+"""Controller for creating or editing a single transaction
+
+Classes
+----------
+TransactionController
+    Controller for creating or editing a single transaction
+"""
 import gettext
 import datetime
 
@@ -11,6 +18,51 @@ _ = gettext.gettext
 
 
 class TransactionController(EditController):
+    """Controller for creating or editing a single transaction
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    fields : dict of fields
+        Which fields to display for edition.
+        Refer to widgets.EditController for the dict format
+    error_widgets : dict
+        Which fields have errors
+        Format: {field_id: "error message"}
+    transaction_id : int
+        The ID of the transaction to edit. 0 for new transactions.
+    item : models.transaction.Transaction
+        The transaction being edited or created
+
+    Methods
+    -------
+    on_change_any_value (self)
+        Handler for any change of data (resets errors)
+    on_change_type (self)
+        Handler when transaction type changes. Changes which fields are visible.
+    on_change_quantity_or_unit_price (self)
+        Handler for quantity or unit price change. Updates total amount.
+    on_change_currency_delta (self)
+        Handler for total value change. Updates total amount.
+    on_change_share_or_date (self)
+        Handler for share or date changes. Updates known price dropdown.
+
+    on_validation_end (self)
+        Additional validation : warning if account balance becomes negative
+
+    get_quantity (self)
+        Returns user-entered quantity
+    get_unit_price (self)
+        Returns user-entered unit price
+    get_currency_delta (self)
+        Returns user-entered currency total
+
+    save (self)
+        Ensure entered data matches transaction's database fields
+
+    """
+
     name = _("Transaction")
 
     fields = {
@@ -62,6 +114,12 @@ class TransactionController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, transaction_id=0):
+        """Sets up all data required to display the fields
+
+        For each fields, sets up:
+        - "default" value, based on existing database data
+        - "onchange" value (if needed), to connect handlers
+        """
         super().__init__(parent_controller)
         self.transaction_id = int(transaction_id)
 
@@ -113,6 +171,7 @@ class TransactionController(EditController):
         self.clear_errors()
 
     def on_change_type(self):
+        """Handler when transaction type changes. Changes which fields are visible."""
         # Somewhat, doing this increases the height to the wanted one
         self.window.sizeHint()
 
@@ -180,6 +239,7 @@ class TransactionController(EditController):
 
     # Displays known share prices
     def on_change_share_or_date(self):
+        """Handler for share or date changes. Updates known price dropdown."""
         date = datetime.datetime.fromisoformat(
             self.fields["date"]["widget"].date().toString(Qt.ISODate)
         )
@@ -220,6 +280,7 @@ class TransactionController(EditController):
 
     # Raise warning if cash or asset balance becomes negative
     def on_validation_end(self):
+        """Additional validation : warning if account balance becomes negative"""
         if not self.item.account:
             account = self.database.account_get_by_id(self.item.account_id)
         else:
@@ -244,8 +305,8 @@ class TransactionController(EditController):
     def get_currency_delta(self):
         return self.fields["currency_delta"]["widget"].value()
 
-    # Ensure entered data matches transaction's database fields
     def save(self):
+        """Ensure entered data matches transaction's database fields"""
         value = self.fields["type"]["widget"].currentData()
         transaction_type = [
             v for v in models.transaction.TransactionTypes if v.name == value
@@ -262,6 +323,3 @@ class TransactionController(EditController):
                 self.fields["unit_price"]["widget"].setValue(1)
 
         super().save()
-
-    def close(self):
-        self.window.close()

@@ -1,3 +1,10 @@
+"""Controller for editing items - should be used only as base class (not directly)
+
+Classes
+----------
+AccountController
+    Controller for editing items - should be used only as base class (not directly)
+"""
 import gettext
 import datetime
 
@@ -5,13 +12,69 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 
 from models.base import ValidationException, ValidationWarningException
-from .widgets.sharecombobox import ShareComboBox
+from controllers.widgets.sharecombobox import ShareComboBox
 
 
 _ = gettext.gettext
 
 
 class EditController:
+    """Controller for editing items - should be used only as base class (not directly)
+
+    This controller facilitates the display of various fields for editing items.
+    The fields can be of different types:
+        Text: free text
+        List: a list of possible values (dropdown list)
+        Checkbox: a true/false checkbox
+        Date: a date
+        Float: a numeric value
+        Sharelist: a share from the database (uses widget ShareComboBox)
+    Each field may be mandatory, have a handler for change, default values, ...
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    fields : dict of fields
+        Which fields to display for edition.
+        The key should be the ID of the field (as is stored in the database)
+        The value is a dict with the following keys:
+            name (mandatory): the label to display
+            type (mandatory): which field type to display.
+                Can be text, list, checkbox, date, float or sharelist
+            onchange (optional): the handler to call when data is changed by the user
+            possible_values (mandatory for combobox): the list of possible values
+            default (optional, default to blank): the value to display at the start
+            widget (added by this controller): the QWidget item to display in the screen
+            excluded (only for sharelist type): forbidden value
+            mandatory (optional, default to False): whether the field is mandatory
+    error_widgets : dict
+        Which fields have errors
+        Format: {field_id: "error message"}
+    seen_warnings : dict
+        Which fields have warnings that the user saw already (and thus are non-blocking)
+        Format: {field_id: "error message"}
+    item : model.*.*
+        The item being edited or created
+
+    window : QtWidgets.QDialog
+        The window to display
+    layout : QtWidgets.QVBoxLayout
+        The layout of the window
+    form_layout : QtWidgets.QFormLayout
+        The layout of the form displayed
+
+    Methods
+    -------
+    show_window (self)
+        Displays the dialog
+    validate_data (self)
+        Validates the entered data
+            Checks if fields have the right format
+            Checks if models raise any error for this field
+
+    """
+
     name = ""
     fields = {}
 
@@ -22,27 +85,28 @@ class EditController:
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.item = None
-        self.window = None
+
+        self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
+        self.layout = QtWidgets.QVBoxLayout()
+        self.form_layout = QtWidgets.QFormLayout()
 
     def show_window(self):
+        """Displays the dialog based on self.fields"""
         # Discard previous ones
         if self.window:
             self.window.close()
-            self.window = None
+            self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
 
-        self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
         self.window.setModal(True)
 
         # Display content
-        self.window.layout = QtWidgets.QVBoxLayout()
         self.window.setWindowTitle(self.name)
-        self.window.setLayout(self.window.layout)
+        self.window.setLayout(self.layout)
 
         # Create the form
         form_group = QtWidgets.QGroupBox("")
-        self.form_layout = QtWidgets.QFormLayout()
         form_group.setLayout(self.form_layout)
-        self.window.layout.addWidget(form_group)
+        self.layout.addWidget(form_group)
 
         # Create the fields
         for field in self.fields.values():
@@ -147,16 +211,26 @@ class EditController:
         button_box.accepted.connect(self.save)
         button_box.rejected.connect(self.close)
 
-        self.window.layout.addWidget(button_box)
+        self.layout.addWidget(button_box)
         # Size & Move to center
         self.window.setMinimumSize(300, 200)
-        self.window.resize(self.window.layout.sizeHint())
+        self.window.resize(self.layout.sizeHint())
 
         self.seen_warnings = []
 
         self.window.exec()
 
     def validate_data(self):
+        """Validates the entered data
+
+        Checks if fields have the right format
+        Checks if models raise any error for this field
+        Displays any error or warning raised
+        If warnings have already been seen, they will no longer be blocking the save
+
+        Triggers self.on_validation_end() for additional validations
+        """
+
         # Clear previous errors
         has_error = False
         has_new_warnings = False
@@ -207,6 +281,7 @@ class EditController:
         return has_error or has_new_warnings
 
     def add_error_field(self, message, error_field, is_warning=False):
+        """Displays errors on the screen"""
         error_widget = QtWidgets.QLabel(message)
         if is_warning:
             error_widget.setProperty("class", "validation_warning")
@@ -223,6 +298,10 @@ class EditController:
         self.error_widgets = []
 
     def set_value(self, field_id):
+        """Sets the value for a single field on the model database
+
+        Warnings and errors will be raised by the DB as exceptions
+        Those exceptions will be handled by the caller self.validate_data()"""
         field_widget = self.fields[field_id]["widget"]
         if self.fields[field_id]["type"] == "text":
             value = field_widget.text()
@@ -253,6 +332,10 @@ class EditController:
         setattr(self.item, field_id, value)
 
     def save(self):
+        """Saves the item being edited
+
+        Calls self.after_item_save() after saving.
+        If that raises exceptions, they will be displayed (data will not be saved)"""
         has_error = self.validate_data()
         has_new_warnings = False
 
