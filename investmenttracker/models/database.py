@@ -102,9 +102,9 @@ class Database:
     def accounts_get(self, with_hidden=False, with_disabled=False):
         query = self.session.query(account.Account)
         if not with_hidden:
-            query = query.filter(account.Account.hidden == False)
+            query = query.filter(account.Account.hidden.is_(False))
         if not with_disabled:
-            query = query.filter(account.Account.enabled == True)
+            query = query.filter(account.Account.enabled)
         return query.all()
 
     def account_get_by_id(self, account_id):
@@ -121,7 +121,7 @@ class Database:
     def shares_get(self, with_hidden=False):
         query = self.session.query(share.Share)
         if not with_hidden:
-            query = query.filter(share.Share.hidden == False)
+            query = query.filter(share.Share.hidden.is_(False))
         return query.all()
 
     def share_get_by_id(self, share_id):

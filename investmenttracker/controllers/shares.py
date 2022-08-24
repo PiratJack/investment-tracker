@@ -401,7 +401,7 @@ class SharesController:
         )
 
         if not self.display_hidden:
-            self.shares_without_group.filter(models.share.Share.hidden == False)
+            self.shares_without_group.filter(models.share.Share.hidden.is_(False))
         self.shares_without_group = self.shares_without_group.all()
 
         self.tree.clear()
