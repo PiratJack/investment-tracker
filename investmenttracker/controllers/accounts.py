@@ -195,7 +195,9 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         self.insertTopLevelItems(0, tree_items)
 
     def on_click_edit_button(self, tree_item):
-        # TODO (major): Double-click on shares opens the edit dialog
+        # Ignore clicks on shares
+        if tree_item.parent():
+            return
         self.account_details = controllers.account.AccountController(
             self.parent_controller, tree_item.text(1)
         )
