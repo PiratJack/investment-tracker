@@ -1,3 +1,16 @@
+"""Displays shares prices, with filter on share & date
+
+Classes
+----------
+SharePricesTableModel
+    The model for the table displaying the prices
+
+SharePricesTableView
+    The table displaying the prices
+
+SharePricesController
+    Handles user interactions and links all displayed widgets
+"""
 import gettext
 import datetime
 

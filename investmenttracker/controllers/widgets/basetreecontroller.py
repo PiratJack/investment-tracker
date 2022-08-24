@@ -22,7 +22,7 @@ class BaseTreeController(QtWidgets.QTreeWidget, autoresize.AutoResize):
     ----------
     columns : list of dicts
         Columns to display. The name key is the only one used here (for headers)
-    parent_controller : TransactionsController
+    parent_controller : *Controller
         The controller in which this class is displayed
     database : models.database.Database
         A reference to the application database

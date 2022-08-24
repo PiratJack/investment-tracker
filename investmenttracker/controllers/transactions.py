@@ -36,6 +36,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
     ----------
     columns : list of dicts
         Columns to display. Each column should have a name and size key
+    parent_controller : TransactionsController
+        The controller in which this class is displayed
     selected_accounts : list of int
         The account IDs for filtering the list of transactions
     account_shares : dict of dict of int

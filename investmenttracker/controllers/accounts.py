@@ -21,14 +21,16 @@ _ = gettext.gettext
 
 
 class AccountsTree(basetreecontroller.BaseTreeController):
-    """Display of accounts & shares for user selection
+    """Displays accounts & held shares
 
     Attributes
     ----------
     columns : list of dicts
         Columns to display. Each column should have a name and size key
-    selected_accounts : list of int
-        The account IDs for filtering the list of transactions
+    parent_controller : AccountsController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
     account_details : controllers.account.AccountController
         The controller for creating/editing a single account
 
@@ -38,7 +40,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         Fills the tree with accounts data (& their children)
 
     on_click_edit_button (self)
-        Handles a click on the Edit button: displays edit dialog
+        Handles a double-click on accounts: displays edit dialog
     """
 
     columns = [
@@ -193,6 +195,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         self.insertTopLevelItems(0, tree_items)
 
     def on_click_edit_button(self, tree_item):
+        # TODO (major): Double-click on shares opens the edit dialog
         self.account_details = controllers.account.AccountController(
             self.parent_controller, tree_item.text(1)
         )
@@ -200,7 +203,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
 
 class AccountsController:
-    """Controller for display & interactions on transactions list
+    """Controller for display & interactions on accounts list
 
     Attributes
     ----------
@@ -223,9 +226,9 @@ class AccountsController:
         The main display for this controller
     tree : controllers.widgets.AccountsSharesTree
         A tree displaying the accounts & shares
-    checkbox_hidden_accounts : bool
+    checkbox_hidden_accounts : QtWidgets.QCheckBox
         The checkbox to display hidden accounts
-    checkbox_disabled_accounts : bool
+    checkbox_disabled_accounts : QtWidgets.QCheckBox
         The checkbox to display disabled accounts
 
     Methods
