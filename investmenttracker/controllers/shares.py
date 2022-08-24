@@ -99,6 +99,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
             "alignment": Qt.AlignCenter,
         },
     ]
+    group_details = None
+    share_details = None
 
     def fill_groups(self, groups, shares_without_group):
         """Fills the tree based on provided share groups and shares without a group
