@@ -57,28 +57,30 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
 
     Methods
     -------
-    columnCount (self, index)
+    __init__ (database, columns)
+        Sets up all data required to display the screen
+    columnCount (index)
         Returns the number of columns
-    rowCount (self, index)
+    rowCount (index)
         Returns the number of rows
-    canFetchMore (self, index)
+    canFetchMore (index)
         Returns True if further data can be loaded, False otherwise
-    fetchMore (self, index)
+    fetchMore (index)
         Gets additional data from the database
-    data (self, index)
+    data (index)
         Returns which data to display (or how to display it) for the corresponding cell
-    setData (self, index, value, role)
+    setData (index, value, role)
         Handler of user entries in the table
-    flags (self, index)
+    flags (index)
         Returns whether items are selectable, enabled or editable
-    headerData (self, index)
+    headerData (index)
         Returns the table headers
 
-    set_filters (self, index)
+    set_filters (index)
         Applies the filters on the list of transactions
-    on_table_clicked (self, index)
+    on_table_clicked (index)
         Handled user click (on delete button)
-    on_click_delete_button (self, index)
+    on_click_delete_button (index)
         Displays a confirmation dialog for deletion of share prices
     """
 
@@ -87,6 +89,15 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
     count_values = 0
 
     def __init__(self, database, columns):
+        """Sets up all data required to display the screen
+
+        Parameters
+        ----------
+        database : models.database.Database
+            A reference to the application database
+        columns : list of dicts
+            Columns to display. Each column should have a name and size key
+        """
         super().__init__()
         self.columns = columns
         self.database = database
@@ -97,16 +108,43 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         self.date = None
 
     def columnCount(self, index):
+        """Returns the number of columns
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         return len(self.columns)
 
     def rowCount(self, index):
+        """Returns the number of rows
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         return len(self.share_prices) + 1
 
     def canFetchMore(self, index):
+        """Returns whether more rows can be displayed
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         return len(self.share_prices) < self.count_values
 
     def fetchMore(self, index):
-        """Gets additional data from the database"""
+        """Gets additional data from the database
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         # Determine what to fetch
         items_left = self.count_values - len(self.share_prices)
         items_to_fetch = min(items_left, self.row_batch_count)
@@ -128,11 +166,19 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         """Returns the data or formatting to display
 
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display
+        role : Qt.DisplayRole
+            The required role (display, decoration, ...)
+
         Returns
         -------
-        If role = Qt.DisplayRole: the data to display or "Add a share price"
-        If role = Qt.DecorationRole: the images for delete action
-        If role = Qt.TextAlignmentRole: the proper alignment
+        QtCore.QVariant
+            If role = Qt.DisplayRole: the data to display or "Add a share price"
+            If role = Qt.DecorationRole: the images for delete action
+            If role = Qt.TextAlignmentRole: the proper alignment
         """
         if not index.isValid():
             return False
@@ -211,7 +257,8 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
 
         Returns
         -------
-        True if the data was successfully editer"""
+        bool
+            True if the data was successfully edited"""
         col = index.column()
         if role == Qt.EditRole:
             price = self.share_prices[index.row()]
@@ -246,11 +293,41 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         return False
 
     def flags(self, index):
+        """Returns whether items are selectable, enabled or editable
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+
+        Returns
+        ----------
+        Qt.ItemFlags
+            Enabled & selectable for ID and button columns
+            Enabled, selectable & editable for other fields
+        """
         if index.column() in (1, 6):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     def headerData(self, column, orientation, role):
+        """Returns the headers to display for a given column
+
+        Parameters
+        ----------
+        column : int
+            The column number
+        orientation : Qt.Orientation
+            Whether headers are horizontal or vertical
+        role : Qt.DisplayRole
+            The required role (display, decoration, ...)
+
+        Returns
+        -------
+        QtCore.QVariant
+            If role = Qt.DisplayRole and orientation == Qt.Horizontal: the header name
+            Else: QtCore.QVariant
+        """
         if role != Qt.DisplayRole:
             return QtCore.QVariant()
 
@@ -258,7 +335,6 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant(_(self.columns[column]["name"]))
         return QtCore.QVariant()
 
-    # Value -1 resets the filters
     def set_filters(self, share=None, date=None):
         """Applies the filters on the list of share prices to display
 
@@ -270,10 +346,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         date : QtCore.QDate, datetime.datetime, str or int
             Only prices after that date will be displayed
             -1 resets the filter
-
-        Returns
-        -------
-        None"""
+        """
         self.query = self.base_query
 
         if share:
@@ -316,11 +389,26 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         self.share_prices = self.query.all()
 
     def on_table_clicked(self, index):
+        """User clicks on delete button => triggers the deletion
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display
+        """
         if index.column() == 6:
             self.on_click_delete_button(index)
 
     def on_click_delete_button(self, index):
-        """Displays a confirmation dialog for deletion of share prices"""
+        """Displays a confirmation dialog for deletion of share prices
+
+        If deletion is confirmed, reloads the data
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display
+        """
         price = self.share_prices[index.row()]
         messagebox = QtWidgets.QMessageBox.critical(
             self.parent(),
@@ -346,7 +434,7 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
     columns : list of dicts
         Columns to display. Each column should have a name and size key
     parent_controller : SharePricesController
-        The controller in which this class is displayed
+        The controller displaying this class
     database : models.database.Database
         A reference to the application database
     model : TransactionsTableModel
@@ -357,9 +445,11 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
 
     Methods
     -------
-    set_filters (self, share=None, date=None)
-        Applies the corresponding filters on the list of share prices
-    on_table_clicked (self, index)
+    __init__ (parent_controller)
+        Sets up model & delegates for the table display
+    set_filters (share=None, date=None)
+        Applies the filters on the list of share prices & refreshes the display
+    on_table_clicked (index)
         User click handler - delete a share price
     """
 
@@ -402,7 +492,13 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
     ]
 
     def __init__(self, parent_controller):
-        """Sets up model & delegates for the table display"""
+        """Sets up model & delegates for the table display
+
+        Parameters
+        ----------
+        parent_controller : SharePricesController
+            The controller displaying this class
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -416,11 +512,27 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
         self.clicked.connect(self.on_table_clicked)
 
     def set_filters(self, share=None, date=None):
+        """Applies the filters on the list of share prices & refreshes the display
+
+        Parameters
+        ----------
+        share : int
+            The selected share, used to filter the list of prices displayed
+        date : datetime.date
+            The selected date, used to filter the list of prices displayed
+        """
         self.model.set_filters(share, date)
         self.model.layoutChanged.emit()
         self.viewport().update()
 
     def on_table_clicked(self, index):
+        """User click handler - triggers the model's method
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         self.model.on_table_clicked(index)
 
 
@@ -452,14 +564,17 @@ class SharePricesController:
 
     Methods
     -------
-    get_toolbar_button (self)
+    __init__ (parent_window)
         Returns a QtWidgets.QAction for display in the main window toolbar
-    get_display_widget (self)
+
+    get_toolbar_button
+        Returns a QtWidgets.QAction for display in the main window toolbar
+    get_display_widget
         Returns the main QtWidgets.QWidget for this controller
 
-    on_select_share (self)
+    on_select_share
         User selects a share => filter the list of share prices
-    on_select_date (self)
+    on_select_date
         User selects a date => filter the list of share prices
     """
 
@@ -467,6 +582,13 @@ class SharePricesController:
     share_id = 0
 
     def __init__(self, parent_window):
+        """Stores parameters & creates all UI elements
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The main window displaying this controller
+        """
         self.parent_window = parent_window
         self.database = parent_window.database
 
@@ -518,8 +640,22 @@ class SharePricesController:
         return self.display_widget
 
     def on_select_share(self, index):
+        """User selects a share => filter the list of share prices
+
+        Parameters
+        ----------
+        index : int
+            The index of the item selected in the dropdown
+        """
         share_id = self.field_share.itemData(index)
         self.table.set_filters(share=share_id)
 
     def on_select_date(self, date):
+        """User selects a date => filter the list of share prices
+
+        Parameters
+        ----------
+        date : datetime.date
+            The selected date
+        """
         self.table.set_filters(date=date)

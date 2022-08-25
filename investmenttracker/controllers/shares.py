@@ -41,15 +41,15 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
     Methods
     -------
-    fill_groups (self, groups, shares_without_group)
+    fill_groups (groups, shares_without_group)
         Fills the tree with the groups & shares without group
-    add_group (self, name, group_id)
+    add_group (name, group_id)
         Adds a single group (& its children) to the tree
-    add_share (self, data, parent_widget=None)
+    add_share (data, parent_widget=None)
         Adds a single share to the tree
 
-    on_click_edit_button (self)
-        Handles double-click on items: displays edit dialog
+    on_double_click
+        User double-clicks: opens the share group or share create/edit dialog
     """
 
     columns = [
@@ -112,12 +112,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         groups : list of models.sharegroup.ShareGroup
             The list of share groups to display
         shares_without_group : list of models.share.Share
-            The list of shares without a group to display
-
-        Returns
-        -------
-        None"""
-        # Fill in the data
+            The list of shares without a group to display"""
+        # Fill in the different groups
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
 
@@ -220,7 +216,9 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         Returns
         -------
-        A QtWidgets.QTreeWidgetItem representing the share group to add in the tree"""
+        QtWidgets.QTreeWidgetItem
+            The share group to add in the tree
+        """
         group_widget = QtWidgets.QTreeWidgetItem(
             [name, str(group_id), "group", "", "", "", "", "", ""]
         )
@@ -263,7 +261,9 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         Returns
         -------
-        A QtWidgets.QTreeWidgetItem representing the share to add in the tree"""
+        QtWidgets.QTreeWidgetItem
+            The share to add in the tree
+        """
         share_widget = QtWidgets.QTreeWidgetItem([str(field) for field in data])
         share_widget.setFlags(share_widget.flags() & ~Qt.ItemIsUserCheckable)
         if parent_widget:
@@ -300,8 +300,14 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         return share_widget
 
-    def on_click_edit_button(self, tree_item):
-        """Opens either the share group or share create/edit dialog"""
+    def on_double_click(self, tree_item):
+        """User double-clicks: opens the share group or share create/edit dialog
+
+        Parameters
+        ----------
+        tree_item : QtWidgets.QTreeWidgetItem
+            The tree item being modified
+        """
         if tree_item.text(2) == "group":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, tree_item.text(1)
@@ -345,14 +351,16 @@ class SharesController:
 
     Methods
     -------
-    get_toolbar_button (self)
+    __init__ (parent_window)
+        Sets up all data required to display the screen
+    get_toolbar_button
         Returns a QtWidgets.QAction for display in the main window toolbar
-    get_display_widget (self)
+    get_display_widget
         Returns the main QtWidgets.QWidget for this controller
-    reload_data (self)
-        Reloads the list of accounts/shares
+    reload_data
+        Reloads the list of accounts/shares (& triggers tree refresh)
 
-    on_click_display_hidden (self)
+    on_click_display_hidden
         User clicks on 'display hidden shares' checkbox => reload tree
     """
 
@@ -360,6 +368,13 @@ class SharesController:
     display_hidden = False
 
     def __init__(self, parent_window):
+        """Sets up all data required to display the screen
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The window displaying this controller
+        """
         self.parent_window = parent_window
         self.database = parent_window.database
         self.groups = self.database.share_groups_get_all()
@@ -372,6 +387,7 @@ class SharesController:
         self.display_hidden_widget = QtWidgets.QCheckBox(_("Display hidden shares?"))
 
     def get_toolbar_button(self):
+        """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
             QtGui.QIcon("assets/images/shares.png"), _("Shares"), self.parent_window
         )
@@ -395,6 +411,7 @@ class SharesController:
         return self.display_widget
 
     def reload_data(self):
+        """Reloads the list of accounts/shares (& triggers tree refresh)"""
         self.groups = self.database.share_groups_get_all()
         self.shares_without_group = self.database.shares_query().filter(
             models.share.Share.group == None
@@ -408,6 +425,7 @@ class SharesController:
         self.tree.fill_groups(self.groups, self.shares_without_group)
 
     def on_click_display_hidden(self):
+        """User clicks on 'display hidden shares' checkbox => reload tree"""
         self.display_hidden = self.display_hidden_widget.isChecked()
         self.reload_data()
         self.tree.setFocus()

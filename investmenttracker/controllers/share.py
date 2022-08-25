@@ -25,13 +25,24 @@ class ShareController(EditController):
     fields : dict of fields
         Which fields to display for edition.
         Refer to widgets.EditController for the dict format
+
+    parent_controller : QtWidgets.QMainWindow
+        The main window displaying this widget
     error_widgets : dict
         Which fields have errors
         Format: {field_id: "error message"}
+
     share_id : int
         The ID of the share to edit. 0 for new shares.
     item : models.share.Share
         The share being edited or created
+
+    Methods
+    ----------
+    __init__ (parent_controller, share_id=0)
+        Sets up all data required to display the screen
+    after_item_save
+        Saves the share codes & ensures we have a code for the selected sync origin
     """
 
     name = _("Share")
@@ -67,10 +78,18 @@ class ShareController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, share_id=0):
-        """Sets up all data required to display the fields
+        """Sets up all data required to display the screen
 
         For each fields, sets up the "default" value, based on existing database data
         If needed, set up the "possible_values" for dropdowns.
+
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this widget
+        share_id : int
+            The ID of the share to edit. 0 for new shares.
         """
         super().__init__(parent_controller)
         self.share_id = int(share_id)
@@ -114,7 +133,12 @@ class ShareController(EditController):
         """Saves the share codes & ensures we have a code for the selected sync origin
 
         As share codes are a separate model, EditController won't handle it
-        Raises a warning if the sync is enabled and the corresponding code is missing
+
+        Raises
+        ----------
+        ValidationException
+            If the sync origin is defined, but there is no corresponding code
+            (Therefore any syncing will fail)
         """
         # This refreshes the data from DB, so that self.item.id is set
         self.database.session.flush()

@@ -34,10 +34,7 @@ class ShareComboBox(QtWidgets.QComboBox):
             The parent of this combobox
         include_choice_all : bool
             Whether value "All" should be included
-
-        Returns
-        -------
-        None"""
+        """
         super().__init__(parent)
         self.database = database
 

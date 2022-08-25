@@ -57,6 +57,9 @@ class EditController:
     item : model.*.*
         The item being edited or created
 
+    parent_controller : *Controller
+        The controller displaying this edit dialog
+
     window : QtWidgets.QDialog
         The window to display
     layout : QtWidgets.QVBoxLayout
@@ -66,13 +69,24 @@ class EditController:
 
     Methods
     -------
-    show_window (self)
+    __init__ (parent_controller)
+        Stores parameters & creates all UI elements
+    show_window
         Displays the dialog
-    validate_data (self)
+    validate_data
         Validates the entered data
             Checks if fields have the right format
             Checks if models raise any error for this field
-
+    add_error_field (message, error_field, is_warning=False)
+        Displays an error
+    clear_errors
+        Clears all errors
+    set_value (field_id)
+        Sets the value for a single field on the database model being edited/created
+    save (field_id)
+        Saves the database model being edited/created
+    close
+        Closes the dialog
     """
 
     name = ""
@@ -82,6 +96,13 @@ class EditController:
     seen_warnings = []
 
     def __init__(self, parent_controller):
+        """Stores parameters & creates all UI elements
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this controller
+        """
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.item = None
@@ -92,7 +113,7 @@ class EditController:
 
     def show_window(self):
         """Displays the dialog based on self.fields"""
-        # Discard previous ones
+        # Discard previous windows
         if self.window:
             self.window.close()
             self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
@@ -281,7 +302,17 @@ class EditController:
         return has_error or has_new_warnings
 
     def add_error_field(self, message, error_field, is_warning=False):
-        """Displays errors on the screen"""
+        """Displays errors on the screen
+
+        Parameters
+        ----------
+        message : str
+            The error message to display
+        error_field : QWidget
+            The widget with the bad data
+        is_warning : bool
+            Whether the error is a warning or not (displays differently)
+        """
         error_widget = QtWidgets.QLabel(message)
         if is_warning:
             error_widget.setProperty("class", "validation_warning")
@@ -293,15 +324,21 @@ class EditController:
         self.form_layout.insertRow(field_row[0] + 1, "", error_widget)
 
     def clear_errors(self):
+        """Removes all errors being displayed"""
         for error_widget in self.error_widgets:
             self.form_layout.removeRow(error_widget)
         self.error_widgets = []
 
     def set_value(self, field_id):
-        """Sets the value for a single field on the model database
+        """Sets the value for a single field on the database model being edited/created
 
         Warnings and errors will be raised by the DB as exceptions
-        Those exceptions will be handled by the caller self.validate_data()"""
+        Those exceptions will be handled by the caller self.validate_data()
+
+        Parameters
+        ----------
+        field_id : str
+            The ID of the field being validated/Set"""
         field_widget = self.fields[field_id]["widget"]
         if self.fields[field_id]["type"] == "text":
             value = field_widget.text()
@@ -332,7 +369,7 @@ class EditController:
         setattr(self.item, field_id, value)
 
     def save(self):
-        """Saves the item being edited
+        """Saves the database model being edited/created
 
         Calls self.after_item_save() after saving.
         If that raises exceptions, they will be displayed (data will not be saved)"""
@@ -372,4 +409,5 @@ class EditController:
             self.window.close()
 
     def close(self):
+        """Closes the dialog"""
         self.window.close()

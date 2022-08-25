@@ -45,20 +45,22 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
     Methods
     -------
-    fill_tree (self, accounts)
+    __init__ (parent_controller)
+        Initial setup (mostly through inherited __init__)
+    fill_tree (accounts)
         Fills the tree with accounts data (& their children)
-    add_account (self, account)
+    add_account (account)
         Adds a single account to the tree
-    add_share (self, share, parent_item=None)
+    add_share (share, parent_item=None)
         Adds a single share to the tree
 
-    on_select_item (self)
-        Handler for user selection
-    store_item_selection (self)
+    on_select_item
+        Handler for user selection: triggers controller's handler
+    store_item_selection
         Stores selected accounts/shares (for re-selection after refresh)
-    get_selected_items (self)
+    get_selected_items
         Returns a list of selected accounts and a dict of selected shares
-    restore_item_selection (self)
+    restore_item_selection
         Restores previous selection of accounts/shares (used after tree refresh)
     """
 
@@ -83,6 +85,13 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
     selected_shares = {}
 
     def __init__(self, parent_controller):
+        """Initial setup (mostly through inherited __init__)
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this widget
+        """
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
@@ -96,10 +105,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         ----------
         accounts : list of models.account.Account
             The list of accounts to display
-
-        Returns
-        -------
-        None"""
+        """
         for account in sorted(accounts, key=lambda a: a.name):
             if account.hidden and not self.parent_controller.display_hidden_accounts:
                 continue
@@ -128,7 +134,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
         Returns
         -------
-        QtWidgets.QTreeWidgetItem for inclusion in the tree"""
+        QtWidgets.QTreeWidgetItem
+            Account item for inclusion in the tree"""
         account_item = QtWidgets.QTreeWidgetItem(
             [account.name, "account", str(account.id)]
         )
@@ -158,7 +165,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
         Returns
         -------
-        QtWidgets.QTreeWidgetItem for inclusion in the tree"""
+        QtWidgets.QTreeWidgetItem
+            Share item for inclusion in the tree"""
         share_item = QtWidgets.QTreeWidgetItem(
             [
                 share.name,
@@ -177,9 +185,11 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         return share_item
 
     def on_select_item(self):
+        """Handler for user selection: triggers controller's handler"""
         self.parent_controller.on_change_selection(*self.get_selected_items())
 
     def store_item_selection(self):
+        """Stores selected accounts/shares (for re-selection after refresh)"""
         self.selected_accounts, self.selected_shares = self.get_selected_items()
 
     def get_selected_items(self):
@@ -187,8 +197,11 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
         Returns
         -------
-        A list of account IDs
-        A dict of the format {account_id:[share_id]}"""
+        selected_accounts : list of int
+            A list of account IDs
+        selected_shares : dict of list of int
+            A dict of the format {account_id:[share_id]}
+        """
         role = Qt.DisplayRole
         self.selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()
@@ -243,7 +256,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
     Attributes
     ----------
     columns : list of dicts
-        Columns to display. Each column should have a name and size key
+        Columns to display. Each column needs a name key (alignment & size are optional)
     database : models.database.Database
         A reference to the application database
     accounts : list of models.account.Account
@@ -253,22 +266,35 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
 
     Methods
     -------
-    columnCount (self, index)
+    __init__ (database, columns)
+        Stores the provided parameters for future use
+
+    columnCount (index)
         Returns the number of columns
-    rowCount (self, index)
+    rowCount (index)
         Returns the number of rows
-    data (self, index)
+    data (index)
         Returns which data to display (or how to display it) for the corresponding cell
-    headerData (self, index)
+    headerData (index)
         Returns the table headers
 
-    set_filters (self, index)
+    set_filters (index)
         Applies the filters on the list of transactions
-    get_transaction (self, index)
+    get_transaction (index)
         Returns a models.transaction.Transaction object for the corresponding index
     """
 
     def __init__(self, database, columns):
+        """Stores the provided parameters for future use
+
+        Parameters
+        ----------
+        database : models.database.Database
+            A reference to the application database
+        columns : list of dicts
+            Columns to display.
+            Each column needs a name key (alignment & size are optional)
+        """
         super().__init__()
         self.columns = columns
         self.database = database
@@ -276,19 +302,41 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         self.transactions = []
 
     def columnCount(self, index):
+        """Returns the number of columns
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         return len(self.columns)
 
     def rowCount(self, index):
+        """Returns the number of rows
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display (not used in this method)
+        """
         return len(self.transactions) + 1
 
     def data(self, index, role):
-        """Returns the data or formatting to display
+        """Returns the data or formatting to display in table contents
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display
+        role : Qt.DisplayRole
+            The required role (display, decoration, ...)
 
         Returns
         -------
-        If role = Qt.DisplayRole: the data to display or "Add a transaction"
-        If role = Qt.DecorationRole: the images for edit / delete actions
-        If role = Qt.TextAlignmentRole: the proper alignment
+        QtCore.QVariant
+            If role = Qt.DisplayRole: the data to display or "Add a transaction"
+            If role = Qt.DecorationRole: the images for edit / delete actions
+            If role = Qt.TextAlignmentRole: the proper alignment
         """
         if not index.isValid():
             return False
@@ -336,6 +384,23 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
     def headerData(self, column, orientation, role):
+        """Returns the data or formatting to display in headers
+
+        Parameters
+        ----------
+        column : int
+            The column number
+        orientation : Qt.Orientation
+            Whether headers are horizontal or vertical
+        role : Qt.DisplayRole
+            The required role (display, decoration, ...)
+
+        Returns
+        -------
+        QtCore.QVariant
+            If role = Qt.DisplayRole and orientation == Qt.Horizontal: the header name
+            Else: QtCore.QVariant
+        """
         if role != Qt.DisplayRole:
             return QtCore.QVariant()
 
@@ -344,12 +409,33 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
     def set_filters(self, selected_accounts=None, selected_shares=None):
+        """Updates self.transactions based on user selection of accounts/shares
+
+        Parameters
+        ----------
+        selected_accounts : list of int
+            The account IDs for filtering the list of transactions
+        account_shares : dict of dict of int
+            The shares for filtering, in the form {account_id:[share_id]}
+        """
         self.transactions = self.database.transactions_get_by_account_and_shares(
             selected_accounts, selected_shares
         )
         self.transactions = sorted(self.transactions, key=lambda t: (t.date, t.id))
 
     def get_transaction(self, index):
+        """Returns the transaction displayed in a given position (index/row)
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell to display
+
+        Returns
+        -------
+        models.transaction.Transaction
+            The transaction to display for the provided index/row
+        """
         return self.transactions[index.row()]
 
 
@@ -372,9 +458,11 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
 
     Methods
     -------
-    set_filters (self, selected_accounts=None, selected_shares=None)
+    __init__ (parent_controller)
+        Stores parameters & connects with the model & user interactions
+    set_filters (selected_accounts=None, selected_shares=None)
         Applies the corresponding filters on the list of transactions
-    on_table_clicked (self, index)
+    on_table_clicked (index)
         User click handler - either create a new transaction, copy or delete it
     """
 
@@ -448,6 +536,13 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
     transaction_details = None
 
     def __init__(self, parent_controller):
+        """Stores parameters & connects with the model & user interactions
+
+        Parameters
+        ----------
+        parent_controller : TransactionsController
+            The controller in which this table is displayed
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -466,16 +561,21 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
             The account IDs for filtering the list of transactions
         account_shares : dict of dict of int
             The shares for filtering, in the form {account_id:[share_id]}
-
-        Returns
-        -------
-        None"""
+        """
         self.model.set_filters(selected_accounts, selected_shares)
         self.model.layoutChanged.emit()
         self.viewport().update()
 
     def on_table_clicked(self, index):
-        """User click handler - either create a new transaction, copy or delete it"""
+        """User click handler - either create a new transaction, copy or delete it
+
+        Will trigger a reload of the table once the action is complete
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell clicked
+        """
         self.parent_controller.store_tree_item_selection()
         # New transaction
         if index.row() == len(self.model.transactions):
@@ -520,7 +620,6 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
                     self.set_filters()  # Reload the data
                     self.model.endRemoveRows()
 
-        # self.parent_controller.reload_data()
         self.parent_controller.restore_tree_item_selection()
 
 
@@ -562,23 +661,25 @@ class TransactionsController:
 
     Methods
     -------
-    get_toolbar_button (self)
+    __init__ (parent_window)
+        Stores provided parameters & sets up UI items
+    get_toolbar_button
         Returns a QtWidgets.QAction for display in the main window toolbar
-    get_display_widget (self)
+    get_display_widget
         Returns the main QtWidgets.QWidget for this controller
     reload_data (self, reload_accounts=False)
         Reloads the list of accounts/shares (if reload_accounts=True)
 
-    on_click_hidden_accounts (self)
+    on_click_hidden_accounts
         User clicks on 'display hidden accounts' checkbox => reload tree
-    on_click_disabled_accounts (self)
+    on_click_disabled_accounts
         User clicks on 'display disabled accounts' checkbox => reload tree
-    on_change_selection (self, selected_accounts, selected_shares)
+    on_change_selection (selected_accounts, selected_shares)
         User selects accounts or share => reload transations accordingly
 
-    store_tree_item_selection (self)
+    store_tree_item_selection
         Stores selected accounts/shares (for re-selection after refresh)
-    restore_tree_item_selection (self)
+    restore_tree_item_selection
         Restores selected accounts/shares (used after tree refresh)
     """
 
@@ -588,6 +689,13 @@ class TransactionsController:
     display_disabled_accounts = False
 
     def __init__(self, parent_window):
+        """Stores parameters & creates all UI elements
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The main window displaying this controller
+        """
         self.parent_window = parent_window
         self.database = parent_window.database
 
@@ -652,9 +760,14 @@ class TransactionsController:
         self.reload_data(True)
         return self.display_widget
 
-    # reload_accounts=False prevents the editcontroller from reloading accounts
     def reload_data(self, reload_accounts=False):
-        """Reloads the list of accounts/shares (if reload_accounts=True)"""
+        """Reloads the list of accounts/shares (if reload_accounts=True)
+
+        Parameters
+        ----------
+        reload_accounts : bool
+            If True, the data will be reloaded.
+        """
         if reload_accounts:
             self.accounts = self.database.accounts_get(
                 with_hidden=self.display_hidden_accounts,
@@ -679,7 +792,15 @@ class TransactionsController:
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_change_selection(self, selected_accounts, selected_shares):
-        """User selects accounts or share => reload transations accordingly"""
+        """User selects accounts or share => reload transations accordingly
+
+        Parameters
+        ----------
+        selected_accounts : list of int
+            The account IDs for filtering the list of transactions
+        account_shares : dict of dict of int
+            The shares for filtering, in the form {account_id:[share_id]}
+        """
         self.table.set_filters(selected_accounts, selected_shares)
 
     def store_tree_item_selection(self):

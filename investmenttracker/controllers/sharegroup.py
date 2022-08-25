@@ -23,9 +23,13 @@ class ShareGroupController(EditController):
     fields : dict of fields
         Which fields to display for edition.
         Refer to widgets.EditController for the dict format
+
+    parent_controller : QtWidgets.QMainWindow
+        The main window displaying this widget
     error_widgets : dict
         Which fields have errors
         Format: {field_id: "error message"}
+
     group_id : int
         The ID of the share group to edit. 0 for new share groups.
     item : models.sharegroup.ShareGroup
@@ -48,6 +52,13 @@ class ShareGroupController(EditController):
         """Sets up all data required to display the fields
 
         For each fields, sets up the "default" value, based on existing database data
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this widget
+        group_id : int
+            The ID of the share group to edit. 0 for new share groups.
         """
         super().__init__(parent_controller)
         self.group_id = int(group_id)

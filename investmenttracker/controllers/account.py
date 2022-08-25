@@ -23,9 +23,13 @@ class AccountController(EditController):
     fields : dict of fields
         Which fields to display for edition.
         Refer to widgets.EditController for the dict format
+
+    parent_controller : QtWidgets.QMainWindow
+        The main window displaying this widget
     error_widgets : dict
         Which fields have errors
         Format: {field_id: "error message"}
+
     account_id : int
         The ID of the account to edit. 0 for new accounts.
     item : models.account.Account
@@ -62,9 +66,16 @@ class AccountController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, account_id=0):
-        """Sets up all data required to display the fields
+        """Sets up all data required to display the screen
 
         For each fields, sets up the "default" value, based on existing database data
+
+        Parameters
+        ----------
+        parent_controller : controllers.TransactionsController
+            The controller displaying this class
+        account_id : int
+            The ID of the account to edit. 0 for creating a new one.
         """
         super().__init__(parent_controller)
         self.account_id = int(account_id) if account_id else 0

@@ -31,16 +31,17 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         The controller in which this class is displayed
     database : models.database.Database
         A reference to the application database
+
     account_details : controllers.account.AccountController
         The controller for creating/editing a single account
 
     Methods
     -------
-    fill_accounts (self, accounts)
+    fill_accounts (accounts)
         Fills the tree with accounts data (& their children)
 
-    on_click_edit_button (self)
-        Handles a double-click on accounts: displays edit dialog
+    on_double_click (tree_item)
+        User double-clicks: opens the account create/edit dialog
     """
 
     columns = [
@@ -91,10 +92,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         ----------
         accounts : list of models.account.Account
             The list of accounts to display
-
-        Returns
-        -------
-        None"""
+        """
         tree_items = []
 
         # Fill in the data
@@ -194,8 +192,14 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         # Put everything in the tree
         self.insertTopLevelItems(0, tree_items)
 
-    def on_click_edit_button(self, tree_item):
-        # Ignore clicks on shares
+    def on_double_click(self, tree_item):
+        """User double-clicks: opens the account create/edit dialog
+
+        Parameters
+        ----------
+        tree_item : QtWidgets.QTreeWidgetItem
+            The tree item being modified
+        """
         if tree_item.parent():
             return
         self.account_details = controllers.account.AccountController(
@@ -235,16 +239,19 @@ class AccountsController:
 
     Methods
     -------
-    get_toolbar_button (self)
-        Returns a QtWidgets.QAction for display in the main window toolbar
-    get_display_widget (self)
-        Returns the main QtWidgets.QWidget for this controller
-    reload_data (self)
-        Reloads the list of accounts/shares
+    __init__ (parent_window)
+        Sets up all data required to display the screen
 
-    on_click_checkbox_hidden (self)
+    get_toolbar_button
+        Returns a QtWidgets.QAction for display in the main window toolbar
+    get_display_widget
+        Returns the main QtWidgets.QWidget for this controller
+    reload_data
+        Reloads the list of accounts/shares (& triggers tree refresh)
+
+    on_click_checkbox_hidden
         User clicks on 'display hidden accounts' checkbox => reload tree
-    on_click_checkbox_disabled (self)
+    on_click_checkbox_disabled
         User clicks on 'display disabled accounts' checkbox => reload tree
     """
 
@@ -253,6 +260,13 @@ class AccountsController:
     display_disabled_accounts = False
 
     def __init__(self, parent_window):
+        """Sets up all data required to display the screen
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The window displaying this controller
+        """
         self.parent_window = parent_window
         self.database = parent_window.database
         self.accounts = self.database.accounts_get()
@@ -267,6 +281,7 @@ class AccountsController:
         )
 
     def get_toolbar_button(self):
+        """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
             QtGui.QIcon("assets/images/accounts.png"), _("Accounts"), self.parent_window
         )
@@ -297,6 +312,7 @@ class AccountsController:
         return self.display_widget
 
     def reload_data(self):
+        """Reloads the list of accounts/shares (& triggers tree refresh)"""
         self.accounts = self.database.accounts_get(
             with_hidden=self.display_hidden_accounts,
             with_disabled=self.display_disabled_accounts,
@@ -305,11 +321,13 @@ class AccountsController:
         self.tree.fill_accounts(self.accounts)
 
     def on_click_checkbox_hidden(self):
+        """User clicks on 'display hidden accounts' checkbox => reload tree"""
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_checkbox_disabled(self):
+        """User clicks on 'display disabled accounts' checkbox => reload tree"""
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()

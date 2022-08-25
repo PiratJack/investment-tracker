@@ -44,10 +44,13 @@ class ImportResultsDialog:
 
     Methods
     -------
+    __init__ (parent_controller, shares, load_results)
+        Sets up all data required to display the screen
+
     show_window (self)
         Displays the dialog with load results
 
-    display_results (self)
+    fill_results_table (self)
         Fills in the results table
     """
 
@@ -56,6 +59,17 @@ class ImportResultsDialog:
     load_results = {}
 
     def __init__(self, parent_controller, shares, load_results):
+        """Sets up all data required to display the screen
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The window displaying this controller
+        shares : list of models.share.Share
+            All shares present in database
+        load_results : dict of format {share_id: {"loaded": int, "duplicate": int}}
+            The summary of the load per share
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.shares = shares
@@ -86,13 +100,13 @@ class ImportResultsDialog:
         button_box.accepted.connect(self.window.close)
         self.layout.addWidget(button_box)
 
-        self.display_results()
+        self.fill_results_table()
 
         self.window.setMinimumSize(700, 900)
         self.window.resize(self.layout.sizeHint())
         self.window.show()
 
-    def display_results(self):
+    def fill_results_table(self):
         """Fills in the results table"""
         self.results_table.setRowCount(len(self.load_results) + 1)
         self.results_table.setColumnCount(4)
@@ -216,42 +230,49 @@ class ImportDialog:
 
     Methods
     -------
-    show_window (self)
+    __init__ (parent_controller)
+        Gets previous user's choices from the database & sets up UI elements
+
+    show_window
         Displays the dialog with load results
 
-    set_file (self, file_path)
+    set_file (file_path)
         Sets the path of the file to import
 
-    process_data (self)
+    process_data
         Processes the file (by calling many other functions)
-    parse_headers (self)
+    parse_headers
         Reads the file headers to guess possible headers
-    load_file_in_memory (self)
+    load_file_in_memory
         Loads the file and splits it according to self.delimiter
         Updates self.data and self.nb_columns
-    refine_mapping (self)
-        Refines the mapping by tring to determine special formats (like date format)
-    is_mapping_complete (self)
+    refine_mapping
+        Refines the mapping by guessing special formats (like date format)
+    is_mapping_complete
         Returns True if all required fields are mapped without duplicate
-    check_data (self, nb_rows)
+    check_data (nb_rows)
         Checks nb_rows of data for data format
         Updates self.data_errors according to found errors
-    display_table (self)
+    check_duplicate (share_price)
+        Returns True if a share price is NOT a duplicate of existing data
+    display_table
         Displays the table with mapping headers & the details of file data
 
-    on_has_headers (self, has_headers)
+    on_has_headers (has_headers)
         User clicks on "had headers". Triggers a remapping of the file.
-    on_change_header (self, column, value)
+    on_change_header (column, value)
         User changes one of the header mapping. Triggers self.check_data
-    on_confirm_load (self)
+    on_confirm_load
         User clicks "OK". Will load data without errors.
-    parse_date_format (self, table_rows, column)
-        Tries to determine the date format for a given column
-    set_delimiter (self, new_delimiter)
-        Sets the field delimited
-    set_decimal_dot (self, new_decimal_dot)
+    parse_date_format (table_rows, column)
+        Guesses the date format for a given column
+
+    set_delimiter (new_delimiter)
+        Sets the field delimiter
+    set_decimal_dot (new_decimal_dot)
         Sets the decimal separator
-    save_config (self)
+
+    save_config
         Saves the preferences (delimiter, decimal_dot, has_headers, mapping)
     """
 
@@ -303,7 +324,13 @@ class ImportDialog:
     results_dialog = None
 
     def __init__(self, parent_controller):
-        """Gets previous user's choices from the database"""
+        """Gets previous user's choices from the database & sets up UI elements
+
+        Parameters
+        ----------
+        parent_controller : controllers.TransactionsController
+            The controller displaying this class
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -385,10 +412,21 @@ class ImportDialog:
         self.window.showMaximized()
 
     def set_file(self, file_path):
+        """Sets the path of the file to import"""
         self.file_path = file_path
         self.file_contents = open(file_path, "r+", encoding="UTF-8").read().splitlines()
 
     def process_data(self):
+        """Processes the file
+
+        In order:
+        - Resets data checks
+        - Parse first line of file to find headers
+        - Load file to memory
+        - Determine special field formats (like date)
+        - Check data (if all headers are known)
+        - Display results
+        """
         self.data_errors = {}
         self.data_checked = False
 
@@ -401,8 +439,8 @@ class ImportDialog:
             self.check_data(30)
         self.display_table()
 
-    # Looks for headers, but doesn't check the format of the data
     def parse_headers(self):
+        """Reads the file headers to guess possible headers"""
         if self.mapping:
             return
 
@@ -415,6 +453,10 @@ class ImportDialog:
                     self.mapping[column] = self.header_to_field[file_header]
 
     def load_file_in_memory(self):
+        """Loads the file and splits it according to self.delimiter
+
+        Updates self.data and self.nb_columns
+        """
         self.data = []
         self.nb_columns = 0
         for row, line in enumerate(self.file_contents):
@@ -424,8 +466,8 @@ class ImportDialog:
             self.data.append(fields)
             self.nb_columns = max(self.nb_columns, len(fields))
 
-    # Will try to find option ID based on existing mapping - mostly for date format
     def refine_mapping(self):
+        """Refines the mapping by guessing special formats (like date format)"""
         if not self.mapping:
             return
 
@@ -435,7 +477,6 @@ class ImportDialog:
                 if len(date_formats) == 1:
                     self.mapping[column] = date_formats[0]
 
-    # Check we have all fields needed & they appear only once
     def is_mapping_complete(self):
         """Returns True if all required fields are mapped without duplicate"""
         # Convert format ID (in self.mapping) to a field list
@@ -466,7 +507,6 @@ class ImportDialog:
         self.error_label.setText("")
         return True
 
-    # Checks each row for format + values and provides a "status"
     def check_data(self, nb_rows=30):
         """Checks nb_rows of data for data format
 
@@ -481,10 +521,7 @@ class ImportDialog:
         ----------
         nb_rows : int
             The number of rows to check in the file
-
-        Returns
-        -------
-        None"""
+        """
         self.data_checked = False
         if not self.mapping or not self.data:
             return
@@ -536,12 +573,34 @@ class ImportDialog:
         self.data_checked = True
         self.data_errors = errors
 
+    def check_duplicate(self, share_price):
+        """Returns True if a share price is NOT a duplicate of existing data
+
+        Also updates self.load_results"""
+        # Check for duplicates
+        existing = self.database.share_prices_get(
+            share_id=share_price.share_id,
+            currency_id=share_price.currency_id,
+            start_date=share_price.date,
+            exact_date=True,
+        )
+        # Share is not synced yet still in the file
+        if share_price.share_id not in self.load_results:
+            self.load_results[share_price.share_id] = {"loaded": 0, "duplicate": 0}
+        if existing:
+            self.load_results[share_price.share_id]["duplicate"] += 1
+        else:
+            self.load_results[share_price.share_id]["loaded"] += 1
+            return True
+        return False
+
     def display_table(self):
         """Displays the table with mapping headers & the details of file data
 
         The header will have allow the user to choose the mapping for each column
         The first 30 rows of the file are displayed
-        Each cell may be colored in red in case data errors are detected"""
+        Each cell may be colored in red in case data errors are detected
+        """
         self.data_table.clear()
         self.data_table.setRowCount(min(31, len(self.data) + 1))  # +1 due to headers
         self.data_table.setColumnCount(self.nb_columns)
@@ -600,6 +659,7 @@ class ImportDialog:
         self.data_table.resizeRowsToContents()
 
     def on_has_headers(self, has_headers):
+        """User clicks on "had headers". Triggers a remapping of the file."""
         self.has_headers = has_headers
         self.mapping = {}
         self.load_file_in_memory()
@@ -611,6 +671,7 @@ class ImportDialog:
         self.display_table()
 
     def on_change_header(self, column, value):
+        """User changes one of the header mapping. Triggers self.check_data"""
         self.mapping[column] = value[1]
         if self.is_mapping_complete():
             self.check_data(30)
@@ -703,6 +764,7 @@ class ImportDialog:
         self.results_dialog.show_window()
 
     def parse_date_format(self, table_rows, column):
+        """Guesses the date format for a given column"""
         data_to_check = [
             i[column] for i in table_rows if column in i and i[column] != ""
         ][:50]
@@ -716,6 +778,7 @@ class ImportDialog:
         return possible_formats
 
     def set_delimiter(self, new_delimiter):
+        """Sets the field delimiter"""
         if new_delimiter == self.decimal_dot:
             self.delimiter_widget.setCurrentText("Tab")
             return
@@ -724,6 +787,7 @@ class ImportDialog:
         self.process_data()
 
     def set_decimal_dot(self, new_decimal_dot):
+        """Sets the decimal separator"""
         if new_decimal_dot == self.delimiter:
             self.decimal_dot_widget.setCurrentText(".")
             return
@@ -747,24 +811,3 @@ class ImportDialog:
         self.database.config_set(
             "import.last", datetime.datetime.now().strftime("%Y-%m-%d")
         )
-
-    def check_duplicate(self, share_price):
-        """Returns True if a share price is NOT a duplicate
-
-        Also updates self.load_results"""
-        # Check for duplicates
-        existing = self.database.share_prices_get(
-            share_id=share_price.share_id,
-            currency_id=share_price.currency_id,
-            start_date=share_price.date,
-            exact_date=True,
-        )
-        # Share is not synced yet still in the file
-        if share_price.share_id not in self.load_results:
-            self.load_results[share_price.share_id] = {"loaded": 0, "duplicate": 0}
-        if existing:
-            self.load_results[share_price.share_id]["duplicate"] += 1
-        else:
-            self.load_results[share_price.share_id]["loaded"] += 1
-            return True
-        return False

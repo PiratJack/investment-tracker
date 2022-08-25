@@ -24,6 +24,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     Attributes
     ----------
+    database : models.database.Database
+        A reference to the application database
     elements : dict of Controllers
         The different screens of the app
     layout : QtWidgets.QStackedLayout
@@ -33,6 +35,13 @@ class MainWindow(QtWidgets.QMainWindow):
     """
 
     def __init__(self, database):
+        """Stores subwindows, displays toolbar and creates the layout
+
+        Parameters
+        ----------
+        database : models.database.Database
+            A reference to the application database
+        """
         super().__init__()
         self.database = database
 
@@ -57,6 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.setCurrentIndex(0)
 
     def create_layout(self):
+        """Arranges all elements in the window layout"""
         for element in self.elements.values():
             element_window = element.get_display_widget()
             if element_window:
@@ -69,6 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.create_toolbar()
 
     def create_toolbar(self):
+        """Creates the toolbar based on subwindows"""
         # Create the toolbar itself
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
@@ -84,4 +95,5 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.toolbar.addAction(button)
 
     def display_tab(self, tab):
+        """User clicks on toolbar item => display the subwindow"""
         self.layout.setCurrentIndex(list(self.elements).index(tab))

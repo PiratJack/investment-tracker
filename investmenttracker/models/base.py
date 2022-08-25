@@ -50,8 +50,9 @@ def format_number(number, currency=None):
 
     Returns
     -------
-    Either '-' for numbers <= 10**-7, or formatted number
-    Includes the currency string if provided
+    str
+        Either '-' for numbers <= 10**-7, or formatted number
+        Includes the currency string if provided
     """
     if abs(number) <= 10**-7:
         return "-"

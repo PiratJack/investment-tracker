@@ -299,7 +299,8 @@ class Transaction(Base):
 
         Returns
         -------
-        The provided value"""
+        object
+            The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value

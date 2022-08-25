@@ -38,10 +38,16 @@ class AutoResize:
     ]
 
     def resizeEvent(self, event):
+        """Handler for resizeEvent => resizes columns"""
         QtWidgets.QMainWindow.resizeEvent(self, event)
         self.set_column_sizes()
 
     def set_column_sizes(self):
+        """Resizes all columns based on their sizes
+
+        Columns with size 0 will be hidden
+        Sizes above 1 will be counted as pixels (useful for fixed-size ones)
+        Sizes below will occupy (size*100) % of the remaining width"""
         grid_width = (
             self.width() - sum([x["size"] for x in self.columns if x["size"] > 1]) - 10
         )

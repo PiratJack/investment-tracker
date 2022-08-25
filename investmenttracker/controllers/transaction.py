@@ -27,9 +27,13 @@ class TransactionController(EditController):
     fields : dict of fields
         Which fields to display for edition.
         Refer to widgets.EditController for the dict format
+
+    parent_controller : QtWidgets.QMainWindow
+        The main window displaying this widget
     error_widgets : dict
         Which fields have errors
         Format: {field_id: "error message"}
+
     transaction_id : int
         The ID of the transaction to edit. 0 for new transactions.
     item : models.transaction.Transaction
@@ -37,29 +41,34 @@ class TransactionController(EditController):
 
     Methods
     -------
-    on_change_any_value (self)
-        Handler for any change of data (resets errors)
-    on_change_type (self)
-        Handler when transaction type changes. Changes which fields are visible.
-    on_change_quantity_or_unit_price (self)
-        Handler for quantity or unit price change. Updates total amount.
-    on_change_currency_delta (self)
-        Handler for total value change. Updates total amount.
-    on_change_share_or_date (self)
-        Handler for share or date changes. Updates known price dropdown.
+    __init__ (parent_controller, transaction_id=0)
+        Sets up all data required to display the screen
 
-    on_validation_end (self)
+    on_change_any_value
+        Handler for any change of data (resets errors)
+    on_change_type
+        Handler when transaction type changes. Changes which fields are visible.
+    on_change_quantity_or_unit_price
+        Handler for quantity or unit price change. Updates total amount.
+    on_change_currency_delta
+        Handler for total value change. Updates unit price.
+    on_change_share_or_date
+        Handler for share or date changes. Updates known price dropdown.
+    on_change_known_unit_price
+        Handler for selection of a known price. Updates unit price.
+
+    on_validation_end
         Additional validation : warning if account balance becomes negative
 
-    get_quantity (self)
+    get_quantity
         Returns user-entered quantity
-    get_unit_price (self)
+    get_unit_price
         Returns user-entered unit price
-    get_currency_delta (self)
+    get_currency_delta
         Returns user-entered currency total
 
-    save (self)
-        Ensure entered data matches transaction's database fields
+    save
+        Converts entered data to expected database format
 
     """
 
@@ -114,11 +123,18 @@ class TransactionController(EditController):
     error_widgets = []
 
     def __init__(self, parent_controller, transaction_id=0):
-        """Sets up all data required to display the fields
+        """Sets up all data required to display the screen
 
         For each fields, sets up:
         - "default" value, based on existing database data
         - "onchange" value (if needed), to connect handlers
+
+        Parameters
+        ----------
+        parent_controller : controllers.TransactionsController
+            The controller displaying this class
+        transaction_id : int
+            The ID of the transaction to edit. 0 for creating a new one.
         """
         super().__init__(parent_controller)
         self.transaction_id = int(transaction_id)
@@ -168,6 +184,7 @@ class TransactionController(EditController):
         self.fields["known_unit_price"]["onchange"] = self.on_change_known_unit_price
 
     def on_change_any_value(self):
+        """Handler when any data changes. Clears the errors."""
         self.clear_errors()
 
     def on_change_type(self):
@@ -220,15 +237,15 @@ class TransactionController(EditController):
         if self.window.height() <= self.window.sizeHint().height():
             self.window.resize(self.window.sizeHint())
 
-    # Calculate total currency impact when quantity / unit price change
     def on_change_quantity_or_unit_price(self):
+        """Handler for quantity or unit price change. Updates total amount."""
         total = self.get_quantity() * self.get_unit_price()
         self.fields["currency_delta"]["widget"].setValue(total)
 
         self.on_change_any_value()
 
-    # Calculate unit price when total changes
     def on_change_currency_delta(self):
+        """Handler for total value change. Updates unit price."""
         try:
             unit_price = self.get_currency_delta() / self.get_quantity()
             self.fields["unit_price"]["widget"].setValue(unit_price)
@@ -237,7 +254,6 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
-    # Displays known share prices
     def on_change_share_or_date(self):
         """Handler for share or date changes. Updates known price dropdown."""
         date = datetime.datetime.fromisoformat(
@@ -270,17 +286,22 @@ class TransactionController(EditController):
 
         self.on_change_any_value()
 
-    # User selects a known share price => update unit price
     def on_change_known_unit_price(self):
+        """Handler for selection of a known price. Updates unit price."""
         chosen_price = self.fields["known_unit_price"]["widget"].currentData()
         if chosen_price and not isinstance(chosen_price, int):
             self.fields["unit_price"]["widget"].setValue(chosen_price.price)
 
         self.on_change_any_value()
 
-    # Raise warning if cash or asset balance becomes negative
     def on_validation_end(self):
-        """Additional validation : warning if account balance becomes negative"""
+        """Additional validation : warning if account balance becomes negative
+
+        Raises
+        ----------
+        ValidationWarningException
+            A validation warning about negative balance (which the user can ignore)
+        """
         if not self.item.account:
             account = self.database.account_get_by_id(self.item.account_id)
         else:
@@ -297,16 +318,21 @@ class TransactionController(EditController):
             )
 
     def get_quantity(self):
+        """Returns user-entered quantity"""
         return self.fields["quantity"]["widget"].value()
 
     def get_unit_price(self):
+        """Returns user-entered unit price"""
         return self.fields["unit_price"]["widget"].value()
 
     def get_currency_delta(self):
+        """Returns user-entered total amount"""
         return self.fields["currency_delta"]["widget"].value()
 
     def save(self):
-        """Ensure entered data matches transaction's database fields"""
+        """Converts entered data to expected database format
+
+        If the transaction has no asset, the unit price should be 1"""
         value = self.fields["type"]["widget"].currentData()
         transaction_type = [
             v for v in models.transaction.TransactionTypes if v.name == value

@@ -141,7 +141,9 @@ class Database:
 
         Returns
         -------
-        A list of corresponding shares"""
+        list of models.share.Share
+            A list of matching shares
+        """
         query = self.session.query(share.Share).filter(
             sqlalchemy.or_(share.Share.name == name, share.Share.main_code == name)
         )
@@ -211,7 +213,9 @@ class Database:
 
         Returns
         -------
-        A list of corresponding share prices"""
+        list of models.share.Share
+            A list of matching shares
+        """
         query = self.session.query(shareprice.SharePrice)
         if share_id:
             if isinstance(share_id, int):
@@ -260,7 +264,9 @@ class Database:
 
         Returns
         -------
-        A list of corresponding transactions"""
+        list of models.transaction.Transaction
+            A list of matching transactions
+        """
         transactions = self.session.query(transaction.Transaction)
 
         conditions = []

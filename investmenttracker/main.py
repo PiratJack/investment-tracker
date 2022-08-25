@@ -18,7 +18,6 @@ gettext.bindtextdomain("messages", LOCALE_FOLDER)
 gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 
 # TODO (major): when changes happen, clear all screens & reload data
-# TODO (minor): Refactor code to have a base_QTableView
 
 # Connect to database
 database = models.database.Database(DATABASE_FILE)

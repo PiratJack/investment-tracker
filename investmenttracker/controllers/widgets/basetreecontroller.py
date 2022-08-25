@@ -36,6 +36,13 @@ class BaseTreeController(QtWidgets.QTreeWidget, autoresize.AutoResize):
     columns = {}
 
     def __init__(self, parent_controller):
+        """Stores parameters & defines table characteristics (sort, column counts, ...)
+
+        Parameters
+        ----------
+        parent_controller : controllers.*Controller
+            The controller displaying this tree
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -46,9 +53,17 @@ class BaseTreeController(QtWidgets.QTreeWidget, autoresize.AutoResize):
         self.setSortingEnabled(True)
         self.sortByColumn(0, Qt.AscendingOrder)
 
-        self.itemDoubleClicked.connect(self.on_click_edit_button)
+        self.itemDoubleClicked.connect(self.on_double_click)
         self.setExpandsOnDoubleClick(False)
 
-    # If this is not implemented in child class, use default behavior
-    def on_click_edit_button(self, tree_item):
+    def on_double_click(self, tree_item):
+        """Handler for user double-click. By default, expands the item
+
+        Should be overridden in child classes
+
+        Parameters
+        ----------
+        tree_item : controllers.*Controller
+            The controller displaying this tree
+        """
         self.setExpandsOnDoubleClick(True)
