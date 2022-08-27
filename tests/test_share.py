@@ -6,6 +6,7 @@ import investmenttracker.models.database as databasemodel
 
 from investmenttracker.models.base import NoPriceException, ValidationException
 from investmenttracker.models.share import Share
+from investmenttracker.models.sharecode import ShareCode
 from investmenttracker.models.shareprice import SharePrice
 
 DATABASE_FILE = "test.sqlite"
@@ -22,7 +23,13 @@ class TestShare(unittest.TestCase):
         self.database = databasemodel.Database(DATABASE_FILE)
         self.database.session.add_all(
             [
-                Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
+                Share(
+                    id=1,
+                    name="AXA",
+                    main_code="FR847238",
+                    base_currency_id=5,
+                    sync_origin="alphavantage",
+                ),
                 Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
                 Share(
                     id=3,
@@ -47,6 +54,11 @@ class TestShare(unittest.TestCase):
                     price=550,
                     currency_id=6,
                     source="Second test",
+                ),
+                ShareCode(
+                    share_id=1,
+                    origin="alphavantage",
+                    value="fezfze",
                 ),
             ]
         )
@@ -79,7 +91,7 @@ class TestShare(unittest.TestCase):
         share = self.database.share_get_by_id(1)
         self.assertEqual(
             str(share),
-            "Share AXA (FR847238, EUR, unsynced)",
+            "Share AXA (FR847238, EUR, synced)",
             "Share representation is wrong",
         )
         share = Share(

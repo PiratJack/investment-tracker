@@ -115,3 +115,21 @@ class TestConfig(unittest.TestCase):
             "Config for load.file.filename : /test/path",
             "Config string representation is wrong",
         )
+
+        # Test setting a string value
+        config = self.database.config_set("load.file.filename", "blabla")
+        config = self.database.config_get_by_name("load.file.filename")
+        self.assertEqual(
+            str(config),
+            "Config for load.file.filename : blabla",
+            "Config setting is wrong",
+        )
+
+        # Test setting a boolean value
+        config = self.database.config_set("extra.config", False)
+        config = self.database.config_get_by_name("extra.config")
+        self.assertEqual(
+            config.value,
+            "0",
+            "Config boolean setting is wrong",
+        )

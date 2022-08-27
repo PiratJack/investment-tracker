@@ -246,6 +246,15 @@ class TestTransaction(unittest.TestCase):
         )
 
         # Test forbidden values
+        transaction = Transaction(
+            account_id=1,
+            date=datetime.datetime(2020, 4, 15),
+            label="Sell ACN",
+            type="dividends",
+            share_id=2,
+            quantity=10,
+            unit_price=1,
+        )
         forbidden_values = {
             "type": ["", None, 0, -1],
             "account_id": ["", None, 0],
