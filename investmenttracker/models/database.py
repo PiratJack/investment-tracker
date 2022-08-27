@@ -33,37 +33,36 @@ class Database:
 
     Methods
     -------
-    __init__ (self, database_file)
+    __init__ (database_file)
         Loads (or creates) the database from the provided file
 
-    create_tables (self)
+    create_tables
         Creates all the DB tables
 
-    accounts_get (self, with_hidden=False, with_disabled=False)
-        Returns a list of all accounts (with or without hidden / disabled accounts)
-    account_get_by_id (self, account_id)
+    accounts_get (with_hidden=False, with_disabled=False)
+        Returns all accounts (with or without hidden / disabled accounts)
+    account_get_by_id (account_id)
         Returns a account based on its ID
 
-    shares_query (self)
+    shares_query
         Returns a query for shares
-    shares_get (self, with_hidden=False)
+    shares_get (with_hidden=False)
         Returns all shares (with or without hidden ones)
-    share_get_by_id (self, share_id)
+    share_get_by_id (share_id)
         Returns a share based on its ID
-    share_search (self, name)
+    share_search (name)
         Searches for shares based on the provided name
 
-    share_groups_get_all (self)
+    share_groups_get_all
         Returns all share groups
-    share_group_get_by_id (self, share_group_id)
+    share_group_get_by_id (share_group_id)
         Returns a share group based on its ID
 
-    share_price_query (self)
+    share_price_query
         Returns a query for share prices
-    share_price_get_by_id (self, share_price_id)
+    share_price_get_by_id (share_price_id)
         Returns a share price based on its ID
     share_prices_get (
-            self,
             share_id=None,
             currency_id=None,
             start_date=None,
@@ -72,23 +71,30 @@ class Database:
         )
         Returns share prices based on various filters
 
-    transaction_get_by_id (self, transaction_id):
+    transaction_get_by_id (transaction_id):
         Returns a transaction based on its ID
-    transactions_get_by_account_and_shares(self, accounts, account_shares)
-        Returns transactions based on various filters
+    transactions_get_by_account_and_shares(accounts, account_shares)
+        Returns transactions for the chosen account and account+shares combination
 
-    configs_get_all (self)
-        Returns all configuration items
-    config_get_by_name (self, name)
+    configs_get_all
+        Returns all configuration items in form {key: value}
+    config_get_by_name (name)
         Returns a configuration item based on its *name*
-    config_set (self, name, value)
+    config_set (name, value)
         Sets a configuration based on the name & value
 
-    delete (self, item)
+    delete (item)
         Deletes the provided item
     """
 
     def __init__(self, database_file):
+        """Loads (or creates) the database from the provided file
+
+        Parameters
+        ----------
+        database_file : str
+            The path to the database file
+        """
         self.engine = sqlalchemy.create_engine("sqlite:///" + database_file)
         self.metadata = sqlalchemy.MetaData()
         self.create_tables()
@@ -96,10 +102,25 @@ class Database:
         self.session = sqlalchemy.orm.sessionmaker(bind=self.engine)()
 
     def create_tables(self):
+        """Creates all the DB tables"""
         Base.metadata.create_all(self.engine)
 
     # Accounts
     def accounts_get(self, with_hidden=False, with_disabled=False):
+        """Returns all accounts (with or without hidden / disabled ones)
+
+        Parameters
+        ----------
+        with_hidden : bool
+            If True, includes hidden accounts. If false, do not include them.
+        with_disabled : bool
+            If True, includes disabled accounts. If false, do not include them.
+
+        Returns
+        -------
+        list of models.account.Account
+            The list of matching accounts
+        """
         query = self.session.query(account.Account)
         if not with_hidden:
             query = query.filter(account.Account.hidden.is_(False))
@@ -108,6 +129,23 @@ class Database:
         return query.all()
 
     def account_get_by_id(self, account_id):
+        """Returns a account based on its ID
+
+        Parameters
+        ----------
+        account_id : int
+            The ID of the account to get
+
+        Returns
+        -------
+        model.account.Account
+            The account found
+
+        Raises
+        -------
+        sqlalchemy.orm.exc.NoResultFound
+            If the ID doesn't match any account in the database
+        """
         return (
             self.session.query(account.Account)
             .filter(account.Account.id == account_id)
@@ -116,15 +154,51 @@ class Database:
 
     # Shares
     def shares_query(self):
+        """Returns a query for shares
+
+        Returns
+        -------
+        sqlalchemy.orm.Query
+            A query for models.share.Share objects
+        """
         return self.session.query(share.Share)
 
     def shares_get(self, with_hidden=False):
+        """Returns all shares (with or without hidden ones)
+
+        Parameters
+        ----------
+        with_hidden : bool
+            If True, includes hidden shares. If false, do not include them.
+
+        Returns
+        -------
+        list of models.share.Share
+            The list of matching shares
+        """
         query = self.session.query(share.Share)
         if not with_hidden:
             query = query.filter(share.Share.hidden.is_(False))
         return query.all()
 
     def share_get_by_id(self, share_id):
+        """Returns a share based on its ID
+
+        Parameters
+        ----------
+        share_id : int
+            The ID of the share to get
+
+        Returns
+        -------
+        model.share.Share
+            The share found
+
+        Raises
+        -------
+        sqlalchemy.orm.exc.NoResultFound
+            If the ID doesn't match any share in the database
+        """
         return self.session.query(share.Share).filter(share.Share.id == share_id).one()
 
     def share_search(self, name):
@@ -162,9 +236,33 @@ class Database:
 
     # Share groups
     def share_groups_get_all(self):
+        """Returns all share groups
+
+        Returns
+        -------
+        list of models.sharegroup.ShareGroup
+            The list of matching share groups
+        """
         return self.session.query(sharegroup.ShareGroup).all()
 
     def share_group_get_by_id(self, share_group_id):
+        """Returns a share group based on its ID
+
+        Parameters
+        ----------
+        share_group_id : int
+            The ID of the share group to get
+
+        Returns
+        -------
+        model.sharegroup.ShareGroup
+            The share group found
+
+        Raises
+        -------
+        sqlalchemy.orm.exc.NoResultFound
+            If the ID doesn't match any share group in the database
+        """
         return (
             self.session.query(sharegroup.ShareGroup)
             .filter(sharegroup.ShareGroup.id == share_group_id)
@@ -173,17 +271,39 @@ class Database:
 
     # Share prices
     def share_price_query(self):
+        """Returns a query for share prices
+
+        Returns
+        -------
+        sqlalchemy.orm.Query
+            A query for models.shareprice.SharePrice objects
+        """
         return self.session.query(shareprice.SharePrice)
 
     def share_price_get_by_id(self, share_price_id):
+        """Returns a share price based on its ID
+
+        Parameters
+        ----------
+        share_price_id : int
+            The ID of the share price to get
+
+        Returns
+        -------
+        model.shareprice.SharePrice
+            The share price found
+
+        Raises
+        -------
+        sqlalchemy.orm.exc.NoResultFound
+            If the ID doesn't match any share price in the database
+        """
         return (
             self.session.query(shareprice.SharePrice)
             .filter(shareprice.SharePrice.id == share_price_id)
             .one()
         )
 
-    # The date filter will look for values within 2 weeks before
-    # start_date and end_date expect a datetime.date object
     def share_prices_get(
         self,
         share_id=None,
@@ -239,21 +359,33 @@ class Database:
             query = query.filter(shareprice.SharePrice.date <= end)
         return query.all()
 
-    def delete(self, item):
-        self.session.delete(item)
-        self.session.commit()
-
     # Transactions
     def transaction_get_by_id(self, transaction_id):
+        """Returns a transaction based on its ID
+
+        Parameters
+        ----------
+        transaction_id : int
+            The ID of the transaction to get
+
+        Returns
+        -------
+        model.transaction.Transaction
+            The transaction found
+
+        Raises
+        -------
+        sqlalchemy.orm.exc.NoResultFound
+            If the ID doesn't match any transaction in the database
+        """
         return (
             self.session.query(transaction.Transaction)
             .filter(transaction.Transaction.id == transaction_id)
             .one()
         )
 
-    # Get transactions that are in some accounts OR combination of accounts + shares
     def transactions_get_by_account_and_shares(self, accounts, account_shares):
-        """Returns transactions for the chosen account and shares
+        """Returns transactions for the chosen account and account+shares combination
 
         Parameters
         ----------
@@ -288,14 +420,40 @@ class Database:
 
     # Configuration
     def configs_get_all(self):
+        """Returns all configuration items in form {key: value}
+
+        Returns
+        -------
+        dict
+            All configuration items in form {key: value}
+        """
         query = self.session.query(config.Config).all()
         return {config.name: config.value for config in query}
 
     def config_get_by_name(self, name):
+        """Returns a configuration item based on its *name*
+
+        Parameters
+        ----------
+
+
+        Returns
+        -------
+
+        """
         query = self.session.query(config.Config).filter(config.Config.name == name)
         return query.one() if query.count() == 1 else None
 
     def config_set(self, name, value):
+        """Sets a configuration based on the name & value
+
+        Parameters
+        ----------
+        name : str
+            The name (key) of the configuration to set
+        value : str
+            The value of the configuration to set
+        """
         if isinstance(value, bool):
             value = 1 if value else 0
 
@@ -305,4 +463,15 @@ class Database:
         else:
             config_data = config.Config(name=str(name), value=str(value))
             self.session.add(config_data)
+        self.session.commit()
+
+    def delete(self, item):
+        """Deletes the provided item
+
+        Parameters
+        ----------
+        item : model.*.*
+            The item to delete
+        """
+        self.session.delete(item)
         self.session.commit()

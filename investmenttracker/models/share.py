@@ -71,10 +71,10 @@ class Share(Base):
 
     Methods
     -------
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
     """
 
@@ -105,12 +105,14 @@ class Share(Base):
     )
 
     def __init__(self, **kwargs):
+        """Defaults hidden value to its default"""
         if "hidden" not in kwargs:
             kwargs["hidden"] = self.__table__.c.hidden.default.arg
         super().__init__(**kwargs)
 
     @sqlalchemy.orm.validates("main_code")
     def validate_main_code(self, key, value):
+        """Ensure the main code field has less than 250 characters"""
         if len(value) > 250:
             raise ValidationException(
                 _("Max length for share main code is 250 characters"), self, key, value
@@ -119,6 +121,7 @@ class Share(Base):
 
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
+        """Ensure the name field is filled and has less than 250 characters"""
         self.validate_missing_field(key, value, _("Missing share name"))
         if len(value) > 250:
             raise ValidationException(
@@ -128,6 +131,7 @@ class Share(Base):
 
     @sqlalchemy.orm.validates("base_currency_id")
     def validate_base_currency_id(self, key, value):
+        """Ensure the base currency field is not the share itself"""
         if value is not None and value == self.id:
             raise ValidationException(
                 _("Share base currency can't be itself"), self, key, value
@@ -136,6 +140,7 @@ class Share(Base):
 
     @sqlalchemy.orm.validates("base_currency")
     def validate_base_currency(self, key, value):
+        """Ensure the base currency field is not the share itself"""
         if value is not None and value.id == self.id:
             raise ValidationException(
                 _("Share base currency can't be itself"), self, key, value
@@ -143,6 +148,21 @@ class Share(Base):
         return value
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        object
+            The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
@@ -174,12 +194,14 @@ class Share(Base):
 
     @property
     def short_name(self):
+        """Returns a string of form [name] ([main_code])"""
         output = self.name
         if self.main_code:
             output += " (" + self.main_code + ")"
         return output
 
     def __repr__(self):
+        """Returns a string of form Share [name] ([main_code], [currency], (un)synced)"""
         output = "Share " + self.name + " ("
         if self.main_code:
             output += self.main_code + ", "

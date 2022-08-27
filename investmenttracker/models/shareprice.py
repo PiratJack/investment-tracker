@@ -44,10 +44,10 @@ class SharePrice(Base):
 
     Methods
     -------
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
     """
 
@@ -66,6 +66,7 @@ class SharePrice(Base):
 
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
+        """Ensure the share_id field is filled and is not the currency"""
         self.validate_missing_field(key, value, _("Missing share price share ID"))
         if value is not None and value == self.currency_id:
             raise ValidationException(
@@ -75,16 +76,19 @@ class SharePrice(Base):
 
     @sqlalchemy.orm.validates("date")
     def validate_date(self, key, value):
+        """Ensure the date field is filled"""
         self.validate_missing_field(key, value, _("Missing share price date"))
         return value
 
     @sqlalchemy.orm.validates("price")
     def validate_price(self, key, value):
+        """Ensure the price field is filled"""
         self.validate_missing_field(key, value, _("Missing share price actual price"))
         return value
 
     @sqlalchemy.orm.validates("currency_id")
     def validate_currency(self, key, value):
+        """Ensure the currency_id field is filled and is not the share itself"""
         self.validate_missing_field(key, value, _("Missing share price currency"))
         if value is not None and value == self.share_id:
             raise ValidationException(
@@ -94,6 +98,7 @@ class SharePrice(Base):
 
     @sqlalchemy.orm.validates("source")
     def validate_source(self, key, value):
+        """Ensure the source field is filled and has less than 250 characters"""
         self.validate_missing_field(key, value, _("Missing share price source"))
         if len(value) > 250:
             raise ValidationException(
@@ -105,11 +110,28 @@ class SharePrice(Base):
         return value
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        object
+            The provided value
+        """
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
 
     def __repr__(self):
+        """Returns a string of form Price (share name at price currency on date)"""
         output = [
             "Price (",
             self.share.name + " at " if self.share else "",
@@ -125,6 +147,7 @@ class SharePrice(Base):
 
     @property
     def short_name(self):
+        '''Returns a string of form "[price] [currency] on [date]"'''
         output = [
             str(self.price)
             + " "

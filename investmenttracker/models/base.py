@@ -22,12 +22,16 @@ Base = declarative_base()
 
 
 class NoPriceException(Exception):
+    """Exception type when shares have no price according to requested parameters"""
+
     def __init__(self, message, share):
         super().__init__(message)
         self.share = share
 
 
 class ValidationException(Exception):
+    """Exception type for validating data: missing mandatory fields, invalid value..."""
+
     def __init__(self, message, item, key, invalid_value):
         super().__init__(message)
         self.message = message
@@ -37,6 +41,8 @@ class ValidationException(Exception):
 
 
 class ValidationWarningException(Exception):
+    """Exception type for data warnings: things that are possible but not smart"""
+
     def __init__(self, message, item, key, invalid_value):
         super().__init__(message)
         self.message = message

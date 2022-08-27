@@ -37,10 +37,10 @@ class ShareCode(Base):
 
     Methods
     -------
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
     """
 
@@ -53,11 +53,13 @@ class ShareCode(Base):
 
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
+        """Ensure the share_id field is filled"""
         self.validate_missing_field(key, value, _("Missing share code share ID"))
         return value
 
     @sqlalchemy.orm.validates("origin")
     def validate_origin(self, key, value):
+        """Ensure the origin field is filled and one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing share code origin"))
         if value not in self.__table__.columns["origin"].type.enums:
             raise ValidationException(
@@ -70,6 +72,7 @@ class ShareCode(Base):
 
     @sqlalchemy.orm.validates("value")
     def validate_value(self, key, value):
+        """Ensure the value field is filled and has less than 250 characters"""
         self.validate_missing_field(key, value, _("Missing share code value"))
         if len(value) > 250:
             raise ValidationException(
@@ -78,11 +81,27 @@ class ShareCode(Base):
         return value
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        object
+            The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
 
     def __repr__(self):
+        """Returns a string of format ShareCode [share_name] ([value] @ [website])"""
         if self.share:
             return (
                 "ShareCode "

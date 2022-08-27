@@ -31,10 +31,10 @@ class ShareGroup(Base):
 
     Methods
     -------
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
     """
 
@@ -47,6 +47,7 @@ class ShareGroup(Base):
 
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
+        """Validates the name field: mandatory + should have less than 250 characters"""
         self.validate_missing_field(key, value, _("Missing share group name"))
         if len(value) > 250:
             raise ValidationException(
@@ -55,6 +56,21 @@ class ShareGroup(Base):
         return value
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        object
+            The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value

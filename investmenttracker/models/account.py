@@ -59,15 +59,15 @@ class Account(Base):
 
     Methods
     -------
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
 
-    balance_after_transaction (self, transaction)
+    balance_after_transaction (transaction)
         Returns the cash and asset balance after a given transaction (for the relevant asset)
-    balance_before_staged_transaction (self, transaction)
+    balance_before_staged_transaction (transaction)
         Same as balance_after_transaction for unsaved transactions
     """
 
@@ -85,6 +85,7 @@ class Account(Base):
     )
 
     def __init__(self, **kwargs):
+        """Defaults the enabled & hidden values based on table defaults"""
         if "enabled" not in kwargs:
             kwargs["enabled"] = self.__table__.c.enabled.default.arg
         if "hidden" not in kwargs:
@@ -93,6 +94,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("name")
     def validate_name(self, key, value):
+        """Ensure the name field is filled and has less than 250 characters"""
         self.validate_missing_field(key, value, _("Missing account name"))
         if len(value) > 250:
             raise ValidationException(
@@ -105,6 +107,7 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("code")
     def validate_code(self, key, value):
+        """Ensure the code field has less than 250 characters"""
         if len(value) > 250:
             raise ValidationException(
                 _("Max length for account code is 250 characters"),
@@ -116,16 +119,19 @@ class Account(Base):
 
     @sqlalchemy.orm.validates("base_currency")
     def validate_base_currency(self, key, value):
+        """Ensure the base currency field is filled"""
         self.validate_missing_field(key, value, _("Missing account base currency"))
         return value
 
     @sqlalchemy.orm.validates("base_currency_id")
     def validate_base_currency_id(self, key, value):
+        """Ensure the base currency field is filled"""
         self.validate_missing_field(key, value, _("Missing account base currency"))
         return value
 
     @property
     def balance(self):
+        """Returns the cash balance of the account"""
         balance = 0
         for transaction in self.transactions:
             balance += transaction.cash_total
@@ -258,11 +264,27 @@ class Account(Base):
         return account_holdings
 
     def validate_missing_field(self, key, value, message):
+        """Raises a ValidationException if the corresponding field is None or empty
+
+        Parameters
+        ----------
+        key : str
+            The name of the field to validate
+        value : str
+            The value of the field to validate
+        message : str
+            The message to raise if the field is empty
+
+        Returns
+        -------
+        object
+            The provided value"""
         if value == "" or value is None:
             raise ValidationException(message, self, key, value)
         return value
 
     def __repr__(self):
+        """Returns string of form Account ([code], enabled/disabled, hidden/visible)"""
         output = "Account " + self.name + " ("
         if self.code:
             output += self.code + ", "

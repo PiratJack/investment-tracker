@@ -204,13 +204,13 @@ class Transaction(Base):
 
     Methods
     -------
-    copy ()
+    copy
         Returns a copy of the transaction
 
-    validate_* (self, key, value)
+    validate_* (key, value)
         Validator for the corresponding field
 
-    validate_missing_field (self, key, value, message)
+    validate_missing_field (key, value, message)
         Raises a ValidationException if the corresponding field is empty
     """
 
@@ -232,6 +232,7 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("label")
     def validate_label(self, key, value):
+        """Ensure the label field has less than 250 characters"""
         if len(value) > 250:
             raise ValidationException(
                 _("Max length for transaction label is 250 characters"),
@@ -243,6 +244,7 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("type")
     def validate_type(self, key, value):
+        """Ensure the type field is filled and has one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing transaction type"))
 
         if value not in self.__table__.columns["type"].type.enums:
@@ -256,15 +258,13 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("account_id")
     def validate_account_id(self, key, value):
+        """Ensure the account field is filled"""
         self.validate_missing_field(key, value, _("Missing transaction account"))
-        if value == 0:
-            raise ValidationException(
-                "This transaction has no impact", self, key, value
-            )
         return value
 
     @sqlalchemy.orm.validates("quantity")
     def validate_quantity(self, key, value):
+        """Ensure the quantity field is filled and different than 0"""
         self.validate_missing_field(key, value, _("Missing transaction quantity"))
         if value == 0:
             raise ValidationException(
@@ -274,14 +274,18 @@ class Transaction(Base):
 
     @sqlalchemy.orm.validates("unit_price")
     def validate_unit_price(self, key, value):
+        """Ensure the unit price field is filled"""
         self.validate_missing_field(key, value, _("Missing transaction unit price"))
         return value
 
     @sqlalchemy.orm.validates("share_id")
     def validate_share_id(self, key, value):
+        """Ensure the share_id field is filled if transaction has assets"""
         if self.type:
             type_value = TransactionTypes[self.type].value
             if type_value["impact_asset"] and value in (-1, 0):
+                raise ValidationException("Missing transaction share", self, key, value)
+            if type_value["has_asset"] and value in (-1, 0):
                 raise ValidationException("Missing transaction share", self, key, value)
         return value
 
@@ -342,6 +346,7 @@ class Transaction(Base):
         return new_transaction
 
     def __repr__(self):
+        """Returns a string of form Transaction (type, date, share, account)"""
         type_str = self.type if isinstance(self.type, str) else self.type.value["name"]
         account_str = self.account.name if self.account else ""
         share_str = self.share.name if self.share else ""
