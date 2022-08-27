@@ -340,7 +340,7 @@ class Transaction(Base):
             "account",
         ]:
             if attr == "type":
-                new_transaction.type = self.type._name_
+                new_transaction.type = self.type.name
             else:
                 setattr(new_transaction, attr, getattr(self, attr))
         return new_transaction
