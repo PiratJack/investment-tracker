@@ -104,6 +104,31 @@ class TestAccount(unittest.TestCase):
                     quantity=100,
                     unit_price=1,
                 ),
+                Transaction(  # Account 2: Cash entry of 10 k
+                    account_id=2,
+                    date=datetime.date(2020, 1, 1),
+                    label="Invest 10 k",
+                    type="cash_entry",
+                    quantity=10000.000000001,
+                    unit_price=1,
+                ),
+                Transaction(  # Account 2: Cash exit of 10 k
+                    account_id=2,
+                    date=datetime.date(2020, 1, 1),
+                    label="Withdraw 10 k",
+                    type="cash_exit",
+                    quantity=10000,
+                    unit_price=1,
+                ),
+                Transaction(  # Account 3: buy 10 EUR with EUR (absurd, just for test)
+                    account_id=3,
+                    date=datetime.date(2020, 4, 10),
+                    label="Buy EUR",
+                    type="asset_buy",
+                    share_id=5,
+                    quantity=10,
+                    unit_price=1,
+                ),
                 Transaction(  # Account 4: deposit 10k on April 1st, 2020
                     account_id=4,
                     date=datetime.date(2020, 4, 1),
@@ -147,15 +172,6 @@ class TestAccount(unittest.TestCase):
                     share_id=4,
                     quantity=20,
                     unit_price=125,
-                ),
-                Transaction(  # Account 3: buy 10 EUR with EUR (absurd, just for test)
-                    account_id=3,
-                    date=datetime.date(2020, 4, 10),
-                    label="Buy EUR",
-                    type="asset_buy",
-                    share_id=5,
-                    quantity=10,
-                    unit_price=1,
                 ),
                 SharePrice(  # ACN at 100 EUR on January 5th, 2020
                     share_id=2,
@@ -333,6 +349,11 @@ class TestAccount(unittest.TestCase):
             3110,
             "Account balance should be 3110",
         )
+        self.assertEqual(
+            self.database.account_get_by_id(2).balance,
+            0,
+            "Account balance should be 0",
+        )
 
         ##### Shares held #####
         shares = self.database.accounts_get()[0].shares
@@ -369,7 +390,7 @@ class TestAccount(unittest.TestCase):
             balance, (8000, 10), "Cash/asset balance of transaction is wrong"
         )
 
-        balance = account.balance_after_transaction(9)
+        balance = account.balance_after_transaction(12)
         self.assertEqual(
             balance, (6250, 5), "Cash/asset balance of transaction is wrong"
         )

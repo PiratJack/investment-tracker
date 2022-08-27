@@ -9,6 +9,7 @@ Account
 import gettext
 import datetime
 import sqlalchemy.orm
+import math
 
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 
@@ -16,6 +17,11 @@ from .base import Base, ValidationException, NoPriceException
 from .transaction import TransactionTypes
 
 _ = gettext.gettext
+
+
+def truncate(number, decimals=0):
+    """Returns a value truncated to a specific number of decimal places."""
+    return math.trunc(number * 10**decimals) / 10**decimals
 
 
 class Account(Base):
@@ -135,9 +141,7 @@ class Account(Base):
         balance = 0
         for transaction in self.transactions:
             balance += transaction.cash_total
-        if abs(balance) <= 10**-8:
-            return 0
-        return balance
+        return truncate(balance, 8)
 
     @property
     def start_date(self):
@@ -251,8 +255,9 @@ class Account(Base):
             # Now, add the actual transaction
             account_holdings[t.date]["cash"] += t.cash_total
             # Cash below precision limit: put as 0
-            if abs(account_holdings[t.date]["cash"]) <= 10**-8:
-                account_holdings[t.date]["cash"] = 0
+            account_holdings[t.date]["cash"] = truncate(
+                account_holdings[t.date]["cash"], 8
+            )
             if t.type.value["impact_asset"]:
                 if t.share.id not in account_holdings[t.date]["shares"]:
                     account_holdings[t.date]["shares"][t.share.id] = 0
@@ -322,6 +327,7 @@ class Account(Base):
             if t.date < transaction.date
             or (t.date == transaction.date and t.id <= transaction.id)
         )
+        cash_balance = truncate(cash_balance, 8)
         asset_balance = sum(
             t.asset_total
             for t in self.transactions
@@ -355,6 +361,7 @@ class Account(Base):
             if t.date < transaction.date
             or (t.date == transaction.date and t.id != transaction.id)
         )
+        cash_balance = truncate(cash_balance, 8)
         asset_balance = sum(
             t.asset_total
             for t in self.transactions
