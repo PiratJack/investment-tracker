@@ -2,10 +2,10 @@
 
 Classes
 ----------
-ImportResultsDialog
+SharePriceImportResultsDialog
     A dialog displaying the results of importing share prices
 
-ImportDialog
+SharePriceImportDialog
     A dialog to select mapping information for share price import
 """
 import datetime
@@ -21,7 +21,7 @@ from models.shareprice import SharePrice
 _ = gettext.gettext
 
 
-class ImportResultsDialog:
+class SharePriceImportResultsDialog:
     """Displays accounts & held shares
 
     Attributes
@@ -155,7 +155,7 @@ class ImportResultsDialog:
         self.results_table.resizeRowsToContents()
 
 
-class ImportDialog:
+class SharePriceImportDialog:
     """Displays a dialog to import share prices from a file
 
     The goal is for the user to see all errors prior to the actual import.
