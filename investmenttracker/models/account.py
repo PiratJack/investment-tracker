@@ -87,9 +87,9 @@ class Account(Base):
     def __init__(self, **kwargs):
         """Defaults the enabled & hidden values based on table defaults"""
         if "enabled" not in kwargs:
-            kwargs["enabled"] = self.__table__.c.enabled.default.arg
+            kwargs["enabled"] = True
         if "hidden" not in kwargs:
-            kwargs["hidden"] = self.__table__.c.hidden.default.arg
+            kwargs["hidden"] = False
         super().__init__(**kwargs)
 
     @sqlalchemy.orm.validates("name")

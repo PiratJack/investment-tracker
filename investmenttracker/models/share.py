@@ -107,7 +107,7 @@ class Share(Base):
     def __init__(self, **kwargs):
         """Defaults hidden value to its default"""
         if "hidden" not in kwargs:
-            kwargs["hidden"] = self.__table__.c.hidden.default.arg
+            kwargs["hidden"] = False
         super().__init__(**kwargs)
 
     @sqlalchemy.orm.validates("main_code")
@@ -144,6 +144,18 @@ class Share(Base):
         if value is not None and value.id == self.id:
             raise ValidationException(
                 _("Share base currency can't be itself"), self, key, value
+            )
+        return value
+
+    @sqlalchemy.orm.validates("sync_origin")
+    def validate_origin(self, key, value):
+        """Ensure the sync_origin field is one of the allowed values"""
+        if value and value not in ShareDataOrigin.__members__:
+            raise ValidationException(
+                _("Sharecode origin is invalid"),
+                self,
+                key,
+                value,
             )
         return value
 

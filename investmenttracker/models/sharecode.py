@@ -61,7 +61,7 @@ class ShareCode(Base):
     def validate_origin(self, key, value):
         """Ensure the origin field is filled and one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing share code origin"))
-        if value not in self.__table__.columns["origin"].type.enums:
+        if value not in ShareDataOrigin.__members__:
             raise ValidationException(
                 _("Sharecode origin is invalid"),
                 self,

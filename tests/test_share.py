@@ -232,7 +232,7 @@ class TestShare(unittest.TestCase):
         )
         self.database.session.add(share)
 
-        # Base currency - Check direct value
+        # Can't have itself as base currency - Check direct value
         share = self.database.share_get_by_id(1)
         share.base_currency = self.database.share_get_by_id(6)
         self.assertEqual(
@@ -242,3 +242,29 @@ class TestShare(unittest.TestCase):
         )
         with self.assertRaises(ValidationException) as cm:
             share.base_currency = share
+
+        # Test invalid sync_origin attribute
+        test_name = "Share must have a valid sync_origin attribute"
+        share = self.database.share_get_by_id(1)
+        with self.assertRaises(ValidationException) as cm:
+            share.sync_origin = "hfeozhfze"
+        self.assertEqual(
+            type(cm.exception),
+            ValidationException,
+            test_name + " - exception type is wrong",
+        )
+        self.assertEqual(
+            cm.exception.item,
+            share,
+            test_name + " - exception.item is wrong",
+        )
+        self.assertEqual(
+            cm.exception.key,
+            "sync_origin",
+            test_name + " - exception.key is wrong",
+        )
+        self.assertEqual(
+            cm.exception.invalid_value,
+            "hfeozhfze",
+            test_name + " - exception.invalid_value is wrong",
+        )

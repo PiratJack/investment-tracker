@@ -247,7 +247,7 @@ class Transaction(Base):
         """Ensure the type field is filled and has one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing transaction type"))
 
-        if value not in self.__table__.columns["type"].type.enums:
+        if value not in TransactionTypes.__members__:
             raise ValidationException(
                 _("Transaction type is invalid"),
                 self,
