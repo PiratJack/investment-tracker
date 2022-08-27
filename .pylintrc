@@ -1,7 +1,6 @@
 [HEADER]
 
 good-names=resizeEvent,columnCount,canFetchMore,fetchMore,setData,headerData,createEditor,setEditorData,setModelData,rowCount,t
-docstring-min-length=15
 
 [MESSAGES CONTROL]
 disable=no-self-use,too-many-instance-attributes,too-many-locals,too-many-ancestors
