@@ -26,7 +26,6 @@ from controllers.widgets import basetreecontroller, autoresize
 
 _ = gettext.gettext
 # TODO (?): Link transactions ==> what would be the impacts?
-# TODO (?): Allow modification of transaction by double-click?
 
 
 class AccountsSharesTree(basetreecontroller.BaseTreeController):
@@ -551,6 +550,7 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         self.setModel(self.model)
 
         self.clicked.connect(self.on_table_clicked)
+        self.doubleClicked.connect(self.on_table_double_clicked)
 
     def set_filters(self, selected_accounts=None, selected_shares=None):
         """Applies the filters on the list of transactions to display
@@ -619,6 +619,29 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
                     self.model.beginRemoveRows(index, index.row(), index.row())
                     self.set_filters()  # Reload the data
                     self.model.endRemoveRows()
+
+        self.parent_controller.restore_tree_item_selection()
+
+    def on_table_double_clicked(self, index):
+        """User double-click handler - edit existing transaction
+
+        Will trigger a reload of the table once the action is complete
+
+        Parameters
+        ----------
+        index : QtCore.QModelIndex
+            A reference to the cell clicked
+        """
+        self.parent_controller.store_tree_item_selection()
+        # New transaction
+        if index.row() == len(self.model.transactions):
+            self.on_table_clicked()
+        else:
+            transaction = self.model.get_transaction(index)
+            self.transaction_details = controllers.transaction.TransactionController(
+                self.parent_controller, transaction.id
+            )
+            self.transaction_details.show_window()
 
         self.parent_controller.restore_tree_item_selection()
 
