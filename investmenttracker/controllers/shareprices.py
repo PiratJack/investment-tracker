@@ -30,7 +30,7 @@ _ = gettext.gettext
 class SharePricesTableModel(QtCore.QAbstractTableModel):
     """Model for display of share prices, based on user selection
 
-    The date filter is meant as "any price after this date"
+    The date filter is meant as 'any price after this date'
 
     Attributes
     ----------

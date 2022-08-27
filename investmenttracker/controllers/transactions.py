@@ -667,7 +667,7 @@ class TransactionsController:
         Returns a QtWidgets.QAction for display in the main window toolbar
     get_display_widget
         Returns the main QtWidgets.QWidget for this controller
-    reload_data (self, reload_accounts=False)
+    reload_data (reload_accounts=False)
         Reloads the list of accounts/shares (if reload_accounts=True)
 
     on_click_hidden_accounts

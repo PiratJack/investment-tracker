@@ -23,9 +23,9 @@ class AutoResize:
 
     Methods
     -------
-    resizeEvent (self, event)
+    resizeEvent (event)
         Handler for resize events
-    set_column_sizes (self, event)
+    set_column_sizes (event)
         Resizes columns based on the columns attribute
     """
 

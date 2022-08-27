@@ -29,7 +29,7 @@ class BaseTreeController(QtWidgets.QTreeWidget, autoresize.AutoResize):
 
     Methods
     -------
-    on_click_edit_button (self, tree_item)
+    on_click_edit_button (tree_item)
         Handler for clicks on tree items. By default, expands the item.
     """
 

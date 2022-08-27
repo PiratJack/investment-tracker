@@ -30,7 +30,7 @@ class ImportResultsDialog:
         The name of this dialog. Displayed in top bar.
     shares : list of models.share.Share
         All shares present in database
-    load_results : dict of format {share_id: {"loaded": int, "duplicate": int}}
+    load_results : dict of format {share_id: {'loaded': int, 'duplicate': int}}
         The summary of the load per share
     parent_controller : ImportDialog
         The controller parent of this dialog
@@ -47,10 +47,10 @@ class ImportResultsDialog:
     __init__ (parent_controller, shares, load_results)
         Sets up all data required to display the screen
 
-    show_window (self)
+    show_window
         Displays the dialog with load results
 
-    fill_results_table (self)
+    fill_results_table
         Fills in the results table
     """
 
@@ -67,7 +67,7 @@ class ImportResultsDialog:
             The window displaying this controller
         shares : list of models.share.Share
             All shares present in database
-        load_results : dict of format {share_id: {"loaded": int, "duplicate": int}}
+        load_results : dict of format {share_id: {'loaded': int, 'duplicate': int}}
             The summary of the load per share
         """
         super().__init__()
@@ -208,22 +208,22 @@ class ImportDialog:
     results_table : QtWidgets.QTableWidget
         The table with results
     delimiter_label : QtWidgets.QLabel
-        The label "Delimiter"
+        The label 'Delimiter'
     delimiter_widget : QtWidgets.QComboBox
         The dropdown for delimiter choice
     decimal_dot_label : QtWidgets.QLabel
-        The label "Decimal dot"
+        The label 'Decimal dot'
     decimal_dot_widget : QtWidgets.QComboBox
         The dropdown for decimal dot choice
     has_headers_widget : QtWidgets.QCheckBox
-        The checkbox "file has headers"
+        The checkbox 'file has headers'
 
     error_label : QtWidgets.QLabel
         The display of errors
     data_table : QtWidgets.QTableWidget
         The table contains the mapped file contents
 
-    load_results : dict of format {share_id: {"loaded": int, "duplicate": int}}
+    load_results : dict of format {share_id: {'loaded': int, 'duplicate': int}}
         The summary of the load per share
     results_dialog : ImportResultsDialog
         The dialog displaying import results
@@ -259,11 +259,11 @@ class ImportDialog:
         Displays the table with mapping headers & the details of file data
 
     on_has_headers (has_headers)
-        User clicks on "had headers". Triggers a remapping of the file.
+        User clicks on 'had headers'. Triggers a remapping of the file.
     on_change_header (column, value)
         User changes one of the header mapping. Triggers self.check_data
     on_confirm_load
-        User clicks "OK". Will load data without errors.
+        User clicks 'OK'. Will load data without errors.
     parse_date_format (table_rows, column)
         Guesses the date format for a given column
 
@@ -659,7 +659,7 @@ class ImportDialog:
         self.data_table.resizeRowsToContents()
 
     def on_has_headers(self, has_headers):
-        """User clicks on "had headers". Triggers a remapping of the file."""
+        """User clicks on 'had headers'. Triggers a remapping of the file."""
         self.has_headers = has_headers
         self.mapping = {}
         self.load_file_in_memory()
@@ -678,7 +678,7 @@ class ImportDialog:
         self.display_table()
 
     def on_confirm_load(self):
-        """User clicks "OK". Will load data without errors.
+        """User clicks 'OK'. Will load data without errors.
 
         First maps all rows to corresponding models.shareprice.SharePrice objects
         Then checks for duplicates
