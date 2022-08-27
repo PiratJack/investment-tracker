@@ -22,10 +22,10 @@ Done:
 - Graph with a 100 baseline (on a date selected by the user)
 - Performance of shares or accounts over time (in graph view)
 - Split view: how an account's composition changed over time
+- Dashboard: allows import of share prices & lists how many prices are known
 
 What is remaining:
-- Create API to manage stocks, stock prices, transactions, accounts (on pause, may be cancelled)
-- Add UI for dashboard: last import date, audits, import/export, ...
+- Dashboard: allow export of share list
 
 ## What is NOT this project?
 
