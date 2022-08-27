@@ -9,6 +9,14 @@ import pyqtgraph
 
 
 class PercentageAxisItem(pyqtgraph.AxisItem):
+    """A class to display axis item value as percentage
+
+    Methods
+    -------
+    tickStrings (values, scale, spacing)
+        Returns how to format the tick label for percentage-based axis
+    """
+
     def tickStrings(self, values, scale, spacing):
         if self.logMode:
             return super().tickStrings(values, scale, spacing)
