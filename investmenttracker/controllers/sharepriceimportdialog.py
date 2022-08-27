@@ -225,7 +225,7 @@ class SharePriceImportDialog:
 
     load_results : dict of format {share_id: {'loaded': int, 'duplicate': int}}
         The summary of the load per share
-    results_dialog : ImportResultsDialog
+    results_dialog : SharePriceImportResultsDialog
         The dialog displaying import results
 
     Methods
@@ -683,7 +683,7 @@ class SharePriceImportDialog:
         First maps all rows to corresponding models.shareprice.SharePrice objects
         Then checks for duplicates
         Updated load results
-        Displays the ImportResultsDialog
+        Displays the SharePriceImportResultsDialog
         """
         # Check if the data is at the right format
         if not self.is_mapping_complete():
@@ -758,7 +758,7 @@ class SharePriceImportDialog:
         self.database.session.add_all(ready_to_load.values())
         self.database.session.commit()
 
-        self.results_dialog = ImportResultsDialog(
+        self.results_dialog = SharePriceImportResultsDialog(
             self.parent_controller, all_shares, load_results
         )
         self.results_dialog.show_window()

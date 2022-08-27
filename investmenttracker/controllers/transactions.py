@@ -153,7 +153,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         return account_item
 
     def add_share(self, share, parent_item=None):
-        """Formats a single account for display in the tree
+        """Formats a single share for display in the tree
 
         Parameters
         ----------
@@ -635,7 +635,7 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         self.parent_controller.store_tree_item_selection()
         # New transaction
         if index.row() == len(self.model.transactions):
-            self.on_table_clicked()
+            self.on_table_clicked(index)
         else:
             transaction = self.model.get_transaction(index)
             self.transaction_details = controllers.transaction.TransactionController(

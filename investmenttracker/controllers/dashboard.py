@@ -120,7 +120,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
 
 
 class DashboardController:
-    """Controller for dashboard display - handled user interactions & children widgets
+    """Controller for dashboard display - handles user interactions & children widgets
 
     From top to bottom, displays:
     - Widgets to export shares in a file
@@ -287,7 +287,6 @@ class DashboardController:
         # Share price statistics
         self.display_widget.layout.addWidget(self.share_price_stats, 4, 0, 1, 4)
 
-        # TODO (major) - Audit: shares with price that change too much (in last 3 months)
         self.parent_window.setCentralWidget(self.display_widget)
 
         return self.display_widget

@@ -79,7 +79,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
     set_filters (index)
         Applies the filters on the list of transactions
     on_table_clicked (index)
-        Handled user click (on delete button)
+        Handles user click (on delete button)
     on_click_delete_button (index)
         Displays a confirmation dialog for deletion of share prices
     """

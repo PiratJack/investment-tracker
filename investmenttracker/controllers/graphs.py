@@ -1,3 +1,22 @@
+"""Displays different graphs & performance calculations for analysis
+
+Classes
+----------
+AccountsTree
+    Displays accounts so the user can choose what to display in the graph
+
+SharesTree
+    Displays shares so the user can choose what to display in the graph
+
+GraphsArea
+    The graph displaying the evolution of share & account price over time
+
+PerformanceTable
+    A table displaying account & share performance over time
+
+GraphsController
+    Controller for graph display - handles user interactions & children widgets
+"""
 import gettext
 import datetime
 import locale
@@ -9,12 +28,41 @@ import pyqtgraph
 
 import models.share
 from models.base import NoPriceException, ValidationException, format_number
-from controllers.widgets import basetreecontroller
+from controllers.widgets import basetreecontroller, percentageaxisitem
 
 _ = gettext.gettext
 
 
-class AccountsSharesTree(basetreecontroller.BaseTreeController):
+class AccountsTree(basetreecontroller.BaseTreeController):
+    """Displays accounts so the user can choose what to display in the graph
+
+    Attributes
+    ----------
+    columns : list of dicts
+        Columns to display. Each column should have a name and size key
+    parent_controller : AccountsController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
+
+    selected_accounts : list of int
+        The list of selected account IDs
+
+    Methods
+    -------
+    __init__ (parent_controller)
+        Stores parameters for future use & loads data to display
+
+    fill_tree (accounts)
+        Fills the tree with accounts data
+    add_account (account)
+        Adds a single account to the tree
+    on_select_item
+        Handler for user selection: triggers controller's handler
+    get_selected_items
+        Returns a list of selected account IDs
+    """
+
     columns = [
         {
             "name": _("Name"),
@@ -35,11 +83,27 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
     selected_accounts = []
 
     def __init__(self, parent_controller):
+        """Stores parameters for future use & loads data to display
+
+        Parameters
+        ----------
+        parent_controller : DashboardController
+            The controller in which this table is displayed
+        """
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
     def fill_tree(self, accounts):
+        """Fills the tree based on provided accounts
+
+        The items are directly added to the tree
+
+        Parameters
+        ----------
+        accounts : list of models.account.Account
+            The list of accounts to display
+        """
         for account in accounts:
             if account.hidden and not self.parent_controller.display_hidden_accounts:
                 continue
@@ -52,6 +116,17 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             self.addTopLevelItem(account_item)
 
     def add_account(self, account):
+        """Formats a single account for display in the tree
+
+        Parameters
+        ----------
+        account : models.account.Account
+            The account to format
+
+        Returns
+        -------
+        QtWidgets.QTreeWidgetItem
+            Account item for inclusion in the tree"""
         account_item = QtWidgets.QTreeWidgetItem(
             [account.name, "account", str(account.id)]
         )
@@ -70,12 +145,17 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         return account_item
 
     def on_select_item(self):
+        """Handler for user selection: triggers controller's handler"""
         self.parent_controller.on_change_account_selection(self.get_selected_items())
 
-    def store_item_selection(self):
-        self.selected_accounts = self.get_selected_items()
-
     def get_selected_items(self):
+        """Returns a list of selected account IDs
+
+        Returns
+        -------
+        list of int
+            A list of account IDs
+        """
         role = Qt.DisplayRole
         self.selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()
@@ -83,14 +163,39 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
         return self.selected_accounts
 
-    def restore_item_selection(self):
-        for account_id in self.selected_accounts:
-            items = self.findItems(str(account_id), Qt.MatchExactly, 2)
-            for item in items:
-                item.setSelected(True)
-
 
 class SharesTree(basetreecontroller.BaseTreeController):
+    """Displays accounts so the user can choose what to display in the graph
+
+    Attributes
+    ----------
+    columns : list of dicts
+        Columns to display. Each column should have a name and size key
+    parent_controller : AccountsController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
+
+    selected_accounts : list of int
+        The list of selected account IDs
+
+    Methods
+    -------
+    __init__ (parent_controller)
+        Stores parameters for future use & loads data to display
+
+    fill_tree (accounts)
+        Fills the tree with accounts data
+    add_group (name, group_id)
+        Adds a single share group to the tree
+    add_share (data, parent_widget=None)
+        Adds a single share to the tree
+    on_select_item
+        Handler for user selection: triggers controller's handler
+    get_selected_items
+        Returns a list of selected share IDs
+    """
+
     columns = [
         {
             "name": _("Name"),
@@ -108,13 +213,32 @@ class SharesTree(basetreecontroller.BaseTreeController):
             "alignment": Qt.AlignRight,
         },
     ]
+    selected_shares = []
 
     def __init__(self, parent_controller):
+        """Stores parameters for future use & loads data to display
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this widget
+        """
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
 
     def fill_tree(self, groups, shares_without_group):
+        """Fills the tree based on provided share groups and shares without a group
+
+        The items are directly added to the tree
+
+        Parameters
+        ----------
+        groups : list of models.sharegroup.ShareGroup
+            The list of share groups to display
+        shares_without_group : list of models.share.Share
+            The list of shares without a group to display
+        """
         # Add shares within a group
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
@@ -133,6 +257,20 @@ class SharesTree(basetreecontroller.BaseTreeController):
             )
 
     def add_group(self, name, group_id):
+        """Adds a single share group (& its children) to the tree
+
+        Parameters
+        ----------
+        name : str
+            The name of the share group
+        group_id : int
+            The ID of the group to add
+
+        Returns
+        -------
+        QtWidgets.QTreeWidgetItem
+            The share group to add in the tree
+        """
         group_widget = QtWidgets.QTreeWidgetItem([name, "Group", str(group_id)])
         self.addTopLevelItem(group_widget)
 
@@ -147,11 +285,24 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         return group_widget
 
-    def add_share(self, data, parent_widget=None):
+    def add_share(self, data, parent_item=None):
+        """Formats a single share for display in the tree
+
+        Parameters
+        ----------
+        share : models.share.Share
+            The share to format
+        parent_item : QtWidgets.QTreeWidgetItem
+            If present, the share item returned will use it as parent
+
+        Returns
+        -------
+        QtWidgets.QTreeWidgetItem
+            Share item for inclusion in the tree"""
         share_widget = QtWidgets.QTreeWidgetItem([str(field) for field in data])
         share_widget.setFlags(share_widget.flags() & ~Qt.ItemIsUserCheckable)
-        if parent_widget:
-            parent_widget.addChild(share_widget)
+        if parent_item:
+            parent_item.addChild(share_widget)
         else:
             self.addTopLevelItem(share_widget)
 
@@ -161,6 +312,13 @@ class SharesTree(basetreecontroller.BaseTreeController):
         return share_widget
 
     def get_selected_items(self):
+        """Returns a list of selected share IDs
+
+        Returns
+        -------
+        list of int
+            A list of share IDs
+        """
         role = Qt.DisplayRole
 
         self.selected_shares = [
@@ -170,26 +328,113 @@ class SharesTree(basetreecontroller.BaseTreeController):
         return self.selected_shares
 
     def on_select_item(self):
+        """Handler for user selection: triggers controller's handler"""
         self.parent_controller.on_change_share_selection(self.get_selected_items())
 
 
-class PercentageAxisItem(pyqtgraph.AxisItem):
-    def tickStrings(self, values, scale, spacing):
-        if self.logMode:
-            return super().tickStrings(values, scale, spacing)
-
-        if any(value * scale > 3 for value in values):
-            return super().tickStrings(values, scale, spacing)
-
-        strings = []
-        for value in values:
-            value_scaled = value * scale
-            value_label = f"{value_scaled:.1%}"
-            strings.append(value_label)
-        return strings
-
-
 class GraphsArea(pyqtgraph.PlotWidget):
+    """The graph displaying the evolution of share & account price over time
+
+    Attributes
+    ----------
+
+    graph_types : dict
+        The different graph formats
+    graph_type : str
+        The selected graph format
+    display_markers : bool
+        Whether to display the markers on the graph
+
+    all_accounts : list of models.account.Account
+        All accounts from the database
+    all_shares : list of models.share.Share
+        All shares from the database
+    selected_accounts : list of int
+        List of selected account IDs
+    selected_shares : list of int
+        List of selected share IDs
+
+    accounts_holdings : dict
+        The shares & cash held in an account over time (at key dates)
+
+    shares_raw_values : dict
+        The share values calculated. Converted to shares_graph_values for display
+    accounts_raw_values : dict
+        The account values calculated. Converted to accounts_graph_values for display
+    shares_graph_values : dict
+        The share values to display in the graph
+    accounts_graph_values : dict
+        The account values to display in the graph
+
+    start_date : datetime.date
+        The first date to display in the graph
+    end_date : datetime.date
+        The last date to display in the graph
+    baseline_date : datetime.date
+        Date used as baseline for precentage-based graph
+
+    color_set : list
+        A list of colors to use in the graph
+    color_set_split : list
+        A list of colors to use in the graph (for split mode)
+
+    plots : dict of pyqtgraph.Plot
+        The different elements plotted on the graph
+    markers : list of pyqtgraph.TextItem
+        The markers displayed on the graph
+
+    parent_controller : SharesController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
+
+
+    Methods
+    -------
+    __init__ (parent_controller)
+        Stores provided parameters & sets up the calculation variables
+
+    set_accounts (selected_accounts)
+        Defines which accounts to display & triggers reload
+    set_shares (selected_shares)
+        Defines which shares to display & triggers reload
+    set_dates (start_date, end_date)
+        Defines the start & end date for the graph calculation & triggers reload
+    set_baseline (enabled, baseline_date)
+        Defines the baseline date for the graph calculation & triggers reload
+    set_account_split (enabled=-1)
+        Recalculates value for 'split' graph (if enabled)
+    set_markers_visible (visible)
+        Displays or hides markers
+
+    calculate_shares (shares)
+        Calculates the raw values for a list of shares
+    calculate_accounts (accounts)
+        Calculates the raw values for a list of accounts
+
+    plot_graph
+        Plots all shares & accounts in the graph
+    add_markers
+        Adds the markers on the graph
+    convert_raw_to_graph (element_type, element_id)
+        Converts raw values to graph-usable values
+    clear_plots (element_type, element_id)
+        Clears all plots
+    set_axis_range
+        Defines the displayed range of both axis
+
+    find_missing_date_ranges (raw_values, element_id, first_date=None)
+        Given a share or account, finds which dates are missing from calculation
+
+    get_share_value_as_of (share_id, start_date, currency)
+        Returns the price of a share on a given date and in a given currency
+    get_share_value_in_range (share_id, start_date, end_date, currency)
+        Returns the prices of a share on a given date range and in a given currency
+
+    add_error (exception)
+        Adds an error for display (calls parent controller's method)
+    """
+
     graph_types = {
         "value": {
             "min": 0,
@@ -258,9 +503,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
     markers = []
 
     def __init__(self, parent_controller):
+        """Stores provided parameters & sets up the calculation variables
+
+        Parameters
+        ----------
+        parent_controller : QtWidgets.QMainWindow
+            The main window displaying this widget
+        """
         super().__init__()
         self.setAxisItems({"bottom": pyqtgraph.DateAxisItem()})
-        self.setAxisItems({"left": PercentageAxisItem("left")})
+        self.setAxisItems({"left": percentageaxisitem.PercentageAxisItem("left")})
         self.parent_controller = parent_controller
         self.database = parent_controller.database
 
@@ -276,6 +528,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plots["legend"] = self.addLegend()
 
     def set_accounts(self, selected_accounts=None):
+        """Defines which accounts to display & triggers reload
+
+        Parameters
+        ----------
+        selected_accounts : list of int
+            List of selected account IDs
+        """
         self.selected_accounts = selected_accounts if selected_accounts else []
         if selected_accounts:
             self.calculate_accounts(selected_accounts)
@@ -286,6 +545,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plot_graph()
 
     def set_shares(self, selected_shares=None):
+        """Defines which shares to display & triggers reload
+
+        Parameters
+        ----------
+        selected_shares : list of int
+            List of selected share IDs
+        """
         self.selected_shares = selected_shares if selected_shares else []
         if selected_shares:
             self.calculate_shares(selected_shares)
@@ -293,6 +559,15 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.plot_graph()
 
     def set_dates(self, start_date, end_date):
+        """Defines the start & end date for the graph calculation & triggers reload
+
+        Parameters
+        ----------
+        start_date : datetime.date
+            The first date to display in the graph
+        end_date : datetime.date
+            The last date to display in the graph
+        """
         if start_date and end_date and start_date > end_date:
             exception = ValidationException(
                 _("Start date must be before end date"), None, None, None
@@ -307,6 +582,15 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plot_graph()
 
     def set_baseline(self, enabled, baseline_date):
+        """Defines the baseline date for the graph calculation & triggers reload
+
+        Parameters
+        ----------
+        enabled : bool
+            Whether the percentage-based graph is enabled
+        baseline_date : datetime.date
+            Date used as baseline for precentage-based graph
+        """
         self.calculate_accounts(self.selected_accounts)
         self.calculate_shares(self.selected_shares)
         if enabled:
@@ -320,6 +604,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plot_graph()
 
     def set_account_split(self, enabled=-1):
+        """Recalculates value for 'split' graph (if enabled)
+
+        Parameters
+        ----------
+        enabled : bool
+            Whether the graph should display the composition of an account
+        """
         if enabled != -1:
             self.graph_type = "split" if enabled else "value"
 
@@ -350,6 +641,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         if not held_shares:
             return
+        share_id = 0
         for share_id in held_shares:
             try:
                 self.shares_graph_values[share_id] = {
@@ -395,6 +687,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plot_graph()
 
     def set_markers_visible(self, visible):
+        """Displays or hides markers
+
+        Parameters
+        ----------
+        visible : bool
+            Whether to display markers
+        """
         self.display_markers = visible
 
         if visible:
@@ -409,6 +708,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.markers = []
 
     def calculate_shares(self, shares):
+        """Calculates the raw values for a list of shares
+
+        Parameters
+        ----------
+        shares : list of int
+            The list of shares to calculate
+        """
         if not self.start_date or not self.end_date or not shares:
             return
 
@@ -426,18 +732,26 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 )
                 self.shares_raw_values[share_id] |= {v.date: v for v in values}
 
-    # The goal of this function is to calculate the account's value for the graph
-    # There are several challenges:
-    # - We don't want to calculate outside of what's needed (to improve performance)
-    # - At each transaction, the holdings (= # of shares & cash) changes
-    # - Each share held may change value multiple times
-    # - We can't assume any of those dates align with others
-    # However, there are a couple rules we can use:
-    # - Accounts do not exist before their first transaction (they have nothing before)
-    # - Between 2 transactions, there is no change in holdings
-    #   This means we can take those holdings until the next transaction
-    # - There are more share price than transaction, so we should loop on transactions first
     def calculate_accounts(self, accounts):
+        """Calculates the raw values for a list of accounts
+
+        The goal of this function is to calculate the account's value for the graph
+        There are several challenges:
+        - We don't want to calculate outside of what's needed (to improve performance)
+        - At each transaction, the holdings (= of shares & cash) changes
+        - Each share held may change value multiple times
+        - We can't assume any of those dates align with others
+        However, there are a couple rules we can use:
+        - Accounts do not exist before their first transaction (they have nothing before)
+        - Between 2 transactions, there is no change in holdings
+          This means we can take those holdings until the next transaction
+        - There are more share price than transaction, so we loop on transactions first
+
+        Parameters
+        ----------
+        accounts : list of int
+            The list of shares to calculate
+        """
         if not self.start_date or not self.end_date or not accounts:
             return
         # Evaluate the value from the start date until the end date
@@ -545,6 +859,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 self.add_error(exception)
 
     def plot_graph(self):
+        """Calculates the raw values for a list of accounts"""
         self.clear_plots()
         color_set = (
             self.color_set_split if self.graph_type == "split" else self.color_set
@@ -610,6 +925,15 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.set_axis_range()
 
     def add_markers(self, values):
+        """Adds the markers on the graph
+
+        To avoid overload, it'll display at most 30 values
+
+        Parameters
+        ----------
+        values : dict of format {x:y}
+            All the graph values
+        """
         if not self.display_markers:
             return
 
@@ -635,6 +959,18 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.markers.append(marker)
 
     def convert_raw_to_graph(self, element_type, element_id):
+        """Converts raw values to graph-usable values
+
+        The goal is to calculate self.*_graph_values
+        For split-based graph, this conversion is already done
+
+        Parameters
+        ----------
+        element_type : str (either 'share' or 'account')
+            The element type (share or account) to calculate
+        element_id : int
+            The ID of the element to calculate
+        """
         # in "split" mode, the graph values are already calculated
         # Therefore, only the date filtering is needed
         if element_type == "share":
@@ -669,6 +1005,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         }
 
     def clear_plots(self):
+        """Clears all plots"""
         for plot_id, plot in self.plots.items():
             if plot_id == "legend":
                 continue
@@ -682,6 +1019,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.markers = []
 
     def set_axis_range(self):
+        """Defines the displayed range of both axis"""
         start, end = (
             datetime.datetime(d.year, d.month, d.day).timestamp()
             for d in (self.start_date, self.end_date)
@@ -704,8 +1042,20 @@ class GraphsArea(pyqtgraph.PlotWidget):
             ymax = self.graph_types[self.graph_type]["max"]
         self.setYRange(ymin, ymax, padding=0)
 
-    # First date is the "start of the world" so nothing can be before
     def find_missing_date_ranges(self, raw_values, element_id, first_date=None):
+        """Given a share or account, finds which dates are missing from calculation
+
+        The goal is (ultimately) to reduce the number of dates calculated
+
+        Parameters
+        ----------
+        raw_values : dict of format {element_id: {datetime.date: value}}
+            The values already known / calculated
+        element_id : int
+            The ID of element to check
+        first_date : datetime.date
+            The 'start of the world' so nothing can be before
+        """
         ranges_missing = []
         if not first_date:
             first_date = datetime.date(1, 1, 1)
@@ -728,6 +1078,17 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return ranges_missing
 
     def get_share_value_as_of(self, share_id, start_date, currency):
+        """Returns the price of a share on a given date and in a given currency
+
+        Parameters
+        ----------
+        share_id : int
+            The ID of the share to find
+        start_date : datetime.date
+            The date to find
+        currency : models.share.Share
+            In which currency the share price should be
+        """
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -744,6 +1105,19 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return self.shares_raw_values[share_id][max(share_values)]
 
     def get_share_value_in_range(self, share_id, start_date, end_date, currency):
+        """Returns the prices of a share on a given date range and in a given currency
+
+        Parameters
+        ----------
+        share_id : int
+            The ID of the share to find
+        start_date : datetime.date
+            The start date of the range being searched
+        end_date : datetime.date
+            The end date of the range being searched
+        currency : models.share.Share
+            In which currency the share prices should be
+        """
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -766,35 +1140,109 @@ class GraphsArea(pyqtgraph.PlotWidget):
         return share_values
 
     def add_error(self, exception):
+        """Adds an error for display (calls parent controller's method)
+
+        Parameters
+        ----------
+        exception : Exception
+            The exception raised during the calculation
+        """
         self.parent_controller.add_error(exception)
 
 
 class PerformanceTable(QtWidgets.QTableWidget):
+    """A table displaying account & share performance over time
+
+    Attributes
+    ----------
+
+    selected_accounts : list of int
+        The list of selected account IDs
+    selected_shares : list of int
+        The list of selected share IDs
+
+    start_date : datetime.date
+        The first date to display in the table
+    end_date : datetime.date
+        The last date to display in the table
+
+    parent_controller : GraphsController
+        The controller in which this class is displayed
+    database : models.database.Database
+        A reference to the application database
+
+
+    Methods
+    -------
+    __init__ (parent_controller)
+        Stores provided parameters
+
+    set_dates (start_date, end_date)
+        Defines the start & end date for the table calculation & triggers reload
+    set_shares (selected_shares)
+        Defines which shares to display & triggers reload
+    set_accounts (selected_accounts)
+        Defines which accounts to display & triggers reload
+
+    reload_data
+        Recalculates the table contents
+    """
+
     selected_shares = []
     selected_accounts = []
     start_date = None
     end_date = None
-    baseline_date = None
 
     def __init__(self, parent_controller):
+        """Stores provided parameters
+
+        Parameters
+        ----------
+        parent_controller : GraphsController
+            The controller in which this class is displayed
+        """
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
 
     def set_dates(self, start_date, end_date):
+        """Defines the start & end date for the table calculation & triggers reload
+
+        Parameters
+        ----------
+        start_date : datetime.date
+            The first date to display in the table
+        end_date : datetime.date
+            The last date to display in the table
+        """
         self.start_date = start_date
         self.end_date = end_date
         self.reload_data()
 
     def set_shares(self, selected_shares):
+        """Defines which shares to display & triggers reload
+
+        Parameters
+        ----------
+        selected_shares : list of int
+            The list of selected share IDs
+        """
         self.selected_shares = selected_shares
         self.reload_data()
 
     def set_accounts(self, selected_accounts):
+        """Defines which accounts to display & triggers reload
+
+        Parameters
+        ----------
+        selected_accounts : list of int
+            The list of selected account IDs
+        """
         self.selected_accounts = selected_accounts
         self.reload_data()
 
     def reload_data(self):
+        """Recalculates the table contents"""
         table_rows = []
 
         # Determine dates & set headers
@@ -892,6 +1340,116 @@ class PerformanceTable(QtWidgets.QTableWidget):
 
 
 class GraphsController:
+    """Controller for display & interactions on transactions list
+
+    Attributes
+    ----------
+    name : str
+        Name of the controller - used in display
+    display_hidden_accounts : bool
+        Whether to display hidden accounts
+    display_disabled_accounts : bool
+        Whether to display disabled accounts
+    display_hidden_shares : QtWidgets.QCheckBox
+        The checkbox to display hidden shares
+
+    errors : list
+        Errors to display
+
+    accounts : list of models.account.Account
+        List of accounts to display in the tree
+    groups : list of models.sharegroup.ShareGroup
+        List of share groups to display in the tree
+    shares_without_group : list of models.share.Share
+        List of shares that do not belong to a group
+
+    parent_window : QtWidgets.QMainWindow
+        The parent window
+    database : models.database.Database
+        A reference to the application database
+
+    display_widget : QtWidgets.QWidget
+        The main display for this controller
+    left_column : QtWidgets.QWidget
+        The left column of the screen
+    accounts_tree : AccountsTree
+        Displays accounts so the user can choose what to display in the graph
+    checkbox_hidden_accounts : bool
+        The checkbox to display hidden accounts
+    checkbox_disabled_accounts : bool
+        The checkbox to display disabled accounts
+    shares_tree : SharesTree
+        Displays shares so the user can choose what to display in the graph
+    checkbox_hidden_shares : bool
+        The checkbox to display hidden shares
+
+    right_column : QtWidgets.QWidget
+        The right column of the screen
+    period_label : QtWidgets.QLabel
+        Label 'Period' (of time to display)
+
+    start_date = QtWidgets.QDateEdit
+        The first date to display in the graph
+    end_date = QtWidgets.QDateEdit
+        The last date to display in the graph
+
+    baseline_enabled = QtWidgets.QCheckBox
+        Checkbox to display amounts in % of a the value on a given date
+    baseline_label = QtWidgets.QLabel
+        Label 'Baseline date'
+    baseline_date = QtWidgets.QDateEdit
+        Date used as baseline for precentage-based graph
+    split_enabled = QtWidgets.QCheckBox
+        Display the account composition (each share as % of the account's total)
+
+    error_messages = QtWidgets.QLabel
+        Label displaying errors
+    graph = GraphsArea
+        The main graph displaying account & share evolution
+    markers_visible = QtWidgets.QCheckBox
+        Checkbox to display markers
+    performance_table = PerformanceTable
+        A table displaying account & share performance over time
+
+    Methods
+    -------
+    __init__ (parent_window)
+        Stores provided parameters & sets up UI items
+    get_toolbar_button
+        Returns a QtWidgets.QAction for display in the main window toolbar
+    get_display_widget
+        Returns the main QtWidgets.QWidget for this controller
+    reload_data (reload_accounts=False)
+        Reloads the list of accounts/shares (if reload_accounts=True)
+
+    render_left_column
+        Renders the left column of the display
+    render_right_column
+        Renders the right column of the display
+
+    on_click_hidden_accounts
+        User clicks on 'display hidden accounts' checkbox => reload tree
+    on_click_disabled_accounts
+        User clicks on 'display disabled accounts' checkbox => reload tree
+    on_change_dates
+        User changes one of the dates => calculate & render graph with new dates
+    on_change_account_selection (selected_accounts)
+        User changes selection of accounts => display them in graph & table
+    on_change_share_selection (selected_shares)
+        User changes selection of shares => display them in graph & table
+    on_baseline_change
+        User clicks on 'Display evolution' checkbox => reload graph
+    on_display_split_change
+        User clicks on 'Display composition' checkbox => reload graph
+    on_markers_change
+        User clicks on 'Display markers' checkbox => display/hide them
+
+    reset_errors
+        Removes all errors being displayed
+    add_error (exception)
+        Adds an error for display
+    """
+
     name = "Graphs"
     display_hidden_accounts = False
     display_disabled_accounts = False
@@ -900,10 +1458,56 @@ class GraphsController:
     errors = []
 
     def __init__(self, parent_window):
+        """Sets up all data required to display the screen
+
+        Parameters
+        ----------
+        parent_window : QtWidgets.QMainWindow
+            The window displaying this controller
+        """
         self.parent_window = parent_window
         self.database = parent_window.database
 
+        # Data
+        self.accounts = []
+        self.groups = []
+        self.shares_without_group = []
+
+        # Display elements
+        self.display_widget = QtWidgets.QWidget()
+
+        # Left column: select accounts & shares
+        self.left_column = QtWidgets.QWidget()
+        self.accounts_tree = AccountsTree(self)
+        self.checkbox_hidden_accounts = QtWidgets.QCheckBox(
+            _("Display hidden accounts?")
+        )
+        self.checkbox_disabled_accounts = QtWidgets.QCheckBox(
+            _("Display disabled accounts?")
+        )
+        self.shares_tree = SharesTree(self)
+        self.checkbox_hidden_shares = QtWidgets.QCheckBox(_("Display hidden shares?"))
+
+        # Right column: parameters, graph & performance table
+        self.right_column = QtWidgets.QWidget()
+
+        self.period_label = QtWidgets.QLabel(_("Period"))
+        self.start_date = QtWidgets.QDateEdit()
+        self.end_date = QtWidgets.QDateEdit()
+
+        self.baseline_enabled = QtWidgets.QCheckBox(_("Display evolution?"))
+        self.baseline_label = QtWidgets.QLabel(_("Baseline date"))
+        self.baseline_date = QtWidgets.QDateEdit()
+        self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
+
+        self.error_messages = QtWidgets.QLabel()
+        self.graph = GraphsArea(self)
+
+        self.markers_visible = QtWidgets.QCheckBox(_("Display markers?"))
+        self.performance_table = PerformanceTable(self)
+
     def get_toolbar_button(self):
+        """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
             QtGui.QIcon("assets/images/graphs.png"), _("Graphs"), self.parent_window
         )
@@ -912,7 +1516,7 @@ class GraphsController:
         return button
 
     def get_display_widget(self):
-        self.display_widget = QtWidgets.QWidget()
+        """Returns the main QtWidgets.QWidget for this controller"""
         self.display_widget.layout = QtWidgets.QHBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
@@ -928,40 +1532,31 @@ class GraphsController:
         return self.display_widget
 
     def render_left_column(self):
-        self.left_column = QtWidgets.QWidget()
+        """Renders the left column of the display"""
         self.left_column.layout = QtWidgets.QVBoxLayout()
         self.left_column.setLayout(self.left_column.layout)
 
-        self.accounts_tree = AccountsSharesTree(self)
         self.left_column.layout.addWidget(self.accounts_tree)
 
-        self.checkbox_hidden_accounts = QtWidgets.QCheckBox(
-            _("Display hidden accounts?")
-        )
         self.checkbox_hidden_accounts.stateChanged.connect(
             self.on_click_hidden_accounts
         )
         self.left_column.layout.addWidget(self.checkbox_hidden_accounts)
 
-        self.checkbox_disabled_accounts = QtWidgets.QCheckBox(
-            _("Display disabled accounts?")
-        )
         self.checkbox_disabled_accounts.stateChanged.connect(
             self.on_click_disabled_accounts
         )
         self.left_column.layout.addWidget(self.checkbox_disabled_accounts)
 
-        self.shares_tree = SharesTree(self)
         self.left_column.layout.addWidget(self.shares_tree)
 
-        self.checkbox_hidden_shares = QtWidgets.QCheckBox(_("Display hidden shares?"))
         self.checkbox_hidden_shares.stateChanged.connect(
             self.on_click_disabled_accounts
         )
         self.left_column.layout.addWidget(self.checkbox_hidden_shares)
 
     def render_right_column(self):
-        self.right_column = QtWidgets.QWidget()
+        """Renders the right column of the display"""
         self.right_column.layout = QtWidgets.QGridLayout()
         self.right_column.setLayout(self.right_column.layout)
 
@@ -970,64 +1565,53 @@ class GraphsController:
         )
 
         # Choose which dates to display
-        self.period_label = QtWidgets.QLabel(_("Period"))
         self.right_column.layout.addWidget(self.period_label, 0, 0)
 
-        self.start_date = QtWidgets.QDateEdit()
         self.start_date.setDate(datetime.date.today() - datetime.timedelta(6 * 30))
         self.start_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.start_date, 0, 1)
         date_width = self.start_date.sizeHint().width()
         self.start_date.setMinimumWidth(date_width * 2)
 
-        self.end_date = QtWidgets.QDateEdit()
         self.end_date.setDate(datetime.date.today())
         self.end_date.dateChanged.connect(self.on_change_dates)
         self.right_column.layout.addWidget(self.end_date, 0, 2)
         self.end_date.setMinimumWidth(date_width * 2)
 
         # Choose whether to display baseline (= one date equals 100%)
-        self.baseline_enabled = QtWidgets.QCheckBox(_("Display evolution?"))
         self.baseline_enabled.stateChanged.connect(self.on_baseline_change)
         self.right_column.layout.addWidget(self.baseline_enabled, 1, 0)
-
-        self.baseline_label = QtWidgets.QLabel(_("Baseline date"))
         self.right_column.layout.addWidget(self.baseline_label, 1, 1, Qt.AlignRight)
 
-        self.baseline_date = QtWidgets.QDateEdit()
         self.baseline_date.setDate(datetime.date.today() - datetime.timedelta(6 * 30))
         self.baseline_date.dateChanged.connect(self.on_baseline_change)
         self.right_column.layout.addWidget(self.baseline_date, 1, 2)
         self.baseline_date.setMinimumWidth(date_width * 2)
 
         # Display account split?
-        self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
         self.split_enabled.stateChanged.connect(self.on_display_split_change)
         self.right_column.layout.addWidget(self.split_enabled, 1, 3)
 
         # Error messages
-        self.error_messages = QtWidgets.QLabel()
         self.error_messages.setProperty("class", "validation_warning")
         self.right_column.layout.addWidget(self.error_messages, 2, 0, 1, 5)
 
         # Add the graph
-        self.graph = GraphsArea(self)
         self.right_column.layout.addWidget(self.graph, 3, 0, 1, 5)
 
         # Choose whether to display markers
-        self.markers_visible = QtWidgets.QCheckBox(_("Display markers?"))
         self.markers_visible.setChecked(True)
         self.markers_visible.stateChanged.connect(self.on_markers_change)
         self.right_column.layout.addWidget(self.markers_visible, 4, 0)
 
         # Performance table
-        self.performance_table = PerformanceTable(self)
         self.right_column.layout.addWidget(self.performance_table, 5, 0, 1, 5)
 
         # Trigger date change once all dates are set
         self.on_change_dates()
 
     def reload_data(self):
+        """Reloads the list of accounts & shares"""
         self.accounts = self.database.accounts_get(
             with_hidden=self.display_hidden_accounts,
             with_disabled=self.display_disabled_accounts,
@@ -1051,17 +1635,22 @@ class GraphsController:
         self.graph.set_accounts()
         self.graph.set_shares()
 
+        # TODO: also reload graph data
+
     def on_click_hidden_accounts(self):
+        """User clicks on 'display hidden accounts' checkbox => reload tree"""
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_disabled_accounts(self):
+        """User clicks on 'display disabled accounts' checkbox => reload tree"""
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_change_dates(self):
+        """User changes one of the dates => calculate & render graph with new dates"""
         self.reset_errors()
         start_date = datetime.date.fromisoformat(
             self.start_date.date().toString(Qt.ISODate)
@@ -1073,16 +1662,31 @@ class GraphsController:
         self.performance_table.set_dates(start_date, end_date)
 
     def on_change_account_selection(self, selected_accounts):
+        """User changes selection of accounts => display them in graph & table
+
+        Parameters
+        ----------
+        selected_accounts : list of int
+            The list of selected account IDs
+        """
         self.reset_errors()
         self.graph.set_accounts(selected_accounts)
         self.performance_table.set_accounts(selected_accounts)
 
     def on_change_share_selection(self, selected_shares):
+        """User changes selection of shares => display them in graph & table
+
+        Parameters
+        ----------
+        selected_shares : list of int
+            The list of selected share IDs
+        """
         self.reset_errors()
         self.graph.set_shares(selected_shares)
         self.performance_table.set_shares(selected_shares)
 
     def on_baseline_change(self):
+        """User clicks on 'Display evolution' checkbox => reload graph"""
         baseline_date = datetime.date.fromisoformat(
             self.baseline_date.date().toString(Qt.ISODate)
         )
@@ -1091,6 +1695,7 @@ class GraphsController:
         self.graph.set_baseline(self.baseline_enabled.isChecked(), baseline_date)
 
     def on_display_split_change(self):
+        """User clicks on 'Display composition' checkbox => reload graph"""
         self.baseline_enabled.setEnabled(not self.split_enabled.isChecked())
         self.baseline_date.setEnabled(not self.split_enabled.isChecked())
         try:
@@ -1103,13 +1708,22 @@ class GraphsController:
             self.on_change_dates()
 
     def on_markers_change(self):
+        """User clicks on 'Display markers' checkbox => display/hide them"""
         self.graph.set_markers_visible(self.markers_visible.isChecked())
 
     def reset_errors(self):
+        """Removes all errors being displayed"""
         self.errors = []
         self.error_messages.setText("")
 
     def add_error(self, exception):
+        """Adds an error for display
+
+        Parameters
+        ----------
+        exception : Exception
+            The exception raised during the calculation
+        """
         self.errors.append(exception)
         messages = []
         for error in self.errors:

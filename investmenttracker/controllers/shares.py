@@ -112,7 +112,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
         groups : list of models.sharegroup.ShareGroup
             The list of share groups to display
         shares_without_group : list of models.share.Share
-            The list of shares without a group to display"""
+            The list of shares without a group to display
+        """
         # Fill in the different groups
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
