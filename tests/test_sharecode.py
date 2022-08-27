@@ -122,7 +122,7 @@ class TestShareCode(unittest.TestCase):
         for field in ["share_id", "origin", "value"]:
             for value in ["", None]:
                 test_name = "Share code must have a " + field + " that is not "
-                test_name += "None" if value == None else "empty"
+                test_name += "empty" if value == "" else str(value)
                 with self.assertRaises(ValidationException) as cm:
                     setattr(share_code, field, value)
                 self.assertEqual(type(cm.exception), ValidationException, test_name)

@@ -159,7 +159,7 @@ class TestShare(unittest.TestCase):
         for field in ["name"]:
             for value in ["", None]:
                 test_name = "Share must have a " + field + " that is not "
-                test_name += "None" if value == None else "empty"
+                test_name += "empty" if value == "" else str(value)
                 with self.assertRaises(ValidationException) as cm:
                     setattr(share, field, value)
                 self.assertEqual(type(cm.exception), ValidationException, test_name)

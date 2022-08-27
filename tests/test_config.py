@@ -57,6 +57,7 @@ class TestConfig(unittest.TestCase):
             },
             "Get all config fails",
         )
+
     def test_validations(self):
         config = self.database.config_get_by_name("load.file.filename")
 
@@ -64,7 +65,7 @@ class TestConfig(unittest.TestCase):
         for field in ["name", "value"]:
             for value in ["", None]:
                 test_name = "Config must have a " + field + " that is not "
-                test_name += "None" if value == None else "empty"
+                test_name += "empty" if value == "" else str(value)
                 with self.assertRaises(ValidationException) as cm:
                     setattr(config, field, value)
                 self.assertEqual(type(cm.exception), ValidationException, test_name)
@@ -114,4 +115,3 @@ class TestConfig(unittest.TestCase):
             "Config for load.file.filename : /test/path",
             "Config string representation is wrong",
         )
-

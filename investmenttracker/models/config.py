@@ -79,7 +79,7 @@ class Config(Base):
         -------
         object
             The provided value"""
-        if value == "" or value is None:
+        if not value:
             raise ValidationException(message, self, key, value)
         return value
 

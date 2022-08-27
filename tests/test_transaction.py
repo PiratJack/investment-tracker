@@ -257,7 +257,7 @@ class TestTransaction(unittest.TestCase):
         for field in forbidden_values:
             for value in forbidden_values[field]:
                 test_name = "Transaction must have a " + field + " that is not "
-                test_name += "None" if value == None else "empty"
+                test_name += "empty" if value == "" else str(value)
                 with self.assertRaises(ValidationException) as cm:
                     setattr(transaction, field, value)
                 self.assertEqual(type(cm.exception), ValidationException, test_name)
