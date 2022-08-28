@@ -75,7 +75,7 @@ class SharePriceImportResultsDialog:
         self.shares = shares
         self.load_results = load_results
 
-        self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
+        self.window = QtWidgets.QDialog(self.parent_controller.window)
         self.layout = QtWidgets.QVBoxLayout()
         self.results_table = QtWidgets.QTableWidget()
 
@@ -83,7 +83,7 @@ class SharePriceImportResultsDialog:
         """Displays the dialog with load results"""
         if hasattr(self, "window"):
             self.window.close()
-            self.window = None
+            self.window = QtWidgets.QDialog(self.parent_controller.window)
 
         self.window.setModal(True)
 
@@ -97,7 +97,7 @@ class SharePriceImportResultsDialog:
         # Validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok
         button_box = QtWidgets.QDialogButtonBox(buttons)
-        button_box.accepted.connect(self.window.close)
+        button_box.accepted.connect(self.close)
         self.layout.addWidget(button_box)
 
         self.fill_results_table()
@@ -153,6 +153,10 @@ class SharePriceImportResultsDialog:
 
         self.results_table.resizeColumnsToContents()
         self.results_table.resizeRowsToContents()
+
+    def close(self):
+        self.window.close()
+        self.parent_controller.window.close()
 
 
 class SharePriceImportDialog:
@@ -759,7 +763,7 @@ class SharePriceImportDialog:
         self.database.session.commit()
 
         self.results_dialog = SharePriceImportResultsDialog(
-            self.parent_controller, all_shares, load_results
+            self, all_shares, load_results
         )
         self.results_dialog.show_window()
 
