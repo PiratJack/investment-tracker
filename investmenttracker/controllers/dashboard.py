@@ -79,6 +79,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
                 current_date = datetime.date(
                     current_date.year, current_date.month + 1, 1
                 )
+        end_date = current_date
         self.setColumnCount(len(table_row))
         self.setHorizontalHeaderLabels(table_row)
 
@@ -88,7 +89,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
             share_prices = self.database.share_prices_get(
                 share_id=share,
                 start_date=start_date,
-                end_date=current_date,
+                end_date=end_date,
                 currency_id=share.base_currency,
             )
             for current_date in all_dates:
@@ -244,7 +245,6 @@ class DashboardController:
         # Export shares to file
         self.display_widget.layout.addWidget(self.export_file_label, 0, 0)
 
-        self.export_file_path.setText(self.config.get("export.filename", ""))
         self.export_file_path.setEnabled(False)
         self.display_widget.layout.addWidget(self.export_file_path, 0, 1)
 
@@ -257,7 +257,6 @@ class DashboardController:
         # Load transactions from file
         self.display_widget.layout.addWidget(self.import_file_label, 1, 0)
 
-        self.import_file_path.setText(self.config.get("import.filename", ""))
         self.import_file_path.setEnabled(False)
         self.display_widget.layout.addWidget(self.import_file_path, 1, 1)
 
@@ -270,14 +269,6 @@ class DashboardController:
         # Last file import
         self.display_widget.layout.addWidget(self.last_import_label, 2, 0)
 
-        last_import_date = self.config.get("import.last", "")
-        if last_import_date:
-            last_import_date = datetime.datetime.strptime(last_import_date, "%Y-%m-%d")
-            self.last_import.setText(last_import_date.strftime("%x"))
-
-            too_old = datetime.datetime.now() + datetime.timedelta(days=-30)
-            if last_import_date <= too_old:
-                self.last_import.setProperty("class", "warning")
         self.display_widget.layout.addWidget(self.last_import, 2, 1)
 
         # Errors
@@ -289,11 +280,26 @@ class DashboardController:
 
         self.parent_window.setCentralWidget(self.display_widget)
 
+        self.reload_data()
+
         return self.display_widget
 
     def reload_data(self):
         """Reloads all data from DB"""
         self.config = self.database.configs_get_all()
+
+        self.export_file_path.setText(self.config.get("export.filename", ""))
+        self.import_file_path.setText(self.config.get("import.filename", ""))
+
+        last_import_date = self.config.get("import.last", "")
+        if last_import_date:
+            last_import_date = datetime.datetime.strptime(last_import_date, "%Y-%m-%d")
+            self.last_import.setText(last_import_date.strftime("%x"))
+
+            too_old = datetime.datetime.now() + datetime.timedelta(days=-30)
+            if last_import_date <= too_old:
+                self.last_import.setProperty("class", "warning")
+
         self.share_price_stats.load_data()
 
     def on_choose_export_file(self):
@@ -324,6 +330,7 @@ class DashboardController:
         """User wants to export shares: display export dialog"""
         # TODO: Actually export the shares
         print("export shares")
+        self.reload_data()
 
     def on_choose_import_file(self):
         """User wants to select import file: display dialog & store selection"""
@@ -373,3 +380,5 @@ class DashboardController:
             )
             return
         import_dialog.show_window()
+
+        self.reload_data()

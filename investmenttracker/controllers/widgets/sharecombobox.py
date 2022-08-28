@@ -21,6 +21,15 @@ class ShareComboBox(QtWidgets.QComboBox):
     ----------
     database : models.database.Database
         A reference to the application database
+    include_choice_all : bool
+        Whether value "All" should be included
+
+    Methods
+    ----------
+    __init__ (database, parent=None, include_choice_all=0)
+        Defines the dropdown widget & stores parameters
+    reload_data
+        Fill in the dropdown values
     """
 
     def __init__(self, database, parent=None, include_choice_all=0):
@@ -37,9 +46,16 @@ class ShareComboBox(QtWidgets.QComboBox):
         """
         super().__init__(parent)
         self.database = database
+        self.include_choice_all = include_choice_all
+
+        self.reload_data()
+
+    def reload_data(self):
+        """Fill in the dropdown values"""
+        self.clear()
 
         values = []
-        if include_choice_all:
+        if self.include_choice_all:
             values.append((_("All"), -1, True))
 
         # Shared in groups
@@ -51,7 +67,7 @@ class ShareComboBox(QtWidgets.QComboBox):
 
         # Shares without group
         shares_without_group = (
-            self.database.shares_query().filter(models.share.Share.group is None).all()
+            self.database.shares_query().filter(models.share.Share.group == None).all()
         )
         values.append((_("Shares without group"), -1, False))
         for share in shares_without_group:
@@ -64,7 +80,7 @@ class ShareComboBox(QtWidgets.QComboBox):
                 self.model().item(index).setEnabled(False)
 
         # Make placeholder unselectable
-        if not include_choice_all:
+        if not self.include_choice_all:
             self.model().item(0).setEnabled(False)
 
         self.resize(self.sizeHint())

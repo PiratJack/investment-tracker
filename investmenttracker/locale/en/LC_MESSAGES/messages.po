@@ -410,6 +410,9 @@ msgstr ""
 msgid "Share base currency can't be itself"
 msgstr ""
 
+msgid "Share sync origin is invalid"
+msgstr ""
+
 msgid "Sharecode origin is invalid"
 msgstr ""
 

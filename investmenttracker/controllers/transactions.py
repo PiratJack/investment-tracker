@@ -690,8 +690,8 @@ class TransactionsController:
         Returns a QtWidgets.QAction for display in the main window toolbar
     get_display_widget
         Returns the main QtWidgets.QWidget for this controller
-    reload_data (reload_accounts=False)
-        Reloads the list of accounts/shares (if reload_accounts=True)
+    reload_data ()
+        Reloads the list of accounts/shares
 
     on_click_hidden_accounts
         User clicks on 'display hidden accounts' checkbox => reload tree
@@ -780,38 +780,31 @@ class TransactionsController:
 
         self.right_column.layout.addWidget(self.table)
 
-        self.reload_data(True)
+        self.reload_data()
         return self.display_widget
 
-    def reload_data(self, reload_accounts=False):
-        """Reloads the list of accounts/shares (if reload_accounts=True)
+    def reload_data(self):
+        """Reloads the list of accounts/shares"""
+        self.accounts = self.database.accounts_get(
+            with_hidden=self.display_hidden_accounts,
+            with_disabled=self.display_disabled_accounts,
+        )
 
-        Parameters
-        ----------
-        reload_accounts : bool
-            If True, the data will be reloaded.
-        """
-        if reload_accounts:
-            self.accounts = self.database.accounts_get(
-                with_hidden=self.display_hidden_accounts,
-                with_disabled=self.display_disabled_accounts,
-            )
+        self.tree.clear()
+        self.tree.fill_tree(self.accounts)
 
-            self.tree.clear()
-            self.tree.fill_tree(self.accounts)
-
-            self.table.set_filters(None, None)
+        self.table.set_filters(None, None)
 
     def on_click_hidden_accounts(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
-        self.reload_data(True)
+        self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_disabled_accounts(self):
         """User clicks on 'display disabled accounts' checkbox => reload tree"""
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
-        self.reload_data(True)
+        self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_change_selection(self, selected_accounts, selected_shares):

@@ -506,10 +506,9 @@ class GraphsController:
         self.shares_tree.clear()
         self.shares_tree.fill_tree(self.groups, self.shares_without_group)
 
-        self.graph.set_accounts()
-        self.graph.set_shares()
+        self.graph.reload_data()
 
-        # TODO: also reload graph data
+        self.performance_table.reload_data()
 
     def on_click_hidden_accounts(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""

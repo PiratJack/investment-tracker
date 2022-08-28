@@ -80,7 +80,6 @@ class SharePriceImportResultsDialog:
         self.results_table = QtWidgets.QTableWidget()
 
     def show_window(self):
-        print("show_window")
         """Displays the dialog with load results"""
         self.window.setModal(True)
         self.window.rejected.connect(self.parent_controller.window.close)

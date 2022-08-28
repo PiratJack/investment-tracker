@@ -200,16 +200,23 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.parent_controller = parent_controller
         self.database = parent_controller.database
 
-        self.all_accounts = {a.id: a for a in self.database.accounts_get(True, True)}
-        self.accounts_graph_values = {a: {} for a in self.all_accounts}
-        self.all_shares = {s.id: s for s in self.database.shares_get(True)}
-        self.shares_graph_values = {s: {} for s in self.all_shares}
-
         self.setMouseEnabled(x=True, y=False)
         self.enableAutoRange(axis="x")
         self.showGrid(x=True, y=True)
 
         self.plots["legend"] = self.addLegend()
+
+        self.reload_data()
+
+    def reload_data(self):
+        self.all_accounts = {a.id: a for a in self.database.accounts_get(True, True)}
+        self.accounts_graph_values = {a: {} for a in self.all_accounts}
+        self.all_shares = {s.id: s for s in self.database.shares_get(True)}
+        self.shares_graph_values = {s: {} for s in self.all_shares}
+
+        self.accounts_holdings = {}
+        self.shares_raw_values = {}
+        self.accounts_raw_values = {}
 
     def set_accounts(self, selected_accounts=None):
         """Defines which accounts to display & triggers reload

@@ -567,6 +567,9 @@ class SharePricesController:
     __init__ (parent_window)
         Returns a QtWidgets.QAction for display in the main window toolbar
 
+    reload_data
+        Reloads the list of shares (in dropdown) & share prices
+
     get_toolbar_button
         Returns a QtWidgets.QAction for display in the main window toolbar
     get_display_widget
@@ -598,6 +601,13 @@ class SharePricesController:
         self.field_share = ShareComboBox(self.database, include_choice_all=True)
         self.field_date = QtWidgets.QDateEdit()
         self.table = SharePricesTableView(self)
+
+    def reload_data(self):
+        """Reloads the list of shares (in dropdown) & share prices"""
+        # TODO: Reload ShareComboBox
+        self.field_share.reload_data()
+
+        self.table.set_filters()
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""

@@ -97,3 +97,4 @@ class MainWindow(QtWidgets.QMainWindow):
     def display_tab(self, tab):
         """User clicks on toolbar item => display the subwindow"""
         self.layout.setCurrentIndex(list(self.elements).index(tab))
+        self.elements[tab].reload_data()

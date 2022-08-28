@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-22 21:47+0200\n"
+"PO-Revision-Date: 2022-08-28 11:58+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -411,6 +411,9 @@ msgstr "Valeur des titres"
 
 msgid "Share base currency can't be itself"
 msgstr "Une action ne peut avoir elle-même comme monnaie de base"
+
+msgid "Share sync origin is invalid"
+msgstr "Origine de synchronisation invalide"
 
 msgid "Sharecode origin is invalid"
 msgstr "Origine du code invalide"
