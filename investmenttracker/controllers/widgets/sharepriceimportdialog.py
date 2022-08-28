@@ -584,9 +584,8 @@ class SharePriceImportDialog:
         if existing:
             self.load_results[share_price.share_id]["duplicate"] += 1
             return False
-        else:
-            self.load_results[share_price.share_id]["loaded"] += 1
-            return True
+        self.load_results[share_price.share_id]["loaded"] += 1
+        return True
 
     def display_table(self):
         """Displays the table with mapping headers & the details of file data
