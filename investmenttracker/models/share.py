@@ -162,6 +162,8 @@ class Share(Base):
                     key,
                     value,
                 )
+        if not value:
+            return value
         raise ValidationException(
             _("Share sync origin is invalid"),
             self,
