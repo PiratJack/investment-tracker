@@ -8,7 +8,7 @@ ShareGroupController
 import gettext
 
 import models.sharegroup
-from controllers.editcontroller import EditController
+from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
 

@@ -8,7 +8,7 @@ AccountController
 import gettext
 
 import models.account
-from controllers.editcontroller import EditController
+from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
 

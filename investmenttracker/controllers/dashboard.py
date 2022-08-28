@@ -15,8 +15,8 @@ import os.path
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 
-import controllers.sharepriceimportdialog
 import models.config
+from controllers.widgets.sharepriceimportdialog import SharePriceImportDialog
 
 _ = gettext.gettext
 
@@ -370,7 +370,7 @@ class DashboardController:
             return
         self.error_label.setText("")
 
-        import_dialog = controllers.sharepriceimportdialog.SharePriceImportDialog(self)
+        import_dialog = SharePriceImportDialog(self)
         try:
             import_dialog.set_file(file_path)
         except UnicodeDecodeError:

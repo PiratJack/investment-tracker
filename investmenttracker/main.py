@@ -17,8 +17,6 @@ STYLESHEET_FILE = "./assets/style/app.css"
 gettext.bindtextdomain("messages", LOCALE_FOLDER)
 gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 
-# TODO (major): when changes happen, clear all screens & reload data
-
 # Connect to database
 database = models.database.Database(DATABASE_FILE)
 

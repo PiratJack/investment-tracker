@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt
 
 import models.transaction
 from models.base import ValidationWarningException
-from controllers.editcontroller import EditController
+from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
 

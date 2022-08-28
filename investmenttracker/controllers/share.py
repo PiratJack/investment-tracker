@@ -9,7 +9,7 @@ import gettext
 
 import models.share
 import models.sharecode
-from controllers.editcontroller import EditController
+from controllers.widgets.editcontroller import EditController
 from models.base import ValidationException
 
 _ = gettext.gettext
