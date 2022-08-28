@@ -604,7 +604,6 @@ class SharePricesController:
 
     def reload_data(self):
         """Reloads the list of shares (in dropdown) & share prices"""
-        # TODO: Reload ShareComboBox
         self.field_share.reload_data()
 
         self.table.set_filters()

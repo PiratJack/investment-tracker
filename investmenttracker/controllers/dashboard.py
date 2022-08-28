@@ -54,9 +54,9 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
-        self.load_data()
 
     def load_data(self):
+        print(self, "load_data")
         """Loads all data from database and fill the table"""
         self.clear()
         table_rows = []

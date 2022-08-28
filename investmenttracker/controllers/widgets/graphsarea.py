@@ -206,8 +206,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
         self.plots["legend"] = self.addLegend()
 
-        self.reload_data()
-
     def reload_data(self):
         self.all_accounts = {a.id: a for a in self.database.accounts_get(True, True)}
         self.accounts_graph_values = {a: {} for a in self.all_accounts}
