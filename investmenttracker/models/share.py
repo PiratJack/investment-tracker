@@ -148,16 +148,26 @@ class Share(Base):
         return value
 
     @sqlalchemy.orm.validates("sync_origin")
-    def validate_origin(self, key, value):
+    def validate_sync_origin(self, key, value):
         """Ensure the sync_origin field is one of the allowed values"""
-        if value and value not in ShareDataOrigin.__members__:
-            raise ValidationException(
-                _("Sharecode origin is invalid"),
-                self,
-                key,
-                value,
-            )
-        return value
+        if isinstance(value, ShareDataOrigin):
+            return value
+        if value and isinstance(value, str):
+            try:
+                return ShareDataOrigin[value]
+            except KeyError:
+                raise ValidationException(
+                    _("Share sync origin is invalid"),
+                    self,
+                    key,
+                    value,
+                )
+        raise ValidationException(
+            _("Share sync origin is invalid"),
+            self,
+            key,
+            value,
+        )
 
     def validate_missing_field(self, key, value, message):
         """Raises a ValidationException if the corresponding field is None or empty

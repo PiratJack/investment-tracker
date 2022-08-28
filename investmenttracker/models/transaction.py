@@ -247,14 +247,24 @@ class Transaction(Base):
         """Ensure the type field is filled and has one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing transaction type"))
 
-        if value not in TransactionTypes.__members__:
-            raise ValidationException(
-                _("Transaction type is invalid"),
-                self,
-                key,
-                value,
-            )
-        return value
+        if isinstance(value, TransactionTypes):
+            return value
+        if value and isinstance(value, str):
+            try:
+                return TransactionTypes[value]
+            except KeyError:
+                raise ValidationException(
+                    _("Transaction type is invalid"),
+                    self,
+                    key,
+                    value,
+                )
+        raise ValidationException(
+            _("Transaction type is invalid"),
+            self,
+            key,
+            value,
+        )
 
     @sqlalchemy.orm.validates("account_id")
     def validate_account_id(self, key, value):
@@ -266,10 +276,6 @@ class Transaction(Base):
     def validate_quantity(self, key, value):
         """Ensure the quantity field is filled and different than 0"""
         self.validate_missing_field(key, value, _("Missing transaction quantity"))
-        if value == 0:
-            raise ValidationException(
-                "This transaction has no impact", self, key, value
-            )
         return value
 
     @sqlalchemy.orm.validates("unit_price")
@@ -282,7 +288,7 @@ class Transaction(Base):
     def validate_share_id(self, key, value):
         """Ensure the share_id field is filled if transaction has assets"""
         if self.type:
-            type_value = TransactionTypes[self.type].value
+            type_value = self.type.value
             if type_value["impact_asset"] and value in (-1, 0):
                 raise ValidationException("Missing transaction share", self, key, value)
             if type_value["has_asset"] and value in (-1, 0):
@@ -347,7 +353,11 @@ class Transaction(Base):
 
     def __repr__(self):
         """Returns a string of form Transaction (type, date, share, account)"""
-        type_str = self.type if isinstance(self.type, str) else self.type.value["name"]
+        type_str = (
+            TransactionTypes[self.type].name
+            if isinstance(self.type, str)
+            else self.type.value["name"]
+        )
         account_str = self.account.name if self.account else ""
         share_str = self.share.name if self.share else ""
 

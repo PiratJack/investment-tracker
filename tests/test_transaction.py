@@ -7,7 +7,7 @@ import investmenttracker.models.database as databasemodel
 from investmenttracker.models.base import ValidationException, format_number
 from investmenttracker.models.account import Account
 from investmenttracker.models.share import Share
-from investmenttracker.models.transaction import Transaction
+from investmenttracker.models.transaction import Transaction, TransactionTypes
 
 DATABASE_FILE = "test.sqlite"
 database = databasemodel.Database(DATABASE_FILE)
@@ -173,7 +173,7 @@ class TestTransaction(unittest.TestCase):
         )
         self.assertEqual(
             str(transaction),
-            "Transaction ('asset_sell', '2020-04-15 00:00:00', '', '')",
+            "Transaction ('Asset sell', '2020-04-15 00:00:00', '', '')",
             "Transaction representation is wrong",
         )
 
@@ -210,41 +210,6 @@ class TestTransaction(unittest.TestCase):
         )
 
     def test_validations(self):
-        transaction = Transaction(
-            account_id=1,
-            date=datetime.datetime(2020, 4, 15),
-            label="Sell ACN",
-            type="asset_sell",
-            share_id=2,
-            quantity=10,
-            unit_price=1,
-        )
-
-        # Test invalid type attribute
-        test_name = "Transaction must have a valid type"
-        with self.assertRaises(ValidationException) as cm:
-            transaction.type = "hfeozhfze"
-        self.assertEqual(
-            type(cm.exception),
-            ValidationException,
-            test_name + " - exception type is wrong",
-        )
-        self.assertEqual(
-            cm.exception.item,
-            transaction,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "type",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            "hfeozhfze",
-            test_name + " - exception.invalid_value is wrong",
-        )
-
         # Test forbidden values
         transaction = Transaction(
             account_id=1,
@@ -256,10 +221,48 @@ class TestTransaction(unittest.TestCase):
             unit_price=1,
         )
         forbidden_values = {
-            "type": ["", None, 0, -1],
+            "type": ["", None, 0, -1, "hfeozhfze"],
             "account_id": ["", None, 0],
             "quantity": ["", None, 0],
             "unit_price": ["", None],
+            "share_id": [-1, 0],
+        }
+
+        for field in forbidden_values:
+            for value in forbidden_values[field]:
+                test_name = "Transaction must have a " + field + " that is not "
+                test_name += "empty" if value == "" else str(value)
+                with self.assertRaises(ValidationException) as cm:
+                    setattr(transaction, field, value)
+                self.assertEqual(type(cm.exception), ValidationException, test_name)
+                self.assertEqual(
+                    cm.exception.item,
+                    transaction,
+                    test_name + " - exception.item is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.key,
+                    field,
+                    test_name + " - exception.key is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.invalid_value,
+                    value,
+                    test_name + " - exception.invalid_value is wrong",
+                )
+
+        # Test missing share for transaction with impact_asset=True
+        # (has_asset=True is tested above)
+        transaction = Transaction(
+            account_id=1,
+            date=datetime.datetime(2020, 4, 15),
+            label="Sell ACN",
+            type=TransactionTypes["asset_buy"],
+            share_id=2,
+            quantity=10,
+            unit_price=1,
+        )
+        forbidden_values = {
             "share_id": [-1, 0],
         }
 

@@ -61,14 +61,25 @@ class ShareCode(Base):
     def validate_origin(self, key, value):
         """Ensure the origin field is filled and one of the allowed values"""
         self.validate_missing_field(key, value, _("Missing share code origin"))
-        if value not in ShareDataOrigin.__members__:
-            raise ValidationException(
-                _("Sharecode origin is invalid"),
-                self,
-                key,
-                value,
-            )
-        return value
+
+        if isinstance(value, ShareDataOrigin):
+            return value
+        if value and isinstance(value, str):
+            try:
+                return ShareDataOrigin[value]
+            except KeyError:
+                raise ValidationException(
+                    _("Sharecode origin is invalid"),
+                    self,
+                    key,
+                    value,
+                )
+        raise ValidationException(
+            _("Sharecode origin is invalid"),
+            self,
+            key,
+            value,
+        )
 
     @sqlalchemy.orm.validates("value")
     def validate_value(self, key, value):

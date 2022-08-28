@@ -5,7 +5,7 @@ import unittest
 import investmenttracker.models.database as databasemodel
 
 from investmenttracker.models.base import NoPriceException, ValidationException
-from investmenttracker.models.share import Share
+from investmenttracker.models.share import Share, ShareDataOrigin
 from investmenttracker.models.sharecode import ShareCode
 from investmenttracker.models.shareprice import SharePrice
 
@@ -28,7 +28,7 @@ class TestShare(unittest.TestCase):
                     name="AXA",
                     main_code="FR847238",
                     base_currency_id=5,
-                    sync_origin="alphavantage",
+                    sync_origin=ShareDataOrigin["alphavantage"],
                 ),
                 Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
                 Share(
@@ -256,27 +256,29 @@ class TestShare(unittest.TestCase):
             share.base_currency = share
 
         # Test invalid sync_origin attribute
-        test_name = "Share must have a valid sync_origin attribute"
-        share = self.database.share_get_by_id(1)
-        with self.assertRaises(ValidationException) as cm:
-            share.sync_origin = "hfeozhfze"
-        self.assertEqual(
-            type(cm.exception),
-            ValidationException,
-            test_name + " - exception type is wrong",
-        )
-        self.assertEqual(
-            cm.exception.item,
-            share,
-            test_name + " - exception.item is wrong",
-        )
-        self.assertEqual(
-            cm.exception.key,
-            "sync_origin",
-            test_name + " - exception.key is wrong",
-        )
-        self.assertEqual(
-            cm.exception.invalid_value,
-            "hfeozhfze",
-            test_name + " - exception.invalid_value is wrong",
-        )
+        forbidden_values = ["fheozhfei", -2]
+        for value in forbidden_values:
+            test_name = "Share must have a valid sync_origin attribute"
+            share = self.database.share_get_by_id(1)
+            with self.assertRaises(ValidationException) as cm:
+                share.sync_origin = value
+            self.assertEqual(
+                type(cm.exception),
+                ValidationException,
+                test_name + " - exception type is wrong",
+            )
+            self.assertEqual(
+                cm.exception.item,
+                share,
+                test_name + " - exception.item is wrong",
+            )
+            self.assertEqual(
+                cm.exception.key,
+                "sync_origin",
+                test_name + " - exception.key is wrong",
+            )
+            self.assertEqual(
+                cm.exception.invalid_value,
+                value,
+                test_name + " - exception.invalid_value is wrong",
+            )

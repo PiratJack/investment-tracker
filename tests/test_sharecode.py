@@ -4,7 +4,7 @@ import unittest
 import investmenttracker.models.database as databasemodel
 
 from investmenttracker.models.base import ValidationException
-from investmenttracker.models.share import Share
+from investmenttracker.models.share import Share, ShareDataOrigin
 from investmenttracker.models.sharecode import ShareCode
 
 DATABASE_FILE = "test.sqlite"
@@ -31,7 +31,9 @@ class TestShareCode(unittest.TestCase):
                 ShareCode(share_id=1, origin="quantalys", value="14587"),
                 ShareCode(share_id=1, origin="alphavantage", value="FR4941"),
                 ShareCode(share_id=2, origin="quantalys", value="478924"),
-                ShareCode(share_id=2, origin="alphavantage", value="NYSE:ACN"),
+                ShareCode(
+                    share_id=2, origin=ShareDataOrigin["alphavantage"], value="NYSE:ACN"
+                ),
             ]
         )
         self.database.session.commit()
@@ -118,9 +120,15 @@ class TestShareCode(unittest.TestCase):
     def test_validations(self):
         share_code = self.database.share_get_by_id(1).codes[0]
 
-        # Test mandatory fields
-        for field in ["share_id", "origin", "value"]:
-            for value in ["", None]:
+        # Test forbidden values
+        forbidden_values = {
+            "value": ["", None],
+            "origin": ["", None, -1, "uohih"],
+            "share_id": ["", None, 0],
+        }
+
+        for field in forbidden_values:
+            for value in forbidden_values[field]:
                 test_name = "Share code must have a " + field + " that is not "
                 test_name += "empty" if value == "" else str(value)
                 with self.assertRaises(ValidationException) as cm:
@@ -143,7 +151,7 @@ class TestShareCode(unittest.TestCase):
                 )
 
         # Test max length of fields
-        for field in ["origin", "value"]:
+        for field in ["value"]:
             test_name = "Share code " + field + " can't be more than 250 characters"
             value = "a" * 251
             with self.assertRaises(ValidationException) as cm:
@@ -164,3 +172,27 @@ class TestShareCode(unittest.TestCase):
                 value,
                 test_name + " - exception.invalid_value is wrong",
             )
+
+        # Test share code origin with int values
+        for field in ["share_id", "origin", "value"]:
+            for value in ["", None]:
+                test_name = "Share code must have a " + field + " that is not "
+                test_name += "empty" if value == "" else str(value)
+                with self.assertRaises(ValidationException) as cm:
+                    setattr(share_code, field, value)
+                self.assertEqual(type(cm.exception), ValidationException, test_name)
+                self.assertEqual(
+                    cm.exception.item,
+                    share_code,
+                    test_name + " - exception.item is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.key,
+                    field,
+                    test_name + " - exception.key is wrong",
+                )
+                self.assertEqual(
+                    cm.exception.invalid_value,
+                    value,
+                    test_name + " - exception.invalid_value is wrong",
+                )
