@@ -163,13 +163,15 @@ class Database:
         """
         return self.session.query(share.Share)
 
-    def shares_get(self, with_hidden=False):
+    def shares_get(self, with_hidden=False, only_synced=False):
         """Returns all shares (with or without hidden ones)
 
         Parameters
         ----------
         with_hidden : bool
             If True, includes hidden shares. If false, do not include them.
+        only_synced : bool
+            If True, includes only shares that are synced (sync_origin not blank)
 
         Returns
         -------
@@ -179,6 +181,8 @@ class Database:
         query = self.session.query(share.Share)
         if not with_hidden:
             query = query.filter(share.Share.hidden.is_(False))
+        if only_synced:
+            query = query.filter(share.Share.sync_origin.isnot(None))
         return query.all()
 
     def share_get_by_id(self, share_id):

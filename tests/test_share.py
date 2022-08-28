@@ -37,6 +37,7 @@ class TestShare(unittest.TestCase):
                     main_code="FEFZE",
                     base_currency_id=7,
                     hidden=True,
+                    sync_origin=None,
                 ),
                 Share(id=5, name="Euro", main_code="EUR"),
                 Share(id=6, name="Dollar", main_code="USD"),
@@ -85,6 +86,11 @@ class TestShare(unittest.TestCase):
             len(self.database.shares_get(with_hidden=True)),
             6,
             "There are 6 shares in total",
+        )
+        self.assertEqual(
+            len(self.database.shares_get(only_synced=True)),
+            1,
+            "Only 1 share is synced",
         )
 
         # String representation
