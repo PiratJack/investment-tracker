@@ -170,6 +170,14 @@ class TestShare(unittest.TestCase):
             "Share graph label is wrong",
         )
 
+        # Code for sync origin
+        share = self.database.share_get_by_id(1)
+        self.assertEqual(
+            share.code_sync_origin,
+            "fezfze",
+            "Share code for sync origin is wrong",
+        )
+
     def test_validations(self):
         share = Share(id=1, name="Test share", main_code="FE4451")
 

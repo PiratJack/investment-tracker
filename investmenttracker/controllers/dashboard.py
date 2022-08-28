@@ -17,6 +17,7 @@ from PyQt5.QtCore import Qt
 
 import models.config
 from controllers.widgets.sharepriceimportdialog import SharePriceImportDialog
+from controllers.widgets.shareexportdialog import ShareExportDialog
 
 _ = gettext.gettext
 
@@ -82,7 +83,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         self.setColumnCount(len(table_row))
         self.setHorizontalHeaderLabels(table_row)
 
-        all_shares = self.database.shares_get()
+        all_shares = self.database.shares_get(only_synced=True)
         for share in all_shares:
             table_row = [share.name]
             share_prices = self.database.share_prices_get(
@@ -327,8 +328,19 @@ class DashboardController:
 
     def on_export_shares(self):
         """User wants to export shares: display export dialog"""
-        # TODO: Actually export the shares
-        print("export shares")
+        file_path = self.export_file_path.text()
+        if not file_path:
+            self.on_choose_export_file()
+        # If user still doesn't want to choose, display error
+        if not file_path:
+            self.error_label.setText(_("Please select a file before exporting"))
+            return
+        self.error_label.setText("")
+
+        export_dialog = ShareExportDialog(self)
+        export_dialog.set_file(file_path)
+        export_dialog.show_window()
+
         self.reload_data()
 
     def on_choose_import_file(self):

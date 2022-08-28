@@ -22,10 +22,9 @@ Done:
 - Graph with a 100 baseline (on a date selected by the user)
 - Performance of shares or accounts over time (in graph view)
 - Split view: how an account's composition changed over time
-- Dashboard: allows import of share prices & lists how many prices are known
+- Dashboard: allows export of share fields, import of share prices & lists how many prices are known
 
-What is remaining:
-- Dashboard: allow export of share list
+No new feature is planned for now. Bugfixes may happen, new features depending on what I would need.
 
 ## What is NOT this project?
 

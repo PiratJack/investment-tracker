@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-28 11:58+0200\n"
+"PO-Revision-Date: 2022-08-28 17:54+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -70,6 +70,15 @@ msgstr "Vente"
 msgid "Base currency"
 msgstr "Monnaie de base"
 
+msgid "Base currency (ID)"
+msgstr "Monnaie de base (ID)"
+
+msgid "Base currency (main code)"
+msgstr "Monnaie de base (code principal)"
+
+msgid "Base currency (name)"
+msgstr "Monnaie de base (nom)"
+
 msgid "Baseline date"
 msgstr "Date de référence (base 100)"
 
@@ -94,6 +103,9 @@ msgstr "Code"
 #, python-brace-format
 msgid "Code for {origin}"
 msgstr "Code pour {origin}"
+
+msgid "Code of online source"
+msgstr "Code pour la source de synchronisation"
 
 msgid "Codes"
 msgstr "Codes"
@@ -196,14 +208,29 @@ msgstr "Doublon"
 msgid "Duplicate fields: {fields}"
 msgstr "Champs en double: {fields}"
 
+msgid "Export"
+msgstr "Exporter"
+
 msgid "Export data"
 msgstr "Exporter les données"
+
+msgid "Export headers?"
+msgstr "Exporter un en-tête (nom des champs)?"
 
 msgid "Export share list"
 msgstr "Exporter la liste des titres"
 
+msgid "Export shares"
+msgstr "Exporter les titres"
+
 msgid "Field delimiter"
 msgstr "Séparateur de champs"
+
+msgid "File exists"
+msgstr "Le fichier existe"
+
+msgid "File exported"
+msgstr "Fichier exporté"
 
 msgid "Get prices online from?"
 msgstr "Récupérer les valeurs depuis?"
@@ -376,8 +403,14 @@ msgstr "Aucune valeur trouvée"
 msgid "Period"
 msgstr "Période"
 
+msgid "Please choose at least 1 field to export"
+msgstr "Veuillez choisir au moins un champ à exporter"
+
 msgid "Please confirm"
 msgstr "Veuillez confirmer"
+
+msgid "Please select a file before exporting"
+msgstr "Veuillez choisir un fichier avant l'export"
 
 msgid "Please select a file before importing"
 msgstr "Veuillez choisir un fichier avant l'import"
@@ -442,8 +475,14 @@ msgstr "Taxes - en espèces"
 msgid "Taxes - in units"
 msgstr "Taxes - en titres"
 
+msgid "The data has been successfully exported"
+msgstr "Les données ont été exportées"
+
 msgid "The date format is wrong"
 msgstr "Le format de date est incorrect"
+
+msgid "The file already exists. Overwrite?"
+msgstr "Le fichier existe déjà. Écraser?"
 
 msgid "The file has headers"
 msgstr "Le fichier a un en-tête"

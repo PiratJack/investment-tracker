@@ -55,6 +55,15 @@ msgstr ""
 msgid "Base currency"
 msgstr ""
 
+msgid "Base currency (ID)"
+msgstr ""
+
+msgid "Base currency (main code)"
+msgstr ""
+
+msgid "Base currency (name)"
+msgstr ""
+
 msgid "Baseline date"
 msgstr ""
 
@@ -78,6 +87,9 @@ msgstr ""
 
 #, python-brace-format
 msgid "Code for {origin}"
+msgstr ""
+
+msgid "Code of online source"
 msgstr ""
 
 msgid "Codes"
@@ -181,13 +193,28 @@ msgstr ""
 msgid "Duplicate fields: {fields}"
 msgstr ""
 
+msgid "Export"
+msgstr ""
+
 msgid "Export data"
+msgstr ""
+
+msgid "Export headers?"
 msgstr ""
 
 msgid "Export share list"
 msgstr ""
 
+msgid "Export shares"
+msgstr ""
+
 msgid "Field delimiter"
+msgstr ""
+
+msgid "File exists"
+msgstr ""
+
+msgid "File exported"
 msgstr ""
 
 msgid "Get prices online from?"
@@ -361,7 +388,13 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
+msgid "Please choose at least 1 field to export"
+msgstr ""
+
 msgid "Please confirm"
+msgstr ""
+
+msgid "Please select a file before exporting"
 msgstr ""
 
 msgid "Please select a file before importing"
@@ -427,7 +460,13 @@ msgstr ""
 msgid "Taxes - in units"
 msgstr ""
 
+msgid "The data has been successfully exported"
+msgstr ""
+
 msgid "The date format is wrong"
+msgstr ""
+
+msgid "The file already exists. Overwrite?"
 msgstr ""
 
 msgid "The file has headers"
