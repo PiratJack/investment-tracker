@@ -91,6 +91,7 @@ class SharePriceImportResultsDialog:
 
         # Table with results
         self.layout.addWidget(self.results_table)
+        self.results_table.setEditTriggers(self.results_table.NoEditTriggers)
 
         # Validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok
@@ -203,8 +204,6 @@ class SharePriceImportDialog:
         The dialog this class displays
     layout : QtWidgets.QGridLayout
         The layout of the dialog being displayed
-    results_table : QtWidgets.QTableWidget
-        The table with results
     delimiter_label : QtWidgets.QLabel
         The label 'Delimiter'
     delimiter_widget : QtWidgets.QComboBox
@@ -391,6 +390,7 @@ class SharePriceImportDialog:
 
         # Table with preview & choice of values
         self.layout.addWidget(self.data_table, 4, 0, 1, 2)
+        self.data_table.setEditTriggers(self.data_table.NoEditTriggers)
 
         # Validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
