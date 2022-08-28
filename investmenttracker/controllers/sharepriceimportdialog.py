@@ -80,12 +80,11 @@ class SharePriceImportResultsDialog:
         self.results_table = QtWidgets.QTableWidget()
 
     def show_window(self):
+        print("show_window")
         """Displays the dialog with load results"""
-        if hasattr(self, "window"):
-            self.window.close()
-            self.window = QtWidgets.QDialog(self.parent_controller.window)
-
         self.window.setModal(True)
+        self.window.rejected.connect(self.parent_controller.window.close)
+        self.window.accepted.connect(self.parent_controller.window.close)
 
         # Display content
         self.window.setWindowTitle(self.name)
@@ -97,7 +96,7 @@ class SharePriceImportResultsDialog:
         # Validation buttons
         buttons = QtWidgets.QDialogButtonBox.Ok
         button_box = QtWidgets.QDialogButtonBox(buttons)
-        button_box.accepted.connect(self.close)
+        button_box.accepted.connect(self.window.accept)
         self.layout.addWidget(button_box)
 
         self.fill_results_table()
@@ -153,10 +152,6 @@ class SharePriceImportResultsDialog:
 
         self.results_table.resizeColumnsToContents()
         self.results_table.resizeRowsToContents()
-
-    def close(self):
-        self.window.close()
-        self.parent_controller.window.close()
 
 
 class SharePriceImportDialog:
@@ -363,10 +358,6 @@ class SharePriceImportDialog:
 
     def show_window(self):
         """Shows the import dialog"""
-        if hasattr(self, "window"):
-            self.window.close()
-            self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
-
         self.window.setModal(True)
 
         # Display content
@@ -593,10 +584,10 @@ class SharePriceImportDialog:
             self.load_results[share_price.share_id] = {"loaded": 0, "duplicate": 0}
         if existing:
             self.load_results[share_price.share_id]["duplicate"] += 1
+            return False
         else:
             self.load_results[share_price.share_id]["loaded"] += 1
             return True
-        return False
 
     def display_table(self):
         """Displays the table with mapping headers & the details of file data
@@ -699,7 +690,7 @@ class SharePriceImportDialog:
         # Get all shares that are synchronized
         all_shares = {s.id: s for s in self.database.shares_get(with_hidden=True)}
         synced_shares = {s.id: s for s in all_shares.values() if s.sync_origin}
-        load_results = {s: {"loaded": 0, "duplicate": 0} for s in synced_shares}
+        self.load_results = {s: {"loaded": 0, "duplicate": 0} for s in synced_shares}
         ready_to_load = {}
         search_results = {}
         for row, fields in enumerate(self.data):
@@ -763,7 +754,7 @@ class SharePriceImportDialog:
         self.database.session.commit()
 
         self.results_dialog = SharePriceImportResultsDialog(
-            self, all_shares, load_results
+            self, all_shares, self.load_results
         )
         self.results_dialog.show_window()
 
