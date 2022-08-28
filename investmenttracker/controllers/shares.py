@@ -243,9 +243,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton")
-            create_button.clicked.connect(
-                lambda: self.on_click_edit_button(group_widget)
-            )
+            create_button.clicked.connect(lambda: self.on_double_click(group_widget))
             self.setItemWidget(group_widget, 0, create_button)
 
         return group_widget
@@ -294,9 +292,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
             create_button.setProperty("class", "imagebutton")
-            create_button.clicked.connect(
-                lambda: self.on_click_edit_button(share_widget)
-            )
+            create_button.clicked.connect(lambda: self.on_double_click(share_widget))
             self.setItemWidget(share_widget, 0, create_button)
 
         return share_widget
