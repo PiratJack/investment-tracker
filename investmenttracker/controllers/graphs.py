@@ -19,7 +19,7 @@ import models.share
 import controllers.widgets.accountstree
 import controllers.widgets.sharestree
 import controllers.widgets.graphsarea
-from models.base import NoPriceException, format_number
+from models.base import NoPriceException, format_number, ValidationException
 
 _ = gettext.gettext
 
@@ -600,7 +600,7 @@ class GraphsController:
         self.errors.append(exception)
         messages = []
         for error in self.errors:
-            if isinstance(error, UserWarning):
+            if isinstance(error, (UserWarning, ValidationException)):
                 messages.append(str(error))
             elif isinstance(error, NoPriceException):
                 messages.append(
