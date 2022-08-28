@@ -140,13 +140,17 @@ class TransactionController(EditController):
         self.transaction_id = int(transaction_id)
 
         # Define list of values
-        self.fields["account_id"]["possible_values"] = [
-            (g.name, g.id)
-            for g in self.database.accounts_get(with_hidden=True, with_disabled=True)
-        ]
-        self.fields["type"]["possible_values"] = [
-            (g.value["name"], g.name) for g in models.transaction.TransactionTypes
-        ]
+        self.fields["account_id"]["possible_values"] = sorted(
+            [
+                (g.name, g.id)
+                for g in self.database.accounts_get(
+                    with_hidden=True, with_disabled=True
+                )
+            ]
+        )
+        self.fields["type"]["possible_values"] = sorted(
+            [(g.value["name"], g.name) for g in models.transaction.TransactionTypes]
+        )
 
         # Get existing data & define default field values
         if transaction_id:
