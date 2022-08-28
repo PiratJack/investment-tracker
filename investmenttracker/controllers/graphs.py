@@ -151,7 +151,12 @@ class PerformanceTable(QtWidgets.QTableWidget):
                 else:
                     max_date = max(p.date for p in price)
                     max_price = [p for p in price if p.date == max_date][0]
-                    data = format_number(max_price.price, share.base_currency.main_code)
+                    if share.base_currency:
+                        data = format_number(
+                            max_price.price, share.base_currency.main_code
+                        )
+                    else:
+                        data = format_number(max_price.price)
                     if base_price:
                         evolution = (max_price.price - base_price) / base_price
                         data += "\n" + locale.format_string("%.2f %%", evolution)
