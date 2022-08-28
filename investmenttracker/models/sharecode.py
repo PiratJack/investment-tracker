@@ -67,13 +67,13 @@ class ShareCode(Base):
         if value and isinstance(value, str):
             try:
                 return ShareDataOrigin[value]
-            except KeyError:
+            except KeyError as exception:
                 raise ValidationException(
                     _("Sharecode origin is invalid"),
                     self,
                     key,
                     value,
-                )
+                ) from exception
         raise ValidationException(
             _("Sharecode origin is invalid"),
             self,

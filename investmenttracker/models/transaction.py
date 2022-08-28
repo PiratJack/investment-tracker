@@ -252,13 +252,13 @@ class Transaction(Base):
         if value and isinstance(value, str):
             try:
                 return TransactionTypes[value]
-            except KeyError:
+            except KeyError as exception:
                 raise ValidationException(
                     _("Transaction type is invalid"),
                     self,
                     key,
                     value,
-                )
+                ) from exception
         raise ValidationException(
             _("Transaction type is invalid"),
             self,

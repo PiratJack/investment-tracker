@@ -155,13 +155,13 @@ class Share(Base):
         if value and isinstance(value, str):
             try:
                 return ShareDataOrigin[value]
-            except KeyError:
+            except KeyError as exception:
                 raise ValidationException(
                     _("Share sync origin is invalid"),
                     self,
                     key,
                     value,
-                )
+                ) from exception
         if not value:
             return value
         raise ValidationException(
@@ -223,6 +223,14 @@ class Share(Base):
         if self.main_code:
             output += " (" + self.main_code + ")"
         return output
+
+    @property
+    def code_sync_origin(self):
+        """Returns the code matching the sync origin"""
+        matching_code = [
+            code.value for code in self.codes if code.origin == self.sync_origin
+        ]
+        return matching_code[0] if matching_code else ""
 
     def __repr__(self):
         """Returns a string of form Share [name] ([main_code], [currency], (un)synced)"""
