@@ -683,6 +683,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 baseline_value = raw[element_id][max(dates_before)]
             elif raw[element_id]:
                 baseline_value = raw[element_id][min(raw[element_id].keys())]
+            baseline_value = (
+                baseline_value
+                if isinstance(baseline_value, (float, int))
+                else baseline_value.price
+            )
 
         converted[element_id] = {
             d: (
