@@ -309,7 +309,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         tree_item : QtWidgets.QTreeWidgetItem
             The tree item being modified
         """
-        if tree_item.text(2) == "group":
+        if tree_item.text(2) == "group" and tree_item.text(1) != "-1":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, tree_item.text(1)
             )
