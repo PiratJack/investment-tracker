@@ -361,7 +361,7 @@ class SharePriceImportDialog:
         """Shows the import dialog"""
         if hasattr(self, "window"):
             self.window.close()
-            self.window = None
+            self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
 
         self.window.setModal(True)
 
