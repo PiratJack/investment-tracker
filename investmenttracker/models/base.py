@@ -60,7 +60,7 @@ def format_number(number, currency=None):
         Either '-' for numbers <= 10**-7, or formatted number
         Includes the currency string if provided
     """
-    if abs(number) <= 10**-7:
+    if not number or abs(number) <= 10**-7:
         return "-"
     return locale.format_string("%.2f", number, grouping=True) + (
         (" " + currency) if currency else ""
