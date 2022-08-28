@@ -7,6 +7,8 @@ DateDelegate
 ShareDelegate
     Displays a dropdown of shares based on controllers.widgets.ShareComboBox
 """
+import datetime
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
@@ -58,6 +60,8 @@ class DateDelegate(QtWidgets.QItemDelegate):
             value = index.data(Qt.EditRole)
             if value:
                 editor.setDate(value)
+            else:
+                editor.setDate(datetime.datetime.now())
             return
         super().setEditorData(editor, index)
 
