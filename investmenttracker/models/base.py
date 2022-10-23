@@ -62,6 +62,7 @@ def format_number(number, currency=None):
     """
     if not number or abs(number) <= 10**-7:
         return "-"
-    return locale.format_string("%.2f", number, grouping=True) + (
-        (" " + currency) if currency else ""
-    )
+    if currency:
+        return locale.format_string("%.2f", number, grouping=True) + " " + currency
+
+    return locale.format_string("%.5f", number, grouping=True)
