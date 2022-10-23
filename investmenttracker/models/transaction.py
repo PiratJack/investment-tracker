@@ -281,7 +281,13 @@ class Transaction(Base):
     @sqlalchemy.orm.validates("unit_price")
     def validate_unit_price(self, key, value):
         """Ensure the unit price field is filled"""
-        self.validate_missing_field(key, value, _("Missing transaction unit price"))
+        if not self.type:
+            return value
+        if not isinstance(self.type, TransactionTypes):
+            return value
+        type_value = self.type.value
+        if type_value["has_asset"] and type_value["impact_currency"]:
+            self.validate_missing_field(key, value, _("Missing transaction unit price"))
         return value
 
     @sqlalchemy.orm.validates("share_id")
