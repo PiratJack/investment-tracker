@@ -722,7 +722,21 @@ class SharePriceImportDialog:
                         fields[column], field_id
                     )
                 elif field_id == "price":
-                    share_price.price = float(fields[column])
+                    if self.decimal_dot == ".":
+                        share_price.price = float(fields[column])
+                    else:
+                        try:
+                            corrected_value = fields[column].replace(
+                                self.decimal_dot, "."
+                            )
+                            corrected_value = corrected_value.replace(" ", "")
+                            share_price.price = float(corrected_value)
+                        except ValueError:
+                            if row not in self.data_errors:
+                                self.data_errors[row] = {}
+                            self.data_errors[row][column] = {
+                                column: _("The price is not a decimal number")
+                            }
                 elif field_id == "currency":
                     # Stored in 'cache' to avoid repetitive calls to DB
                     if fields[column] in search_results:
