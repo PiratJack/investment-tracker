@@ -16,6 +16,7 @@ TransactionsController
     Handles user interactions and links all displayed widgets
 """
 import gettext
+import os
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import Qt
@@ -373,9 +374,19 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
 
         if role == Qt.DecorationRole and index.row() != len(self.transactions):
             if col == len(self.columns) - 2:
-                return QtCore.QVariant(QtGui.QIcon("assets/images/add.png"))
+                return QtCore.QVariant(
+                    QtGui.QIcon(
+                        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                        + "/assets/images/add.png"
+                    )
+                )
             if col == len(self.columns) - 1:
-                return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
+                return QtCore.QVariant(
+                    QtGui.QIcon(
+                        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                        + "/assets/images/delete.png"
+                    )
+                )
 
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
@@ -746,7 +757,10 @@ class TransactionsController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/transactions.png"),
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/transactions.png"
+            ),
             _("Transactions"),
             self.parent_window,
         )

@@ -9,6 +9,7 @@ AccountsController
     Handles user interactions and links all displayed widgets
 """
 import gettext
+import os
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
@@ -201,7 +202,13 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         font.setItalic(True)
         new_account_widget.setFont(0, font)
         new_account_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
-        new_account_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
+        new_account_widget.setIcon(
+            0,
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/add.png"
+            ),
+        )
         tree_items.append(new_account_widget)
 
         # Put everything in the tree
@@ -298,7 +305,12 @@ class AccountsController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/accounts.png"), _("Accounts"), self.parent_window
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/accounts.png"
+            ),
+            _("Accounts"),
+            self.parent_window,
         )
         button.setStatusTip(_("Display your accounts"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))

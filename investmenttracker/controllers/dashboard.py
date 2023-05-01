@@ -11,6 +11,7 @@ DashboardController
 import datetime
 import gettext
 import os.path
+import os
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
@@ -225,7 +226,10 @@ class DashboardController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/dashboard.png"),
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/dashboard.png"
+            ),
             _("Dashboard"),
             self.parent_window,
         )

@@ -19,8 +19,8 @@ if "--real" in sys.argv:
         platformdirs.user_data_dir("piratjack-investment-tracker", "PiratJack")
         + "/prod.sqlite"
     )
-LOCALE_FOLDER = "./locale"
-STYLESHEET_FILE = "./assets/style/app.css"
+LOCALE_FOLDER = os.path.dirname(os.path.realpath(__file__)) + "/locale"
+STYLESHEET_FILE = os.path.dirname(os.path.realpath(__file__)) + "/assets/style/app.css"
 
 # Setup translation
 gettext.bindtextdomain("messages", LOCALE_FOLDER)

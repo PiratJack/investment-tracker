@@ -13,6 +13,7 @@ SharePricesController
 """
 import gettext
 import datetime
+import os
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
@@ -235,7 +236,12 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             and col == 6
             and index.row() != len(self.share_prices)
         ):
-            return QtCore.QVariant(QtGui.QIcon("assets/images/delete.png"))
+            return QtCore.QVariant(
+                QtGui.QIcon(
+                    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                    + "/assets/images/delete.png"
+                )
+            )
         if role == Qt.TextAlignmentRole:
             return self.columns[index.column()]["alignment"]
 
@@ -611,7 +617,10 @@ class SharePricesController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/money.png"),
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/money.png"
+            ),
             _("Share Prices"),
             self.parent_window,
         )

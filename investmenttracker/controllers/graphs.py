@@ -11,6 +11,7 @@ GraphsController
 import gettext
 import datetime
 import locale
+import os
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
@@ -388,7 +389,12 @@ class GraphsController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/graphs.png"), _("Graphs"), self.parent_window
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/graphs.png"
+            ),
+            _("Graphs"),
+            self.parent_window,
         )
         button.setStatusTip(_("Display graphs"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))

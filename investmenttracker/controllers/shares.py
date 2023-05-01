@@ -9,6 +9,7 @@ SharesController
     Handles user interactions and links all displayed widgets
 """
 import gettext
+import os
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
@@ -238,7 +239,13 @@ class SharesTree(basetreecontroller.BaseTreeController):
         if group_id == 0:
             # Apply style
             group_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
-            group_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
+            group_widget.setIcon(
+                0,
+                QtGui.QIcon(
+                    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                    + "/assets/images/add.png"
+                ),
+            )
 
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
@@ -287,7 +294,13 @@ class SharesTree(basetreecontroller.BaseTreeController):
             font.setItalic(True)
             share_widget.setFont(0, font)
             share_widget.setForeground(0, QtGui.QBrush(QtGui.QColor("#A0A0A0")))
-            share_widget.setIcon(0, QtGui.QIcon("assets/images/add.png"))
+            share_widget.setIcon(
+                0,
+                QtGui.QIcon(
+                    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                    + "/assets/images/add.png"
+                ),
+            )
 
             # Add Create buttons
             create_button = QtWidgets.QPushButton()
@@ -386,7 +399,12 @@ class SharesController:
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
         button = QtWidgets.QAction(
-            QtGui.QIcon("assets/images/shares.png"), _("Shares"), self.parent_window
+            QtGui.QIcon(
+                os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                + "/assets/images/shares.png"
+            ),
+            _("Shares"),
+            self.parent_window,
         )
         button.setStatusTip(_("Display shares"))
         button.triggered.connect(lambda: self.parent_window.display_tab(self.name))

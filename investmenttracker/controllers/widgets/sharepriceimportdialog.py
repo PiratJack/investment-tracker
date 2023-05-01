@@ -10,6 +10,7 @@ SharePriceImportDialog
 """
 import datetime
 import gettext
+import os
 
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
@@ -638,7 +639,12 @@ class SharePriceImportDialog:
             if self.data_checked:
                 item = QtWidgets.QTableWidgetItem()
                 if row in self.data_errors:
-                    item.setIcon(QtGui.QIcon("assets/images/ko.png"))
+                    item.setIcon(
+                        QtGui.QIcon(
+                            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+                            + "/assets/images/ko.png"
+                        )
+                    )
                     item.setToolTip("/n".join(self.data_errors[row].values()))
                 self.data_table.setVerticalHeaderItem(row + 1, item)
 
