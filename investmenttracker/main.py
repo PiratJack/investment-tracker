@@ -2,6 +2,7 @@
 import gettext
 import sys
 import os
+import platformdirs
 import PyQt5
 
 import controllers.mainwindow
@@ -9,7 +10,15 @@ import models.database
 
 # Define some constants
 DATABASE_FILE = "sandbox.sqlite"
-# DATABASE_FILE = "prod.sqlite"
+if "--real" in sys.argv:
+    os.makedirs(
+        platformdirs.user_data_dir("piratjack-investment-tracker", "PiratJack"),
+        exist_ok=True,
+    )
+    DATABASE_FILE = (
+        platformdirs.user_data_dir("piratjack-investment-tracker", "PiratJack")
+        + "/prod.sqlite"
+    )
 LOCALE_FOLDER = "./locale"
 STYLESHEET_FILE = "./assets/style/app.css"
 
