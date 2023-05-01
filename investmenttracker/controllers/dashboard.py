@@ -84,7 +84,7 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(table_row)
 
         all_shares = self.database.shares_get(only_synced=True)
-        for share in all_shares:
+        for share in sorted(all_shares, key=lambda s: s.name):
             table_row = [share.name]
             share_prices = self.database.share_prices_get(
                 share_id=share,
@@ -390,6 +390,5 @@ class DashboardController:
                 _("There was an error reading this file. Please choose another file.")
             )
             return
+        import_dialog.window.finished.connect(self.reload_data)
         import_dialog.show_window()
-
-        self.reload_data()
