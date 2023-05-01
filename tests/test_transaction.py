@@ -200,13 +200,13 @@ class TestTransaction(unittest.TestCase):
         )
         self.assertEqual(
             format_number(1584.415159),
-            "1584.42",
-            "Regular numbers should be displayed with 2 decimals",
+            "1584.41516",
+            "Regular numbers should be displayed with 5 decimals",
         )
         self.assertEqual(
             format_number(1584.415159, "EUR"),
             "1584.42 EUR",
-            "Regular numbers should be displayed with 2 decimals",
+            "Currency-related numbers should be displayed with 2 decimals",
         )
 
     def test_validations(self):
