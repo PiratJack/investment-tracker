@@ -162,6 +162,21 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
                 children.append(child)
 
+            # Add cash
+            child = [
+                _("Cash ({currency})").format(currency=account.base_currency.main_code),
+                "",
+                share.main_code,
+                format_number(account.balance),
+                format_number(
+                    account.balance,
+                    account.base_currency.main_code,
+                ),
+                "",
+                "",
+            ]
+            children.append(child)
+
             for child in children:
                 child_widget = QtWidgets.QTreeWidgetItem(child)
                 for column, field in enumerate(self.columns):

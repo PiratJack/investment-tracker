@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2022-08-28 17:54+0200\n"
+"PO-Revision-Date: 2023-05-01 17:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 msgid "Account"
 msgstr "Compte"
@@ -81,6 +81,10 @@ msgstr "Monnaie de base (nom)"
 
 msgid "Baseline date"
 msgstr "Date de référence (base 100)"
+
+#, python-brace-format
+msgid "Cash ({currency})"
+msgstr "Monnaie ({currency})"
 
 msgid "Cash balance"
 msgstr "Solde (espèces)"

@@ -80,6 +80,10 @@ msgstr ""
 msgid "Baseline date"
 msgstr ""
 
+#, python-brace-format
+msgid "Cash ({currency})"
+msgstr ""
+
 msgid "Cash balance"
 msgstr ""
 
