@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2023-05-01 17:49+0200\n"
+"PO-Revision-Date: 2023-05-06 13:24+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -493,6 +493,9 @@ msgstr "Le fichier a un en-tête"
 
 msgid "The price is not a decimal number"
 msgstr "Le prix n'est pas un nombre décimal"
+
+msgid "The selected file does not exist"
+msgstr "Le fichier n'existe pas"
 
 msgid "The source field is mandatory"
 msgstr "Le champ source est obligatoire"

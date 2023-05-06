@@ -479,6 +479,9 @@ msgstr ""
 msgid "The price is not a decimal number"
 msgstr ""
 
+msgid "The selected file does not exist"
+msgstr ""
+
 msgid "The source field is mandatory"
 msgstr ""
 

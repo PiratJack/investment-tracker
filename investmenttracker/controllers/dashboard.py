@@ -342,7 +342,12 @@ class DashboardController:
         self.error_label.setText("")
 
         export_dialog = ShareExportDialog(self)
-        export_dialog.set_file(file_path)
+        try:
+            export_dialog.set_file(file_path)
+        except FileNotFoundError:
+            self.error_label.setText(_("The selected file does not exist"))
+            return
+
         export_dialog.show_window()
 
         self.reload_data()
@@ -393,6 +398,14 @@ class DashboardController:
             self.error_label.setText(
                 _("There was an error reading this file. Please choose another file.")
             )
+            return
+        except UnicodeDecodeError:
+            self.error_label.setText(
+                _("There was an error reading this file. Please choose another file.")
+            )
+            return
+        except FileNotFoundError:
+            self.error_label.setText(_("The selected file does not exist"))
             return
         import_dialog.window.finished.connect(self.reload_data)
         import_dialog.show_window()
