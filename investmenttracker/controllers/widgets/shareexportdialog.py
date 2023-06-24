@@ -110,6 +110,7 @@ class ShareExportDialog:
         "base_currency.id": _("Base currency (ID)"),
         "base_currency.name": _("Base currency (name)"),
         "base_currency.main_code": _("Base currency (main code)"),
+        "group.name": _("Name of group"),
     }
 
     map_fields = {}
@@ -212,7 +213,7 @@ class ShareExportDialog:
         # Define all possible options
         possible_values = [("", 0)]
         for field_id, label in self.possible_fields.items():
-            possible_values.append((label, field_id))
+            possible_values.append((_(label), field_id))
 
         # Add headers (dropdown for choice)
         if self.map_fields:
@@ -268,6 +269,10 @@ class ShareExportDialog:
             if share.base_currency:
                 field = field_id[len("base_currency") + 1 :]
                 return getattr(share.base_currency, field)
+        if field_id.startswith("group"):
+            if share.group:
+                field = field_id[len("group") + 1 :]
+                return getattr(share.group, field)
         return ""
 
     def on_export_headers(self, export_headers):
