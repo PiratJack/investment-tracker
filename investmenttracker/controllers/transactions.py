@@ -356,7 +356,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.account.name,
                 transaction.id,
                 QtCore.QDate(transaction.date),
-                transaction.type.value["name"],
+                _(transaction.type.value["name"]),
                 transaction.label,
                 format_number(transaction.asset_total),
                 transaction.share.short_name if transaction.share else "-",
