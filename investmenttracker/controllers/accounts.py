@@ -167,7 +167,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
             child = [
                 _("Cash ({currency})").format(currency=account.base_currency.main_code),
                 "",
-                share.main_code,
+                account.base_currency.main_code,
                 format_number(account.balance),
                 format_number(
                     account.balance,
