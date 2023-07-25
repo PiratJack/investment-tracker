@@ -124,6 +124,8 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             for share in sorted(shares, key=lambda a: a.name):
                 account_item.addChild(self.add_share(share, account_item))
 
+        self.restore_item_selection()
+
     def add_account(self, account):
         """Formats a single account for display in the tree
 
@@ -558,14 +560,10 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         self.database = parent_controller.database
 
         self.model = TransactionsTableModel(self.database, self.columns)
-        self.proxymodel = QtCore.QSortFilterProxyModel()
-        self.proxymodel.setSourceModel(self.model)
-        self.setModel(self.proxymodel)
+        self.setModel(self.model)
 
         self.clicked.connect(self.on_table_clicked)
         self.doubleClicked.connect(self.on_table_double_clicked)
-
-        self.setSortingEnabled(True)
 
     def set_filters(self, selected_accounts=None, selected_shares=None):
         """Applies the filters on the list of transactions to display
