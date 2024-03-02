@@ -5,6 +5,7 @@ Classes
 MainWindow
     Main window for display. Displays a toolbar to access the different screens
 """
+
 import gettext
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QSize
@@ -34,7 +35,7 @@ class MainWindow(QtWidgets.QMainWindow):
         The toolbar displayed on the left
     """
 
-    def __init__(self, database):
+    def __init__(self, database, pluginmanager):
         """Stores subwindows, displays toolbar and creates the layout
 
         Parameters
@@ -53,6 +54,10 @@ class MainWindow(QtWidgets.QMainWindow):
             "Graphs": controllers.graphs.GraphsController(self),
             "Dashboard": controllers.dashboard.DashboardController(self),
         }
+        for plugin_name, plugin in pluginmanager.plugins.items():
+            if hasattr(plugin, "Controller"):
+                controller = plugin.Controller(self)
+                self.elements[controller.code] = controller
 
         self.setMinimumSize(800, 600)
         self.statusBar()

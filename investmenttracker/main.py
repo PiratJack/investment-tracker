@@ -1,4 +1,5 @@
 """Main application module"""
+
 import gettext
 import sys
 import os
@@ -7,8 +8,10 @@ import PyQt5
 
 import controllers.mainwindow
 import models.database
+import models.pluginmanager
 
 # Define some constants
+PLUGIN_FOLDER = os.path.join(os.path.dirname(__file__), "plugins")
 DATABASE_FILE = "sandbox.sqlite"
 if "--real" in sys.argv:
     os.makedirs(
@@ -29,6 +32,10 @@ gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 # Connect to database
 database = models.database.Database(DATABASE_FILE)
 
+# Load plugins
+pluginmanager = models.pluginmanager.PluginManager(PLUGIN_FOLDER)
+pluginmanager.find_plugins()
+
 if __name__ == "__main__":
     # Change platform to avoid Wayland-related warning messages
     os.environ["QT_QPA_PLATFORM"] = "xcb"
@@ -36,6 +43,6 @@ if __name__ == "__main__":
     with open(STYLESHEET_FILE, "r", encoding="UTF-8") as stylesheet:
         app.setStyleSheet(stylesheet.read())
 
-    window = controllers.mainwindow.MainWindow(database)
+    window = controllers.mainwindow.MainWindow(database, pluginmanager)
     window.showMaximized()
     app.exec_()
