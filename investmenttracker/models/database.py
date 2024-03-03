@@ -102,7 +102,7 @@ class Database:
         self.plugins = {}
         for plugin_name, plugin in pluginmanager.plugins.items():
             if hasattr(plugin, "Database"):
-                database = plugin.Database(self, Base)
+                database = plugin.Database(self)
                 self.plugins[plugin_name] = database
 
         self.create_tables()
