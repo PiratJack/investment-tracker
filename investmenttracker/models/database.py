@@ -5,6 +5,7 @@ Classes
 Database
     Holds different methods for most queries used in the rest of the application
 """
+
 import datetime
 import sqlalchemy
 
@@ -87,7 +88,7 @@ class Database:
         Deletes the provided item
     """
 
-    def __init__(self, database_file):
+    def __init__(self, database_file, pluginmanager):
         """Loads (or creates) the database from the provided file
 
         Parameters
@@ -97,6 +98,13 @@ class Database:
         """
         self.engine = sqlalchemy.create_engine("sqlite:///" + database_file)
         self.metadata = sqlalchemy.MetaData()
+
+        self.plugins = {}
+        for plugin_name, plugin in pluginmanager.plugins.items():
+            if hasattr(plugin, "Database"):
+                database = plugin.Database(self, Base)
+                self.plugins[plugin_name] = database
+
         self.create_tables()
 
         self.session = sqlalchemy.orm.sessionmaker(bind=self.engine)()
@@ -479,3 +487,8 @@ class Database:
         """
         self.session.delete(item)
         self.session.commit()
+
+    def __getattr__(self, attr):
+        for plugin_name, plugin in self.plugins.items():
+            if hasattr(plugin, attr):
+                return getattr(plugin, attr)

@@ -29,12 +29,12 @@ STYLESHEET_FILE = os.path.dirname(os.path.realpath(__file__)) + "/assets/style/a
 gettext.bindtextdomain("messages", LOCALE_FOLDER)
 gettext.translation("messages", localedir=LOCALE_FOLDER).install()
 
-# Connect to database
-database = models.database.Database(DATABASE_FILE)
-
 # Load plugins
 pluginmanager = models.pluginmanager.PluginManager(PLUGIN_FOLDER)
 pluginmanager.find_plugins()
+
+# Connect to database
+database = models.database.Database(DATABASE_FILE, pluginmanager)
 
 if __name__ == "__main__":
     # Change platform to avoid Wayland-related warning messages
