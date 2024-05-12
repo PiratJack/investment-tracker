@@ -269,9 +269,15 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.start_date = start_date
         self.end_date = end_date
 
-        self.calculate_accounts(self.selected_accounts)
-        self.calculate_shares(self.selected_shares)
-        self.plot_graph()
+        if self.graph_type == "split":
+            try:
+                self.set_account_split()
+            except (UserWarning, NoPriceException) as exception:
+                self.add_error(exception)
+        else:
+            self.calculate_accounts(self.selected_accounts)
+            self.calculate_shares(self.selected_shares)
+            self.plot_graph()
 
     def set_baseline(self, enabled, baseline_date):
         """Defines the baseline date for the graph calculation & triggers reload
@@ -318,9 +324,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.calculate_accounts(self.selected_accounts)
         account_id = self.selected_accounts[0]
         account = self.all_accounts[account_id]
+        start_date = self.start_date
+        if start_date not in self.accounts_holdings[account_id]:
+            start_date = max(
+                d for d in self.accounts_holdings[account_id] if d < start_date
+            )
+        # Find held shares during the timespan of the graph (rather than the whole account lifecycle)
         held_shares = set(
             d
             for date in self.accounts_holdings[account_id]
+            if date > start_date and date <= self.end_date
             for d in self.accounts_holdings[account_id][date]["shares"]
         )
         self.calculate_shares(held_shares)
