@@ -306,15 +306,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if enabled != -1:
             self.graph_type = "split" if enabled else "value"
 
-        if self.graph_type == "split" and len(self.selected_accounts) == 0:
-            self.clear_plots()
-            return
-
-        if self.graph_type == "split" and len(self.selected_accounts) > 1:
-            raise UserWarning("Only 1 account can be displayed in this mode")
-
         if not self.graph_type == "split":
             return
+        if len(self.selected_accounts) == 0:
+            self.clear_plots()
+            return
+        if len(self.selected_accounts) > 1:
+            raise UserWarning("Only 1 account can be displayed in this mode")
 
         # Get raw calculations for everything we need
         self.calculate_accounts(self.selected_accounts)
