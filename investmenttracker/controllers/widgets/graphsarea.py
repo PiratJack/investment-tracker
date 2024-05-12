@@ -361,9 +361,12 @@ class GraphsArea(pyqtgraph.PlotWidget):
                         if share_id in holdings[date]["shares"]
                         else 0
                     )
-                    + sum(
-                        self.shares_graph_values[s][date]
-                        for s in self.shares_graph_values
+                    + max(
+                        [0]
+                        + [
+                            self.shares_graph_values[s][date]
+                            for s in self.shares_graph_values
+                        ]
                     )
                     for date in holdings
                 }
