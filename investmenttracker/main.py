@@ -1,5 +1,6 @@
 """Main application module"""
 
+import logging
 import gettext
 import sys
 import os
@@ -9,6 +10,9 @@ import PyQt5
 import controllers.mainwindow
 import models.database
 import models.pluginmanager
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 # Define some constants
 PLUGIN_FOLDER = os.path.join(os.path.dirname(__file__), "plugins")
