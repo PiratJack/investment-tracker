@@ -131,6 +131,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         "baseline": {
             "min": 0,
         },
+        "baseline_net": {
+            "min": 0,
+        },
     }
     graph_type = "value"
     display_markers = True
@@ -279,7 +282,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.calculate_shares(self.selected_shares)
             self.plot_graph()
 
-    def set_baseline(self, enabled, baseline_date):
+    def set_baseline(self, enabled, baseline_date, baseline_net):
         """Defines the baseline date for the graph calculation & triggers reload
 
         Parameters
@@ -288,12 +291,16 @@ class GraphsArea(pyqtgraph.PlotWidget):
             Whether the percentage-based graph is enabled
         baseline_date : datetime.date
             Date used as baseline for precentage-based graph
+        baseline_net : bool
+            Whether the baseline changes after each entry/exit out of the account
         """
         self.calculate_accounts(self.selected_accounts)
         self.calculate_shares(self.selected_shares)
         if enabled:
             self.baseline_date = baseline_date
             self.graph_type = "baseline"
+            if baseline_net:
+                self.graph_type = "baseline_net"
         else:
             self.baseline_date = None
             self.graph_type = "value"
@@ -694,21 +701,71 @@ class GraphsArea(pyqtgraph.PlotWidget):
             if self.graph_type == "split":
                 raw, converted = self.accounts_graph_values, self.accounts_graph_values
             else:
-                raw, converted = self.accounts_raw_values, self.accounts_graph_values
+                raw, converted = (
+                    self.accounts_raw_values.copy(),
+                    self.accounts_graph_values,
+                )
 
         baseline_value = 1
-        if self.baseline_date:
+        if self.graph_type == "baseline" or self.graph_type == "baseline_net":
             # If there is a date before the baseline, take it. Otherwise, take the first available.
             dates_before = [d for d in raw[element_id] if d <= self.baseline_date]
             if dates_before:
-                baseline_value = raw[element_id][max(dates_before)]
+                real_baseline_date = max(dates_before)
             elif raw[element_id]:
-                baseline_value = raw[element_id][min(raw[element_id].keys())]
+                real_baseline_date = min(raw[element_id].keys())
+            else:
+                raise NoPriceException(
+                    f"No value to graph for {element_type} {element_id}"
+                )
+            baseline_value = raw[element_id][real_baseline_date]
             baseline_value = (
                 baseline_value
                 if isinstance(baseline_value, (float, int))
                 else baseline_value.price
             )
+
+            print("convert_raw_to_graph", self.graph_type, element_type)
+            # For "Net baseline" graphs, we need to "zero out" unwanted transactions
+            if self.graph_type == "baseline_net" and element_type == "account":
+                start_date = min([d for d in raw[element_id]])
+                end_date = max([d for d in raw[element_id]])
+                # Find all transactions to exclude in date range
+                transactions = self.all_accounts[element_id].transactions
+                transactions = [
+                    t
+                    for t in transactions
+                    if t.date >= start_date and t.date <= end_date
+                    if t.type.value["exclude_from_net_baseline"]
+                ]
+                # Transactions before the baseline should be reversed and impact what happened before them
+                # Otherwise, the baseline_value will move
+                print("recalculate with real_baseline_date", real_baseline_date)
+                print("start_date", start_date)
+                print("end_date", end_date)
+                print("transactions", transactions)
+                raw[element_id] = {
+                    graph_date: raw[element_id][graph_date]
+                    + sum(
+                        [
+                            transaction.cash_total
+                            + transaction.asset_total * transaction.unit_price
+                            for transaction in transactions
+                            if transaction.date < real_baseline_date
+                            and graph_date <= transaction.date
+                        ]
+                    )
+                    - sum(
+                        [
+                            transaction.cash_total
+                            + transaction.asset_total * transaction.unit_price
+                            for transaction in transactions
+                            if transaction.date > real_baseline_date
+                            and graph_date >= transaction.date
+                        ]
+                    )
+                    for graph_date in raw[element_id]
+                }
 
         converted[element_id] = {
             d: (

@@ -385,6 +385,9 @@ msgstr ""
 msgid "Name of group"
 msgstr ""
 
+msgid "Net baseline (excludes entry/exit of cash and shares)"
+msgstr ""
+
 #, python-brace-format
 msgid "No price available for share {name} ({main_code})"
 msgstr ""

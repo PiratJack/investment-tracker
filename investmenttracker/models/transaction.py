@@ -8,6 +8,7 @@ TransactionTypes
 Transaction
     Database class for handling transactions
 """
+
 import enum
 import gettext
 import sqlalchemy.orm
@@ -35,6 +36,9 @@ class TransactionTypes(enum.Enum):
         1 if the transaction is linked to an asset
         0 otherwise
         This may be 1 even if impact_asset=0: for example to record asset buying fees
+    - exclude_from_net_baseline:
+        1 if the transaction should be excluded from the net baseline in the graphs
+        0 otherwise
     """
 
     arbitrage_buy = {
@@ -42,132 +46,154 @@ class TransactionTypes(enum.Enum):
         "impact_currency": 0,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     arbitrage_sell = {
         "name": _("Arbitrage - Sell"),
         "impact_currency": 0,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     asset_buy = {
         "name": _("Asset buy / subscription"),
         "impact_currency": -1,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     asset_sell = {
         "name": _("Asset sell"),
         "impact_currency": 1,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     cash_entry = {
         "name": _("Cash deposit"),
         "impact_currency": 1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 1,
     }
     cash_exit = {
         "name": _("Cash withdrawal"),
         "impact_currency": -1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 1,
     }
     company_funding_cash = {
         "name": _("Company funding - Cash"),
         "impact_currency": 1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 0,
     }
     company_funding_asset = {
         "name": _("Company funding - Asset"),
         "impact_currency": 0,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     dividends = {
         "name": _("Dividends"),
         "impact_currency": 1,
         "impact_asset": 0,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     fee_asset = {
         "name": _("Management fee - in units"),
         "impact_currency": 0,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     fee_cash = {
         "name": _("Management fee - in cash"),
         "impact_currency": -1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 0,
     }
     movement_fee = {
         "name": _("Movement fee"),
         "impact_currency": -1,
         "impact_asset": 0,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     profit_asset = {
         "name": _("Profit - in units"),
         "impact_currency": 0,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     profit_cash = {
         "name": _("Profit - in cash"),
         "impact_currency": 1,
         "impact_asset": 0,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     split_source = {
         "name": _("Split & merge - Source"),
         "impact_currency": 0,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     split_target = {
         "name": _("Split & merge - Target"),
         "impact_currency": 0,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     taxes_cash = {
         "name": _("Taxes - in cash"),
         "impact_currency": -1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 0,
     }
     taxes_asset = {
         "name": _("Taxes - in units"),
         "impact_currency": 0,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 0,
     }
     transfer_in_cash = {
         "name": _("Transfer - Cash in"),
         "impact_currency": 1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 1,
     }
     transfer_in_asset = {
         "name": _("Transfer - Asset in"),
         "impact_currency": 0,
         "impact_asset": 1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 1,
     }
     transfer_out_cash = {
         "name": _("Transfer - Cash out"),
         "impact_currency": -1,
         "impact_asset": 0,
         "has_asset": 0,
+        "exclude_from_net_baseline": 1,
     }
     transfer_out_asset = {
         "name": _("Transfer - Asset out"),
         "impact_currency": 0,
         "impact_asset": -1,
         "has_asset": 1,
+        "exclude_from_net_baseline": 1,
     }
 
 

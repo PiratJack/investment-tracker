@@ -379,6 +379,10 @@ class GraphsController:
         self.baseline_enabled = QtWidgets.QCheckBox(_("Display evolution?"))
         self.baseline_label = QtWidgets.QLabel(_("Baseline date"))
         self.baseline_date = QtWidgets.QDateEdit()
+        self.baseline_net = QtWidgets.QCheckBox(
+            _("Net baseline (excludes entry/exit of cash and shares)")
+        )
+
         self.split_enabled = QtWidgets.QCheckBox(_("Display account composition?"))
 
         self.error_messages = QtWidgets.QLabel()
@@ -473,6 +477,10 @@ class GraphsController:
         self.baseline_date.dateChanged.connect(self.on_baseline_change)
         self.right_column.layout.addWidget(self.baseline_date, 1, 2)
         self.baseline_date.setMinimumWidth(date_width * 2)
+
+        # Choose whether the baseline is reset when cash/shares enter/exit
+        self.baseline_net.stateChanged.connect(self.on_baseline_change)
+        self.right_column.layout.addWidget(self.baseline_net, 1, 3)
 
         # Display account split?
         self.split_enabled.stateChanged.connect(self.on_display_split_change)
@@ -576,8 +584,14 @@ class GraphsController:
             self.baseline_date.date().toString(Qt.ISODate)
         )
         self.split_enabled.setEnabled(not self.baseline_enabled.isChecked())
+        if self.baseline_net.isChecked():
+            self.baseline_enabled.setChecked(True)
 
-        self.graph.set_baseline(self.baseline_enabled.isChecked(), baseline_date)
+        self.graph.set_baseline(
+            self.baseline_enabled.isChecked(),
+            baseline_date,
+            self.baseline_net.isChecked(),
+        )
 
     def on_display_split_change(self):
         """User clicks on 'Display composition' checkbox => reload graph"""
