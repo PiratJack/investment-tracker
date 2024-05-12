@@ -89,7 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
         self.toolbar.setOrientation(Qt.Vertical)
-        self.toolbar.setIconSize(QSize(128, 128))
+        self.toolbar.setIconSize(QSize(64, 64))
 
         self.addToolBar(Qt.LeftToolBarArea, self.toolbar)
 
