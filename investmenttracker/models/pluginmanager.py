@@ -48,7 +48,7 @@ class PluginManager:
         path : str
             The path to explore (will do nothing if it's not a folder)
         """
-        logger.debug(f"PluginManager.find_plugins")
+        logger.debug("PluginManager.find_plugins")
         for element in os.listdir(self.plugin_folder):
             full_path = os.path.join(self.plugin_folder, element)
             module_name = element[:-3]
