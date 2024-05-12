@@ -476,22 +476,22 @@ class GraphsController:
 
         # Display account split?
         self.split_enabled.stateChanged.connect(self.on_display_split_change)
-        self.right_column.layout.addWidget(self.split_enabled, 1, 3)
+        self.right_column.layout.addWidget(self.split_enabled, 2, 0)
 
         # Error messages
         self.error_messages.setProperty("class", "validation_warning")
-        self.right_column.layout.addWidget(self.error_messages, 2, 0, 1, 5)
+        self.right_column.layout.addWidget(self.error_messages, 3, 0, 1, 5)
 
         # Add the graph
-        self.right_column.layout.addWidget(self.graph, 3, 0, 1, 5)
+        self.right_column.layout.addWidget(self.graph, 4, 0, 1, 5)
 
         # Choose whether to display markers
         self.markers_visible.setChecked(True)
         self.markers_visible.stateChanged.connect(self.on_markers_change)
-        self.right_column.layout.addWidget(self.markers_visible, 4, 0)
+        self.right_column.layout.addWidget(self.markers_visible, 5, 0)
 
         # Performance table
-        self.right_column.layout.addWidget(self.performance_table, 5, 0, 1, 5)
+        self.right_column.layout.addWidget(self.performance_table, 6, 0, 1, 5)
 
         # Trigger date change once all dates are set
         self.on_change_dates()
