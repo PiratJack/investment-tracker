@@ -6,6 +6,7 @@ Account
     Database class for handling accounts
     Accounts store cash and assets
 """
+
 import gettext
 import datetime
 import math
@@ -262,7 +263,7 @@ class Account(Base):
                 if t.share.id not in account_holdings[t.date]["shares"]:
                     account_holdings[t.date]["shares"][t.share.id] = 0
                 account_holdings[t.date]["shares"][t.share.id] += t.asset_total
-                if account_holdings[t.date]["shares"][t.share.id] == 0:
+                if abs(account_holdings[t.date]["shares"][t.share.id]) <= 10**-13:
                     del account_holdings[t.date]["shares"][t.share.id]
             previous_holdings = account_holdings[t.date]
 
