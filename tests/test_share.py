@@ -2,6 +2,7 @@ import datetime
 import os
 import unittest
 
+import investmenttracker.models.pluginmanager
 import investmenttracker.models.database as databasemodel
 
 from investmenttracker.models.base import NoPriceException, ValidationException
@@ -9,8 +10,13 @@ from investmenttracker.models.share import Share, ShareDataOrigin
 from investmenttracker.models.sharecode import ShareCode
 from investmenttracker.models.shareprice import SharePrice
 
+PLUGIN_FOLDER = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
+)
+pluginmanager = investmenttracker.models.pluginmanager.PluginManager(PLUGIN_FOLDER)
+
 DATABASE_FILE = "test.sqlite"
-database = databasemodel.Database(DATABASE_FILE)
+database = databasemodel.Database(DATABASE_FILE, pluginmanager)
 
 try:
     os.remove(DATABASE_FILE)
@@ -20,7 +26,7 @@ except OSError:
 
 class TestShare(unittest.TestCase):
     def setUp(self):
-        self.database = databasemodel.Database(DATABASE_FILE)
+        self.database = databasemodel.Database(DATABASE_FILE, pluginmanager)
         self.database.session.add_all(
             [
                 Share(

@@ -2,6 +2,7 @@ import datetime
 import os
 import unittest
 
+import investmenttracker.models.pluginmanager
 import investmenttracker.models.database as databasemodel
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -11,8 +12,13 @@ from investmenttracker.models.share import Share
 from investmenttracker.models.transaction import Transaction
 from investmenttracker.models.shareprice import SharePrice
 
+PLUGIN_FOLDER = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
+)
+pluginmanager = investmenttracker.models.pluginmanager.PluginManager(PLUGIN_FOLDER)
+
 DATABASE_FILE = "test.sqlite"
-database = databasemodel.Database(DATABASE_FILE)
+database = databasemodel.Database(DATABASE_FILE, pluginmanager)
 
 # Delete existing database if it exists
 try:
@@ -23,7 +29,7 @@ except OSError:
 
 class TestAccount(unittest.TestCase):
     def setUp(self):
-        self.database = databasemodel.Database(DATABASE_FILE)
+        self.database = databasemodel.Database(DATABASE_FILE, pluginmanager)
         self.database.session.add_all(
             [
                 Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
