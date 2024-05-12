@@ -8,6 +8,7 @@ PerformanceTable
 GraphsController
     Controller for graph display - handles user interactions & children widgets
 """
+
 import gettext
 import datetime
 import locale
@@ -196,7 +197,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
 
                     data = format_number(total_amount, account.base_currency.main_code)
                     if base_amount:
-                        evolution = (total_amount - base_amount) / base_amount
+                        evolution = (total_amount - base_amount) / base_amount * 100
                         data += "\n" + locale.format_string("%.2f %%", evolution)
                     else:
                         base_amount = total_amount
