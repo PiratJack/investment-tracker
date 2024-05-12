@@ -5,6 +5,7 @@ Classes
 GraphsArea
     The graph displaying the evolution of share & account price over time
 """
+
 import gettext
 import datetime
 
@@ -586,8 +587,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
             # Add markers
             self.add_markers(self.shares_graph_values[share_id])
 
-            self.set_axis_range()
-
         for account_id in self.selected_accounts:
             # Convert values
             self.convert_raw_to_graph("account", account_id)
@@ -613,7 +612,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             # Add markers
             self.add_markers(self.accounts_graph_values[account_id])
 
-            self.set_axis_range()
+        self.set_axis_range()
 
     def add_markers(self, values):
         """Adds the markers on the graph
@@ -723,6 +722,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.setXRange(start, end, padding=0)
 
         self.enableAutoRange(axis="y")
+        self.setAutoVisible(y=True)
 
         if (
             "min" in self.graph_types[self.graph_type]
