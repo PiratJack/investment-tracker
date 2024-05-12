@@ -236,7 +236,7 @@ class Database:
         values = query.all()
         query = (
             self.session.query(share.Share)
-            .join(share.Share.codes, aliased=True)
+            .join(share.Share.codes)
             .filter(share.Share.codes.any(sharecode.ShareCode.value == name))
         )
         values += query.all()
