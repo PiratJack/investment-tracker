@@ -232,7 +232,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
             self.set_account_split()
         except (UserWarning, NoPriceException) as exception:
             self.add_error(exception)
-        self.plot_graph()
+        # Split graphs are rendered in self.set_account_split already
+        if not self.graph_type == "split":
+            self.plot_graph()
 
     def set_shares(self, selected_shares=None):
         """Defines which shares to display & triggers reload
@@ -304,7 +306,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
         if enabled != -1:
             self.graph_type = "split" if enabled else "value"
 
-        if self.graph_type == "split" and len(self.selected_accounts) != 1:
+        if self.graph_type == "split" and len(self.selected_accounts) == 0:
+            self.clear_plots()
+            return
+
+        if self.graph_type == "split" and len(self.selected_accounts) > 1:
             raise UserWarning("Only 1 account can be displayed in this mode")
 
         if not self.graph_type == "split":
@@ -369,6 +375,8 @@ class GraphsArea(pyqtgraph.PlotWidget):
             )
             + (self.shares_graph_values[share_id][date] if share_id else 0)
             # share_id contains the last share from the loop, thus everything except cash
+            # This is because the% of a given share is actually the percentage of that share in the total + all the "previous" shares' %
+            # Otherwise, it's not a stacked area chart, but each share would have its percentage
             for date in holdings
         }
 
@@ -704,7 +712,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
         for plot_id, plot in self.plots.items():
             if plot_id == "legend":
                 continue
-
             self.removeItem(plot)
             plot.clear()
         self.plots = {"legend": self.plots["legend"]}
