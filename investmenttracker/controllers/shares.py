@@ -167,6 +167,8 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
         # Add shares without group
         for share in shares_without_group:
+            if share.hidden and not self.parent_controller.display_hidden:
+                continue
             # Try to display the last price
             codes = ", ".join(
                 [code.origin.value["name"] + ": " + code.value for code in share.codes]
