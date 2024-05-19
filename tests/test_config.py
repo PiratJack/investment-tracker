@@ -1,141 +1,73 @@
 import os
-import unittest
+import sys
+import pytest
 
-import investmenttracker.models.pluginmanager
-import investmenttracker.models.database as databasemodel
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(os.path.join(BASE_DIR, "investmenttracker"))
 
-from investmenttracker.models.base import ValidationException
-from investmenttracker.models.config import Config
-
-PLUGIN_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
-)
-pluginmanager = investmenttracker.models.pluginmanager.PluginManager(PLUGIN_FOLDER)
-
-DATABASE_FILE = "test.sqlite"
-database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-
-try:
-    os.remove(DATABASE_FILE)
-except OSError:
-    pass
+from models.base import ValidationException
 
 
-class TestConfig(unittest.TestCase):
-    def setUp(self):
-        self.database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-        self.database.session.add_all(
-            [
-                Config(id=1, name="load.file.filename", value="/test/path"),
-                Config(id=2, name="load.sFTP.username", value="fezfezfze"),
-                Config(id=3, name="load.sFTP.password", value="gre814ge81:;^m"),
-            ]
-        )
-        self.database.session.commit()
+class TestConfig:
+    def test_gets(self, app_db):
+        config = app_db.config_get_by_name("load.file.filename")
+        assert config.id == 1, "1 configuration should match when searching by name"
 
-    def tearDown(self):
-        self.database.session.close()
-        self.database.engine.dispose()
-        os.remove(DATABASE_FILE)
+        config = app_db.config_get_by_name("does.not.exist")
+        assert config is None, "Inexistant configuration should yield None"
 
-    def test_gets(self):
-        config = self.database.config_get_by_name("load.file.filename")
-        self.assertEqual(
-            config.id,
-            1,
-            "1 configuration should match when searching by name",
-        )
+        configs = app_db.configs_get_all()
+        assert configs == {
+            "load.file.filename": "/test/path",
+            "load.sFTP.username": "fezfezfze",
+            "load.sFTP.password": "gre814ge81:;^m",
+        }, "Get all config fails"
 
-        config = self.database.config_get_by_name("does.not.exist")
-        self.assertEqual(
-            config,
-            None,
-            "Inexistant configuration should yield None",
-        )
+        config = app_db.config_get_by_name("load.file.filename")
+        assert (
+            str(config) == "Config for load.file.filename : /test/path"
+        ), "Config string representation is wrong"
 
-        configs = self.database.configs_get_all()
-        self.assertEqual(
-            configs,
-            {
-                "load.file.filename": "/test/path",
-                "load.sFTP.username": "fezfezfze",
-                "load.sFTP.password": "gre814ge81:;^m",
-            },
-            "Get all config fails",
-        )
+        # Test setting a string value
+        config = app_db.config_set("load.file.filename", "blabla")
+        config = app_db.config_get_by_name("load.file.filename")
+        assert (
+            str(config) == "Config for load.file.filename : blabla"
+        ), "Config setting is wrong"
 
-    def test_validations(self):
-        config = self.database.config_get_by_name("load.file.filename")
+        # Test setting a boolean value
+        config = app_db.config_set("extra.config", False)
+        config = app_db.config_get_by_name("extra.config")
+        assert config.value == "0", "Config boolean setting is wrong"
 
+    def test_validations(self, app_db):
         # Test mandatory fields
+        item = app_db.config_get_by_name("load.file.filename")
         for field in ["name", "value"]:
             for value in ["", None]:
                 test_name = "Config must have a " + field + " that is not "
                 test_name += "empty" if value == "" else str(value)
-                with self.assertRaises(ValidationException) as cm:
-                    setattr(config, field, value)
-                self.assertEqual(type(cm.exception), ValidationException, test_name)
-                self.assertEqual(
-                    cm.exception.item,
-                    config,
-                    test_name + " - exception.item is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.key,
-                    field,
-                    test_name + " - exception.key is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.invalid_value,
-                    value,
-                    test_name + " - exception.invalid_value is wrong",
+                with pytest.raises(ValidationException) as cm:
+                    setattr(item, field, value)
+                assert cm.value.item == item, test_name + " - item is wrong"
+                assert cm.value.key == field, test_name + " - key is wrong"
+                assert cm.value.invalid_value == value, (
+                    test_name + " - invalid_value is wrong"
                 )
 
         # Test max length of fields
+        item = app_db.config_get_by_name("load.file.filename")
         for field in ["name", "value"]:
             test_name = "Config " + field + " can't be more than 250 characters"
             value = "a" * 251
-            with self.assertRaises(ValidationException) as cm:
-                setattr(config, field, value)
-            self.assertEqual(type(cm.exception), ValidationException, test_name)
-            self.assertEqual(
-                cm.exception.item,
-                config,
-                test_name + " - exception.item is wrong",
-            )
-            self.assertEqual(
-                cm.exception.key,
-                field,
-                test_name + " - exception.key is wrong",
-            )
-            self.assertEqual(
-                cm.exception.invalid_value,
-                value,
-                test_name + " - exception.invalid_value is wrong",
+            with pytest.raises(ValidationException) as cm:
+                setattr(item, field, value)
+            assert cm.value.item == item, test_name + " - item is wrong"
+            assert cm.value.key == field, test_name + " - key is wrong"
+            assert cm.value.invalid_value == value, (
+                test_name + " - invalid_value is wrong"
             )
 
-    def test_attributes(self):
-        config = self.database.config_get_by_name("load.file.filename")
-        self.assertEqual(
-            str(config),
-            "Config for load.file.filename : /test/path",
-            "Config string representation is wrong",
-        )
 
-        # Test setting a string value
-        config = self.database.config_set("load.file.filename", "blabla")
-        config = self.database.config_get_by_name("load.file.filename")
-        self.assertEqual(
-            str(config),
-            "Config for load.file.filename : blabla",
-            "Config setting is wrong",
-        )
-
-        # Test setting a boolean value
-        config = self.database.config_set("extra.config", False)
-        config = self.database.config_get_by_name("extra.config")
-        self.assertEqual(
-            config.value,
-            "0",
-            "Config boolean setting is wrong",
-        )
+if __name__ == "__main__":
+    pytest.main(["-s", __file__])

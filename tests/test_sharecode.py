@@ -1,130 +1,44 @@
 import os
-import unittest
+import sys
+import pytest
 
-import investmenttracker.models.database as databasemodel
-import investmenttracker.models.pluginmanager
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(os.path.join(BASE_DIR, "investmenttracker"))
 
-from investmenttracker.models.base import ValidationException
-from investmenttracker.models.share import Share, ShareDataOrigin
-from investmenttracker.models.sharecode import ShareCode
-
-PLUGIN_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
-)
-pluginmanager = investmenttracker.models.pluginmanager.PluginManager(PLUGIN_FOLDER)
-
-DATABASE_FILE = "test.sqlite"
-database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-
-try:
-    os.remove(DATABASE_FILE)
-except OSError:
-    pass
+from models.base import ValidationException
 
 
-class TestShareCode(unittest.TestCase):
-    def setUp(self):
-        self.database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-        self.database.session.add_all(
-            [
-                Share(id=1, name="AXA", main_code="FR847238", base_currency_id=5),
-                Share(id=2, name="Accenture", main_code="NYSE:ACN", base_currency_id=6),
-                Share(id=3, name="Workday", main_code="WDAY", base_currency_id=6),
-                Share(id=4, name="HSBC", main_code="LU4325", base_currency_id=5),
-                Share(id=5, name="Euro", main_code="EUR"),
-                Share(id=6, name="Dollar", main_code="USD"),
-                ShareCode(share_id=1, origin="boursorama", value="1rACN"),
-                ShareCode(share_id=1, origin="quantalys", value="14587"),
-                ShareCode(share_id=1, origin="alphavantage", value="FR4941"),
-                ShareCode(share_id=2, origin="quantalys", value="478924"),
-                ShareCode(
-                    share_id=2, origin=ShareDataOrigin["alphavantage"], value="NYSE:ACN"
-                ),
-            ]
-        )
-        self.database.session.commit()
-
-    def tearDown(self):
-        self.database.session.close()
-        self.database.engine.dispose()
-        os.remove(DATABASE_FILE)
-
-    def test_gets(self):
-        share = self.database.share_get_by_id(1)
+class TestShareCode:
+    def test_gets(self, app_db):
+        share = app_db.share_get_by_id(1)
         share_code = share.codes[0]
-        self.assertEqual(
-            len(share.codes),
-            3,
-            "ACN share must have 3 codes",
-        )
-
-        self.assertEqual(
-            str(share_code),
-            "ShareCode AXA (1rACN @ Boursorama)",
-            "ShareCode representation is wrong",
-        )
-        share_code = ShareCode(
-            share_id=2,
-            value="EFEZ",
-        )
-        self.assertEqual(
-            str(share_code),
-            "ShareCode (EFEZ @ None)",
-            "ShareCode representation is wrong",
-        )
+        assert len(share.codes) == 3, "ACN share has 3 codes"
+        assert (
+            str(share_code) == "ShareCode AXA (1rACN @ Boursorama)"
+        ), "ShareCode representation is wrong"
 
         # Search shares by various fields
-        share = self.database.share_search("AXA")
-        self.assertEqual(
-            len(share),
-            1,
-            "Only 1 result found by searching 'AXA' (found through name)",
-        )
-        self.assertEqual(
-            share[0].id,
-            1,
-            "Share 1 found by searching 'AXA' (found through name)",
-        )
+        share = app_db.share_search("AXA")
+        assert len(share) == 1, "Only 1 by searching 'AXA' (via name)"
+        assert share[0].id == 1, "Only 1 by searching 'AXA' (via name)"
 
-        share = self.database.share_search("FR847238")
-        self.assertEqual(
-            len(share),
-            1,
-            "Only 1 result found by searching 'FR847238' (found through main code)",
-        )
-        self.assertEqual(
-            share[0].id,
-            1,
-            "Share 1 found by searching 'FR847238' (found through main code)",
-        )
-        share = self.database.share_search("FR4941")
-        self.assertEqual(
-            len(share),
-            1,
-            "Only 1 result found by searching 'FR4941' (found through code)",
-        )
-        self.assertEqual(
-            share[0].id,
-            1,
-            "Share 1 found by searching 'FR4941' (found through code)",
-        )
+        share = app_db.share_search("FR8472")
+        assert len(share) == 1, "Only 1 by searching 'FR8472' (via main code)"
+        assert share[0].id == 1, "Only 1 by searching 'FR8472' (via main code)"
+
+        share = app_db.share_search("FR4941")
+        assert len(share) == 1, "Only 1 by searching 'FR4941' (via code)"
+        assert share[0].id == 1, "Only 1 by searching 'FR4941' (via code)"
+
         # Check search returns a single share, even if it matches through different means
-        share = self.database.share_search("NYSE:ACN")
-        self.assertEqual(
-            len(share),
-            1,
-            "Only 1 result found by searching 'NYSE:ACN' (should not yield duplicates)",
-        )
-        # Check search returns a single share based on ID
-        share = self.database.share_search(2)
-        self.assertEqual(
-            len(share),
-            1,
-            "Only 1 result found by searching 2",
-        )
+        share = app_db.share_search("NYSE:ACN")
+        assert len(share) == 1, "Only 1 by searching 'NYSE:ACN' (no duplicate)"
 
-    def test_validations(self):
-        share_code = self.database.share_get_by_id(1).codes[0]
+        # Check search returns a single share based on ID
+        share = app_db.share_search(2)
+        assert len(share) == 1, "Only 1 by searching 2 (via id)"
+
+    def test_validations(self, app_db):
 
         # Test forbidden values
         forbidden_values = {
@@ -132,73 +46,46 @@ class TestShareCode(unittest.TestCase):
             "origin": ["", None, -1, "uohih"],
             "share_id": ["", None, 0],
         }
-
+        item = app_db.share_get_by_id(1).codes[0]
         for field in forbidden_values:
             for value in forbidden_values[field]:
                 test_name = "Share code must have a " + field + " that is not "
                 test_name += "empty" if value == "" else str(value)
-                with self.assertRaises(ValidationException) as cm:
-                    setattr(share_code, field, value)
-                self.assertEqual(type(cm.exception), ValidationException, test_name)
-                self.assertEqual(
-                    cm.exception.item,
-                    share_code,
-                    test_name + " - exception.item is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.key,
-                    field,
-                    test_name + " - exception.key is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.invalid_value,
-                    value,
-                    test_name + " - exception.invalid_value is wrong",
+                with pytest.raises(ValidationException) as cm:
+                    setattr(item, field, value)
+                assert cm.value.item == item, test_name + " - item is wrong"
+                assert cm.value.key == field, test_name + " - key is wrong"
+                assert cm.value.invalid_value == value, (
+                    test_name + " - invalid_value is wrong"
                 )
 
         # Test max length of fields
+        item = app_db.share_get_by_id(1).codes[0]
         for field in ["value"]:
             test_name = "Share code " + field + " can't be more than 250 characters"
             value = "a" * 251
-            with self.assertRaises(ValidationException) as cm:
-                setattr(share_code, field, value)
-            self.assertEqual(type(cm.exception), ValidationException, test_name)
-            self.assertEqual(
-                cm.exception.item,
-                share_code,
-                test_name + " - exception.item is wrong",
-            )
-            self.assertEqual(
-                cm.exception.key,
-                field,
-                test_name + " - exception.key is wrong",
-            )
-            self.assertEqual(
-                cm.exception.invalid_value,
-                value,
-                test_name + " - exception.invalid_value is wrong",
+            with pytest.raises(ValidationException) as cm:
+                setattr(item, field, value)
+            assert cm.value.item == item, test_name + " - item is wrong"
+            assert cm.value.key == field, test_name + " - key is wrong"
+            assert cm.value.invalid_value == value, (
+                test_name + " - invalid_value is wrong"
             )
 
         # Test share code origin with int values
+        item = app_db.share_get_by_id(1).codes[0]
         for field in ["share_id", "origin", "value"]:
             for value in ["", None]:
                 test_name = "Share code must have a " + field + " that is not "
                 test_name += "empty" if value == "" else str(value)
-                with self.assertRaises(ValidationException) as cm:
-                    setattr(share_code, field, value)
-                self.assertEqual(type(cm.exception), ValidationException, test_name)
-                self.assertEqual(
-                    cm.exception.item,
-                    share_code,
-                    test_name + " - exception.item is wrong",
+                with pytest.raises(ValidationException) as cm:
+                    setattr(item, field, value)
+                assert cm.value.item == item, test_name + " - item is wrong"
+                assert cm.value.key == field, test_name + " - key is wrong"
+                assert cm.value.invalid_value == value, (
+                    test_name + " - invalid_value is wrong"
                 )
-                self.assertEqual(
-                    cm.exception.key,
-                    field,
-                    test_name + " - exception.key is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.invalid_value,
-                    value,
-                    test_name + " - exception.invalid_value is wrong",
-                )
+
+
+if __name__ == "__main__":
+    pytest.main(["-s", __file__])

@@ -1,125 +1,47 @@
 import os
-import unittest
+import sys
+import pytest
 
-import investmenttracker.models.pluginmanager
-import investmenttracker.models.database as databasemodel
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(os.path.join(BASE_DIR, "investmenttracker"))
 
-from investmenttracker.models.base import ValidationException
-from investmenttracker.models.share import Share
-from investmenttracker.models.sharegroup import ShareGroup
-
-PLUGIN_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
-)
-pluginmanager = investmenttracker.models.pluginmanager.PluginManager(PLUGIN_FOLDER)
-
-DATABASE_FILE = "test.sqlite"
-database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-
-try:
-    os.remove(DATABASE_FILE)
-except OSError:
-    pass
+from models.base import ValidationException
 
 
-class TestShareGroup(unittest.TestCase):
-    def setUp(self):
-        self.database = databasemodel.Database(DATABASE_FILE, pluginmanager)
-        self.database.session.add_all(
-            [
-                ShareGroup(id=1, name="AMEX"),
-                ShareGroup(id=2, name="EUREX"),
-                ShareGroup(id=3, name="CURRENCY"),
-                Share(
-                    id=1,
-                    name="AXA",
-                    main_code="FR847238",
-                    base_currency_id=4,
-                    group_id=2,
-                ),
-                Share(
-                    id=2,
-                    name="Accenture",
-                    main_code="NYSE:ACN",
-                    base_currency_id=4,
-                    group_id=1,
-                ),
-                Share(
-                    id=3,
-                    name="Workday",
-                    main_code="NYSE:WDAY",
-                    base_currency_id=4,
-                    group_id=1,
-                ),
-                Share(id=4, name="Dollar", main_code="USD", group_id=3),
-            ]
-        )
-        self.database.session.commit()
+class TestShareGroup:
+    def test_gets(self, app_db):
+        assert len(app_db.share_groups_get_all()) == 3, "There are 3 groups in total"
+        share_group = app_db.share_group_get_by_id(1)
+        assert len(share_group.shares) == 2, "AMEX group has 2 shares"
 
-    def tearDown(self):
-        self.database.session.close()
-        self.database.engine.dispose()
-        os.remove(DATABASE_FILE)
-
-    def test_gets(self):
-        self.assertEqual(
-            len(self.database.share_groups_get_all()),
-            3,
-            "There are 3 groups in total",
-        )
-        share_group = self.database.share_group_get_by_id(1)
-        self.assertEqual(
-            len(share_group.shares),
-            2,
-            "AMEX group has 2 shares",
-        )
-
-    def test_validations(self):
-        share_group = self.database.share_group_get_by_id(1)
-
+    def test_validations(self, app_db):
         # Test mandatory fields
+        item = app_db.share_group_get_by_id(1)
         for field in ["name"]:
             for value in ["", None]:
                 test_name = "Share price must have a " + field + " that is not "
                 test_name += "empty" if value == "" else str(value)
-                with self.assertRaises(ValidationException) as cm:
-                    setattr(share_group, field, value)
-                self.assertEqual(type(cm.exception), ValidationException, test_name)
-                self.assertEqual(
-                    cm.exception.item,
-                    share_group,
-                    test_name + " - exception.item is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.key,
-                    field,
-                    test_name + " - exception.key is wrong",
-                )
-                self.assertEqual(
-                    cm.exception.invalid_value,
-                    value,
-                    test_name + " - exception.invalid_value is wrong",
+                with pytest.raises(ValidationException) as cm:
+                    setattr(item, field, value)
+                assert cm.value.item == item, test_name + " - item is wrong"
+                assert cm.value.key == field, test_name + " - key is wrong"
+                assert cm.value.invalid_value == value, (
+                    test_name + " - invalid_value is wrong"
                 )
 
         # Test max length of fields
+        item = app_db.share_group_get_by_id(1)
         for field in ["name"]:
             test_name = "Account " + field + " can't be more than 250 characters"
             value = "a" * 251
-            with self.assertRaises(ValidationException) as cm:
-                setattr(share_group, field, value)
-            self.assertEqual(type(cm.exception), ValidationException, test_name)
-            self.assertEqual(
-                cm.exception.item,
-                share_group,
-                test_name + " - exception.item is wrong",
+            with pytest.raises(ValidationException) as cm:
+                setattr(item, field, value)
+            assert cm.value.item == item, test_name + " - item is wrong"
+            assert cm.value.key == field, test_name + " - key is wrong"
+            assert cm.value.invalid_value == value, (
+                test_name + " - invalid_value is wrong"
             )
-            self.assertEqual(
-                cm.exception.key,
-                field,
-                test_name + " - exception.key is wrong",
-            )
-            self.assertEqual(
-                cm.exception.invalid_value,
-                value,
-                test_name + " - exception.invalid_value is wrong",
-            )
+
+
+if __name__ == "__main__":
+    pytest.main(["-s", __file__])
