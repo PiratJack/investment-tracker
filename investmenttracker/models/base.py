@@ -15,10 +15,11 @@ format_number (number, currency=None)
     Formats a number for display
 
 """
-import locale
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+import locale
+import sqlalchemy.orm
+
+Base = sqlalchemy.orm.declarative_base()
 
 
 class NoPriceException(Exception):
