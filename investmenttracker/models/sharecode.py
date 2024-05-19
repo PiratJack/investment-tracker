@@ -5,6 +5,7 @@ Classes
 ShareCode
     Database class for handling share codes
 """
+
 import gettext
 import sqlalchemy.orm
 
@@ -113,14 +114,12 @@ class ShareCode(Base):
 
     def __repr__(self):
         """Returns a string of format ShareCode [share_name] ([value] @ [website])"""
-        if self.share:
-            return (
-                "ShareCode "
-                + self.share.name
-                + " ("
-                + str(self.value)
-                + " @ "
-                + str(self.origin.value["name"])
-                + ")"
-            )
-        return "ShareCode (" + str(self.value) + " @ " + str(self.origin) + ")"
+        return (
+            "ShareCode "
+            + self.share.name
+            + " ("
+            + str(self.value)
+            + " @ "
+            + str(self.origin.value["name"])
+            + ")"
+        )
