@@ -5,6 +5,7 @@ Classes
 AccountsTree
     Displays accounts so the user can select
 """
+
 import gettext
 
 from PyQt5 import QtGui, QtWidgets
@@ -114,7 +115,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
         for column, field in enumerate(self.columns):
-            account_item.setTextAlignment(column, field["alignment"])
+            account_item.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)

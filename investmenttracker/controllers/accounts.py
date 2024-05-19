@@ -8,6 +8,7 @@ AccountsTree
 AccountsController
     Handles user interactions and links all displayed widgets
 """
+
 import gettext
 import os
 
@@ -116,7 +117,9 @@ class AccountsTree(basetreecontroller.BaseTreeController):
                 ]
             )
             for column, field in enumerate(self.columns):
-                account_widget.setTextAlignment(column, field["alignment"])
+                account_widget.setTextAlignment(
+                    column, field["alignment"] | Qt.AlignVCenter
+                )
 
             if not account.enabled:
                 font = account_widget.font(0)
@@ -181,7 +184,9 @@ class AccountsTree(basetreecontroller.BaseTreeController):
             for child in children:
                 child_widget = QtWidgets.QTreeWidgetItem(child)
                 for column, field in enumerate(self.columns):
-                    child_widget.setTextAlignment(column, field["alignment"])
+                    child_widget.setTextAlignment(
+                        column, field["alignment"] | Qt.AlignVCenter
+                    )
                 account_widget.addChild(child_widget)
 
             tree_items.append(account_widget)

@@ -15,6 +15,7 @@ TransactionsTableView
 TransactionsController
     Handles user interactions and links all displayed widgets
 """
+
 import gettext
 import os
 
@@ -143,7 +144,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         )
         account_item.setFlags(account_item.flags() | Qt.ItemIsAutoTristate)
         for column, field in enumerate(self.columns):
-            account_item.setTextAlignment(column, field["alignment"])
+            account_item.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         if not account.enabled or account.hidden:
             font = account_item.font(0)
@@ -182,7 +183,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             self.addTopLevelItem(share_item)
 
         for column, field in enumerate(self.columns):
-            share_item.setTextAlignment(column, field["alignment"])
+            share_item.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         return share_item
 
@@ -362,12 +363,16 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 transaction.label,
                 format_number(transaction.asset_total),
                 transaction.share.short_name if transaction.share else "-",
-                format_number(balance[1])
-                if transaction.type.value["has_asset"]
-                else "-",
-                format_number(transaction.unit_price, currency_code)
-                if transaction.unit_price != 1
-                else "-",
+                (
+                    format_number(balance[1])
+                    if transaction.type.value["has_asset"]
+                    else "-"
+                ),
+                (
+                    format_number(transaction.unit_price, currency_code)
+                    if transaction.unit_price != 1
+                    else "-"
+                ),
                 format_number(transaction.cash_total, currency_code),
                 format_number(balance[0], currency_code),
                 QtCore.QVariant(),
@@ -391,7 +396,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
                 )
 
         if role == Qt.TextAlignmentRole:
-            return self.columns[index.column()]["alignment"]
+            return self.columns[index.column()]["alignment"] | Qt.AlignVCenter
 
         return QtCore.QVariant()
 

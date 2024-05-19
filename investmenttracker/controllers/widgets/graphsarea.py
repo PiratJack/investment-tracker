@@ -725,7 +725,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 else baseline_value.price
             )
 
-            print("convert_raw_to_graph", self.graph_type, element_type)
             # For "Net baseline" graphs, we need to "zero out" unwanted transactions
             if self.graph_type == "baseline_net" and element_type == "account":
                 start_date = min([d for d in raw[element_id]])
@@ -740,10 +739,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
                 ]
                 # Transactions before the baseline should be reversed and impact what happened before them
                 # Otherwise, the baseline_value will move
-                print("recalculate with real_baseline_date", real_baseline_date)
-                print("start_date", start_date)
-                print("end_date", end_date)
-                print("transactions", transactions)
                 raw[element_id] = {
                     graph_date: raw[element_id][graph_date]
                     + sum(

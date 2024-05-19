@@ -8,6 +8,7 @@ SharesTree
 SharesController
     Handles user interactions and links all displayed widgets
 """
+
 import gettext
 import os
 
@@ -227,7 +228,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         self.addTopLevelItem(group_widget)
 
         for column, field in enumerate(self.columns):
-            group_widget.setTextAlignment(column, field["alignment"])
+            group_widget.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         # Shares not grouped
         if group_id <= 0:
@@ -286,7 +287,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
             share_widget.setText(col, "")
 
         for column, field in enumerate(self.columns):
-            share_widget.setTextAlignment(column, field["alignment"])
+            share_widget.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         if data[1] == 0:
             # Apply style

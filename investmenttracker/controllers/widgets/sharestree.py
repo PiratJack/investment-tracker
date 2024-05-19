@@ -5,6 +5,7 @@ Classes
 SharesTree
     Displays shares the user can select
 """
+
 import gettext
 
 from PyQt5 import QtWidgets
@@ -126,7 +127,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         self.addTopLevelItem(group_widget)
 
         for column, field in enumerate(self.columns):
-            group_widget.setTextAlignment(column, field["alignment"])
+            group_widget.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         # Shares not grouped
         if group_id <= 0:
@@ -158,7 +159,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
             self.addTopLevelItem(share_widget)
 
         for column, field in enumerate(self.columns):
-            share_widget.setTextAlignment(column, field["alignment"])
+            share_widget.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
 
         return share_widget
 
