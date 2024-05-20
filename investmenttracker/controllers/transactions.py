@@ -52,7 +52,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         Fills the tree with accounts data (& their children)
     add_account (account)
         Adds a single account to the tree
-    add_share (share, parent_item=None)
+    add_share (share, parent_item)
         Adds a single share to the tree
 
     on_select_item
@@ -149,7 +149,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
         return account_item
 
-    def add_share(self, share, parent_item=None):
+    def add_share(self, share, parent_item):
         """Formats a single share for display in the tree
 
         Parameters
@@ -170,10 +170,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
                 str(share.id),
             ]
         )
-        if parent_item:
-            parent_item.addChild(share_item)
-        else:
-            self.addTopLevelItem(share_item)
+        parent_item.addChild(share_item)
 
         for column, field in enumerate(self.columns):
             share_item.setTextAlignment(column, field["alignment"] | Qt.AlignVCenter)
