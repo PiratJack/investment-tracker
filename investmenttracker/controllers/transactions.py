@@ -108,13 +108,6 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
             The list of accounts to display
         """
         for account in sorted(accounts, key=lambda a: a.name):
-            if account.hidden and not self.parent_controller.display_hidden_accounts:
-                continue
-            if (
-                not account.enabled
-                and not self.parent_controller.display_disabled_accounts
-            ):
-                continue
             account_item = self.add_account(account)
             self.addTopLevelItem(account_item)
 
