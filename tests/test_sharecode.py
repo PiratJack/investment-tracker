@@ -39,7 +39,6 @@ class TestShareCode:
         assert len(share) == 1, "Only 1 by searching 2 (via id)"
 
     def test_validations(self, app_db):
-
         # Test forbidden values
         forbidden_values = {
             "value": ["", None],
