@@ -7,6 +7,7 @@ import logging
 pytest.BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(os.path.join(pytest.BASE_DIR, "investmenttracker"))
 
+import controllers.mainwindow
 
 from models.database import Database
 from models.pluginmanager import PluginManager
@@ -81,6 +82,14 @@ def app_db(app_empty_db):
             ),
             Share(id=5, name="Euro", main_code="EUR"),
             Share(id=6, name="Dollar", main_code="USD", group_id=3),
+            Share(
+                id=7,
+                name="BNP",
+                main_code="FR:BNP",
+                base_currency_id=5,
+                hidden=True,
+                group_id=2,
+            ),
             ShareCode(share_id=1, origin="boursorama", value="1rACN"),
             ShareCode(share_id=1, origin="quantalys", value="14587"),
             ShareCode(share_id=1, origin="alphavantage", value="FR4941"),
@@ -303,3 +312,14 @@ def app_db(app_empty_db):
     app_empty_db.engine.dispose()
 
     yield app_empty_db
+
+
+@pytest.fixture
+# qtbot is here to make sure we have a QApplication running
+def app_mainwindow(qtbot, app_db, app_pluginmanager):
+    mainwindow = controllers.mainwindow.MainWindow(app_db, app_pluginmanager)
+
+    yield mainwindow
+
+    mainwindow.database.session.close()
+    mainwindow.database.engine.dispose()

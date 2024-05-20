@@ -12,9 +12,9 @@ from models.share import Share
 class TestShare:
     def test_gets(self, app_db):
         # Database selects & filters
-        assert len(app_db.shares_query().all()) == 6, "6 shares in total"
+        assert len(app_db.shares_query().all()) == 7, "7 shares in total"
         assert len(app_db.shares_get()) == 5, "5 shares are visible"
-        assert len(app_db.shares_get(with_hidden=True)) == 6, "6 shares in total"
+        assert len(app_db.shares_get(with_hidden=True)) == 7, "7 shares in total"
         assert len(app_db.shares_get(only_synced=True)) == 1, "1 share is synced"
 
         # String representations
