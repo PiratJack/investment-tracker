@@ -609,6 +609,12 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
                         self.parent_controller, transaction.id
                     )
                 )
+
+                def delete_if_cancel():
+                    self.database.session.delete(transaction)
+                    self.database.session.commit()
+
+                self.transaction_details.button_box.rejected.connect(delete_if_cancel)
                 self.transaction_details.show_window()
 
             # Delete button
