@@ -58,10 +58,50 @@ class TestUiSharePrices:
                 column = int(element.split("_")[2])
                 index = get_ui("table").model.index(row, column)
                 return get_ui("table").model.data(index, Qt.EditRole)
+            elif element.startswith("tableeditfield_"):
+                row = int(element.split("_")[1])
+                column = int(element.split("_")[2])
+                index = get_ui("table").model.index(row, column)
+                return get_ui("table").indexWidget(index)
 
             raise ValueError(f"Field {element} could not be found")
 
         return get_ui
+
+    def enter_value_in_field(self, item_name, value, app_ui, qtbot):
+        col = {
+            "share": 0,
+            "date": 2,
+            "price": 3,
+            "currency": 4,
+            "source": 5,
+        }[item_name]
+
+        # Double-click on table to allow edition
+        y_position = app_ui("table").rowViewportPosition(0) + 5
+        x_position = app_ui("table").columnViewportPosition(col) + 10
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+        qtbot.mouseDClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+
+        # Enter new value
+        if item_name == "date":
+            # I couldn't find how to do it by typing keys, so instead the date is set programmatically
+            app_ui("tableeditfield_0_" + str(col)).setDate(value)
+        else:
+            qtbot.keyClicks(app_ui("tableeditfield_0_" + str(col)), str(value))
+
+        # Typing "Enter" doesn't seem to be enough ==> click outside the widget to validate
+        x_position = app_ui("table").columnViewportPosition(0) + 10
+        y_position = app_ui("table").rowViewportPosition(1) + 5
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
 
     def test_shareprices_display(self, app_ui):
         # Check overall structure
@@ -144,6 +184,137 @@ class TestUiSharePrices:
         assert app_ui("tableedit_8_4") == 0, "Price currency OK"
         assert app_ui("tableedit_9_5") == "", "Price source OK"
         assert app_ui("tableedit_10_6") is None, "Price icon OK"
+
+    def test_shareprices_select_share(self, app_ui, qtbot):
+        # Select a share
+        qtbot.keyClicks(app_ui("share_field"), "Accenture")
+
+        # Check table layout
+        assert isinstance(app_ui("table"), QtWidgets.QTableView), "Table type is OK"
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.columnCount(index) == 7, "Column count OK"
+        assert app_ui("table").model.rowCount(index) == 2, "Row count OK"
+
+    def test_shareprices_select_date(self, app_ui, qtbot):
+        # Select a date
+        # I couldn't find how to do it by typing keys, so instead the date is set programmatically
+        # #qtbot.keyClicks(app_ui("tableeditfield_0_2"), "01/05/2024")
+        app_ui("date_field").setDate(QtCore.QDate(2020, 4, 1))
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.columnCount(index) == 7, "Column count OK"
+        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+
+    def test_shareprices_click_table(self, app_ui, qtbot):
+        # Select a share
+        qtbot.keyClicks(app_ui("share_field"), "Accenture")
+
+        # Click on table > triggers saving / restoring selection
+        x_position = app_ui("table").columnViewportPosition(1)
+        y_position = app_ui("table").rowViewportPosition(1)
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+        # Click on non-editable field
+        x_position = app_ui("table").columnViewportPosition(5)
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+
+    def test_shareprices_edit_share(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("share", "Workday", app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.share.name == "Workday", "Share price share is modified"
+
+    def test_shareprices_edit_date(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("date", QtCore.QDate.currentDate(), app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.date == datetime.date.today(), "Share price date is modified"
+
+    def test_shareprices_edit_price(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("price", 15, app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.price == 15, "Share price value is modified"
+
+    def test_shareprices_edit_currency(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("currency", "Dollar", app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.currency.name == "Dollar", "Share price currency is modified"
+
+    def test_shareprices_edit_currency_bad_value(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("currency", "Accenture", app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.currency.name == "Euro", "Price currency is NOT modified"
+
+    def test_shareprices_edit_source(self, app_ui, qtbot, app_db):
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Enter new value
+        self.enter_value_in_field("source", "New", app_ui, qtbot)
+
+        # Check database is updated
+        assert shareprice.source == "New", "Share price source is modified"
+
+    def test_shareprices_delete(self, app_ui, qtbot, app_db):
+        assert False, "To be implemented"
+        # Get displayed price
+        shareprice = app_db.share_price_get_by_id(3)
+
+        # Double-click on table to allow edition
+        x_position = app_ui("table").columnViewportPosition(5) + 10
+        y_position = app_ui("table").rowViewportPosition(0) + 5
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+        qtbot.mouseDClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+
+        # Enter new value
+        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "N")
+        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "e")
+        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "w")
+
+        # Typing "Enter" doesn't seem to be enough ==> click outside the widget to validate
+        x_position = app_ui("table").columnViewportPosition(4) + 10
+        y_position = app_ui("table").rowViewportPosition(1) + 5
+        point = QtCore.QPoint(x_position, y_position)
+        qtbot.mouseClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
+
+        # Check database is updated
+        assert shareprice.source == "New", "Share price source is modified"
 
 
 if __name__ == "__main__":
