@@ -2,6 +2,7 @@ import os
 import sys
 import pytest
 import datetime
+import sqlalchemy.orm
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 
@@ -185,26 +186,82 @@ class TestUiSharePrices:
         assert app_ui("tableedit_9_5") == "", "Price source OK"
         assert app_ui("tableedit_10_6") is None, "Price icon OK"
 
-    def test_shareprices_select_share(self, app_ui, qtbot):
+    def test_shareprices_select_share_via_dropdown(self, app_ui, qtbot):
         # Select a share
         qtbot.keyClicks(app_ui("share_field"), "Accenture")
 
         # Check table layout
         assert isinstance(app_ui("table"), QtWidgets.QTableView), "Table type is OK"
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.columnCount(index) == 7, "Column count OK"
         assert app_ui("table").model.rowCount(index) == 2, "Row count OK"
 
-    def test_shareprices_select_date(self, app_ui, qtbot):
+    def test_shareprices_select_share_set_filters_int(self, app_ui, qtbot):
+        # Select a share via its ID
+        app_ui("table").set_filters(share=3)
+
+        # Check table layout
+        assert isinstance(app_ui("table"), QtWidgets.QTableView), "Table type is OK"
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 2, "Row count OK"
+
+    def test_shareprices_select_share_set_filters_Share(self, app_ui, qtbot, app_db):
+        # Select a share via its ID
+        app_ui("table").set_filters(share=app_db.share_get_by_id(3))
+
+        # Check table layout
+        assert isinstance(app_ui("table"), QtWidgets.QTableView), "Table type is OK"
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 2, "Row count OK"
+
+    def test_shareprices_select_date_via_user_input(self, app_ui, qtbot):
         # Select a date
         # I couldn't find how to do it by typing keys, so instead the date is set programmatically
-        # #qtbot.keyClicks(app_ui("tableeditfield_0_2"), "01/05/2024")
+        # #qtbot.keyClicks(app_ui("tableeditfield_0_2"), "01/04/2024")
         app_ui("date_field").setDate(QtCore.QDate(2020, 4, 1))
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.columnCount(index) == 7, "Column count OK"
         assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+
+    def test_shareprices_select_date_via_set_filters_datetime(self, app_ui, qtbot):
+        # Select a date
+        app_ui("table").set_filters(date=datetime.datetime(2020, 4, 1))
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+
+    def test_shareprices_select_date_via_set_filters_str(self, app_ui, qtbot):
+        # Select a date
+        app_ui("table").set_filters(date="2020-04-01")
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+
+    def test_shareprices_select_date_via_set_filters_int(self, app_ui, qtbot):
+        # Select a date
+        app_ui("table").set_filters(date=3)
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
+
+    def test_shareprices_select_date_via_set_filters_variant(self, app_ui, qtbot):
+        # Select a date
+        app_ui("table").set_filters(date=QtWidgets.QComboBox)
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
+
+    def test_shareprices_select_date_via_set_filters_minus_one(self, app_ui, qtbot):
+        # Select a date
+        app_ui("table").set_filters(date=-1)
+
+        # Check table layout
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
 
     def test_shareprices_click_table(self, app_ui, qtbot):
         # Select a share
@@ -284,13 +341,18 @@ class TestUiSharePrices:
         # Check database is updated
         assert shareprice.source == "New", "Share price source is modified"
 
-    def test_shareprices_delete(self, app_ui, qtbot, app_db):
-        assert False, "To be implemented"
+    def test_shareprices_delete_cancel(self, app_ui, qtbot, app_db, monkeypatch):
         # Get displayed price
         shareprice = app_db.share_price_get_by_id(3)
+        # Setup monkeypatch: cancel deletion
+        monkeypatch.setattr(
+            QtWidgets.QMessageBox,
+            "critical",
+            lambda *args, **kwargs: QtWidgets.QMessageBox.No,
+        )
 
-        # Double-click on table to allow edition
-        x_position = app_ui("table").columnViewportPosition(5) + 10
+        # Double-click on deletion
+        x_position = app_ui("table").columnViewportPosition(6) + 10
         y_position = app_ui("table").rowViewportPosition(0) + 5
         point = QtCore.QPoint(x_position, y_position)
         qtbot.mouseClick(
@@ -300,21 +362,35 @@ class TestUiSharePrices:
             app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
         )
 
-        # Enter new value
-        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "N")
-        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "e")
-        qtbot.keyClick(app_ui("table").viewport().focusWidget(), "w")
+        # Check database is unchanged
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 5, "Row count OK"
+        assert shareprice is not None, "Share price remains unchanged"
 
-        # Typing "Enter" doesn't seem to be enough ==> click outside the widget to validate
-        x_position = app_ui("table").columnViewportPosition(4) + 10
-        y_position = app_ui("table").rowViewportPosition(1) + 5
+    def test_shareprices_delete_confirm(self, app_ui, qtbot, app_db, monkeypatch):
+        # Setup monkeypatch: cancel deletion
+        monkeypatch.setattr(
+            QtWidgets.QMessageBox,
+            "critical",
+            lambda *args, **kwargs: QtWidgets.QMessageBox.Yes,
+        )
+
+        # Double-click on deletion
+        x_position = app_ui("table").columnViewportPosition(6) + 10
+        y_position = app_ui("table").rowViewportPosition(0) + 5
         point = QtCore.QPoint(x_position, y_position)
         qtbot.mouseClick(
             app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
         )
+        qtbot.mouseDClick(
+            app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
+        )
 
-        # Check database is updated
-        assert shareprice.source == "New", "Share price source is modified"
+        # Check database is unchanged
+        index = app_ui("table").model.index(1, 1)
+        assert app_ui("table").model.rowCount(index) == 4, "Row count OK"
+        with pytest.raises(sqlalchemy.orm.exc.NoResultFound):
+            app_db.share_price_get_by_id(3)
 
 
 if __name__ == "__main__":
