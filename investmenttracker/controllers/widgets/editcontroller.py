@@ -5,6 +5,7 @@ Classes
 AccountController
     Controller for editing items - should be used only as base class (not directly)
 """
+
 import gettext
 import datetime
 
@@ -110,6 +111,9 @@ class EditController:
         self.window = QtWidgets.QDialog(self.parent_controller.parent_window)
         self.layout = QtWidgets.QVBoxLayout()
         self.form_layout = QtWidgets.QFormLayout()
+
+        buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        self.button_box = QtWidgets.QDialogButtonBox(buttons)
 
     def show_window(self):
         """Displays the dialog based on self.fields"""
@@ -227,12 +231,10 @@ class EditController:
                 field["onchange"]()
 
         # Create the validation buttons
-        buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        button_box = QtWidgets.QDialogButtonBox(buttons)
-        button_box.accepted.connect(self.save)
-        button_box.rejected.connect(self.close)
+        self.button_box.accepted.connect(self.save)
+        self.button_box.rejected.connect(self.close)
+        self.layout.addWidget(self.button_box)
 
-        self.layout.addWidget(button_box)
         # Size & Move to center
         self.window.setMinimumSize(300, 200)
         self.window.resize(self.layout.sizeHint())
