@@ -78,7 +78,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
     headerData (index)
         Returns the table headers
 
-    set_filters (index)
+    set_filters (share=None, date=None)
         Applies the filters on the list of transactions
     on_table_clicked (index)
         Handles user click (on delete button)
@@ -379,8 +379,6 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
                 self.date = datetime.datetime.fromtimestamp(date)
             else:
                 self.date = None
-        elif date == -1:
-            self.date = None
 
         if self.date:
             self.query = self.query.filter(
