@@ -11,6 +11,7 @@ SharePricesTableView
 SharePricesController
     Handles user interactions and links all displayed widgets
 """
+
 import gettext
 import datetime
 import os
@@ -277,10 +278,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
                 elif col == 2:
                     price.date = value
                 elif col == 3:
-                    try:
-                        price.price = float(value)
-                    except ValueError:
-                        return False
+                    price.price = float(value)
                 elif col == 4:
                     if value > 0:
                         price.currency_id = value
@@ -296,7 +294,6 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             except (sqlalchemy.exc.IntegrityError, ValidationException):
                 self.database.session.rollback()
                 return True
-        return False
 
     def flags(self, index):
         """Returns whether items are selectable, enabled or editable
