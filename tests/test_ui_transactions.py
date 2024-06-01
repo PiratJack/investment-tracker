@@ -582,6 +582,75 @@ class TestUiTransactions:
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
         )
 
+    def test_transactions_add_transaction_known_price(
+        self, app_ui, qtbot, qapp, app_db
+    ):
+        def handle_dialog():
+            # Get the different fields
+            dialog = qapp.activeWindow()
+            account = self.get_dialog_item(dialog, "account", "field")
+            date = self.get_dialog_item(dialog, "date", "field")
+            transaction_type = self.get_dialog_item(dialog, "type", "field")
+            share = self.get_dialog_item(dialog, "share", "field")
+            known_unit_price = self.get_dialog_item(dialog, "known_unit_price", "field")
+
+            button_cancel = self.get_dialog_item(dialog, "button_cancel")
+
+            # Share filled in, account empty
+            transaction_type.setCurrentText("Asset buy / subscription")
+            share.setCurrentText("Accenture (NYSE:ACN)")
+            date.setDate(datetime.date(2023, 6, 15))
+            assert known_unit_price.count() == 0, "No known price"
+
+            # Account now filled in
+            account.setCurrentText("Main account")
+            date.setDate(datetime.date.today())
+            assert known_unit_price.count() == 2, "1 known price (+ 1 empty value)"
+
+            # Close dialog
+            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+
+        # Trigger the display of the dialog (click on label)
+        QtCore.QTimer.singleShot(200, handle_dialog)
+        index = app_ui("table").model.index(0, 0)
+        self.click_table_cell(
+            app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
+        )
+
+    def test_transactions_add_transaction_known_price_select(
+        self, app_ui, qtbot, qapp, app_db
+    ):
+        def handle_dialog():
+            # Get the different fields
+            dialog = qapp.activeWindow()
+            account = self.get_dialog_item(dialog, "account", "field")
+            date = self.get_dialog_item(dialog, "date", "field")
+            transaction_type = self.get_dialog_item(dialog, "type", "field")
+            share = self.get_dialog_item(dialog, "share", "field")
+            known_unit_price = self.get_dialog_item(dialog, "known_unit_price", "field")
+            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
+
+            button_cancel = self.get_dialog_item(dialog, "button_cancel")
+
+            # Generate known prices
+            transaction_type.setCurrentText("Asset buy / subscription")
+            share.setCurrentText("Accenture (NYSE:ACN)")
+            account.setCurrentText("Main account")
+            date.setDate(datetime.date.today() + datetime.timedelta(days=-1))
+
+            known_unit_price.setCurrentIndex(1)
+            assert unit_price.value() == 10, "Known price is selected"
+
+            # Close dialog
+            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+
+        # Trigger the display of the dialog (click on label)
+        QtCore.QTimer.singleShot(200, handle_dialog)
+        index = app_ui("table").model.index(0, 0)
+        self.click_table_cell(
+            app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
+        )
+
     def test_transactions_edit_transaction(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
@@ -700,7 +769,6 @@ class TestUiTransactions:
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(200, handle_dialog)
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
-        index = app_ui("table").model.index(1, 1)
         self.click_table_cell(4, 11, qtbot, app_ui)
 
     def test_transactions_delete_transaction_confirm(
