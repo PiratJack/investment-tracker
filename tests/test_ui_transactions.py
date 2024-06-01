@@ -344,6 +344,7 @@ class TestUiTransactions:
     def test_transactions_add_transaction_cancel(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account_label = self.get_dialog_item(dialog, "account", "label")
             account = self.get_dialog_item(dialog, "account", "field")
@@ -399,7 +400,7 @@ class TestUiTransactions:
                 app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -410,6 +411,7 @@ class TestUiTransactions:
     ):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             button_cancel = self.get_dialog_item(dialog, "button_cancel")
             account = self.get_dialog_item(dialog, "account", "field")
@@ -425,7 +427,7 @@ class TestUiTransactions:
                 app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         # Double-click on "add transaction" (twice to handle focus properly)
         y_position = app_ui("table").rowViewportPosition(5) + 5
         x_position = app_ui("table").columnViewportPosition(0) + 10
@@ -440,6 +442,7 @@ class TestUiTransactions:
     def test_transactions_add_transaction(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -492,7 +495,7 @@ class TestUiTransactions:
             app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -503,6 +506,7 @@ class TestUiTransactions:
     ):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -534,7 +538,7 @@ class TestUiTransactions:
                 app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -545,6 +549,7 @@ class TestUiTransactions:
     ):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -576,7 +581,7 @@ class TestUiTransactions:
                 app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -587,6 +592,7 @@ class TestUiTransactions:
     ):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -611,7 +617,7 @@ class TestUiTransactions:
             qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -622,6 +628,7 @@ class TestUiTransactions:
     ):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -645,7 +652,7 @@ class TestUiTransactions:
             qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         index = app_ui("table").model.index(0, 0)
         self.click_table_cell(
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
@@ -654,6 +661,7 @@ class TestUiTransactions:
     def test_transactions_edit_transaction(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -696,13 +704,14 @@ class TestUiTransactions:
             assert transaction.label == "Get well funded", "Transaction label updated"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
         self.click_table_cell(4, 0, qtbot, app_ui, True)
 
     def test_transactions_copy_transaction(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             account = self.get_dialog_item(dialog, "account", "field")
             date = self.get_dialog_item(dialog, "date", "field")
@@ -745,13 +754,14 @@ class TestUiTransactions:
             assert transaction.label == "Get well funded", "Transaction label updated"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
         self.click_table_cell(4, 11, qtbot, app_ui)
 
     def test_transactions_copy_transaction_cancel(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             button_cancel = self.get_dialog_item(dialog, "button_cancel")
 
@@ -767,7 +777,7 @@ class TestUiTransactions:
                 app_db.transaction_get_by_id(15)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
         self.click_table_cell(4, 11, qtbot, app_ui)
 

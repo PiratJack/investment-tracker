@@ -223,6 +223,7 @@ class TestUiShares:
 
     def test_shares_add_sharegroup_cancel(self, app_ui, qtbot, qapp):
         def handle_dialog():
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             assert dialog is not None, "Dialog gets displayed"
 
@@ -250,12 +251,13 @@ class TestUiShares:
             assert app_ui("share_tree").topLevelItemCount() == 6, "Element count OK"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
     def test_shares_add_sharegroup_empty_name(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Gather variables
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
 
@@ -271,12 +273,13 @@ class TestUiShares:
                 app_db.share_group_get_by_id(4)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
     def test_shares_add_sharegroup_confirm(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Gather variables
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             name_field = self.get_dialog_item(dialog, "sharegroup", "name", "field")
             button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
@@ -290,12 +293,13 @@ class TestUiShares:
             assert app_db.share_group_get_by_id(4).name == "New group", "Save OK"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
     def test_shares_edit_sharegroup(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Gather variables
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             name_field = self.get_dialog_item(dialog, "sharegroup", "name", "field")
             button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
@@ -309,11 +313,12 @@ class TestUiShares:
             assert app_db.share_group_get_by_id(1).name == "AMEX markets", "Save OK"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("group_amex"), qtbot, app_ui)
 
     def test_shares_add_share_cancel(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
 
             # Check overall structure
@@ -404,12 +409,13 @@ class TestUiShares:
             assert app_ui("share_tree").topLevelItemCount() == 6, "Element count OK"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
     def test_shares_add_share_confirm(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             name = self.get_dialog_item(dialog, "share", "name", "field")
             sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
@@ -432,12 +438,13 @@ class TestUiShares:
             assert app_db.share_get_by_id(8).code_sync_origin == "1rNEW"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
     def test_shares_add_share_confirm_empty_name(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
 
             button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
@@ -454,12 +461,13 @@ class TestUiShares:
                 app_db.share_group_get_by_id(8)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
     def test_shares_add_share_sync_origin_no_code(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             name = self.get_dialog_item(dialog, "share", "name", "field")
             sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
@@ -482,12 +490,13 @@ class TestUiShares:
                 app_db.share_group_get_by_id(8)
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
     def test_shares_edit_share(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
             alpha = self.get_dialog_item(dialog, "share", "alpha_code", "field")
@@ -512,12 +521,13 @@ class TestUiShares:
             assert share.codes[0].origin.value["name"] == "Quantalys", "New code added"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("share_WDAY"), qtbot, app_ui)
 
     def test_shares_edit_share_code(self, app_ui, qtbot, qapp, app_db):
         def handle_dialog():
             # Get the different fields
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
             dialog = qapp.activeWindow()
             alpha = self.get_dialog_item(dialog, "share", "alpha_code", "field")
 
@@ -535,7 +545,7 @@ class TestUiShares:
             assert share.codes[2].value == "1wACN", "Code modified"
 
         # Trigger the display of the dialog (click on label)
-        QtCore.QTimer.singleShot(200, handle_dialog)
+        QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("share_AXA"), qtbot, app_ui)
 
 
