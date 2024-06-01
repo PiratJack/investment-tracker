@@ -5,6 +5,7 @@ Classes
 TransactionController
     Controller for creating or editing a single transaction
 """
+
 import gettext
 import datetime
 
@@ -266,17 +267,15 @@ class TransactionController(EditController):
 
         # Get share
         share_id = self.fields["share_id"]["widget"].currentData()
-        if share_id == 0:
+        if share_id == 0 or share_id is None:
             return
 
         # Get account (for base currency)
         account_id = self.fields["account_id"]["widget"].currentData()
-        if account_id == 0:
+        if account_id == 0 or account_id is None:
             return
         account = self.database.account_get_by_id(account_id)
         currency = account.base_currency
-        if not currency:
-            return
 
         prices = self.database.share_prices_get(
             share_id=share_id, currency_id=currency, start_date=date
