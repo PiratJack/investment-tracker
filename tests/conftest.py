@@ -24,7 +24,7 @@ from models.config import Config
 def pytest_configure():
     pytest.BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     sys.path.append(os.path.join(pytest.BASE_DIR, "investmenttracker"))
-    pytest.DATABASE_FILE = "test.sqlite"
+    pytest.DATABASE_FILE = ":memory:"
 
     logging.basicConfig(level=logging.CRITICAL)
 
@@ -41,16 +41,9 @@ def app_pluginmanager():
 
 @pytest.fixture
 def app_empty_db(app_pluginmanager):
-    try:
-        os.remove(pytest.DATABASE_FILE)
-    except OSError:
-        pass
     database = Database(pytest.DATABASE_FILE, app_pluginmanager)
 
     yield database
-
-    # Delete database
-    os.remove(pytest.DATABASE_FILE)
 
 
 @pytest.fixture
@@ -308,10 +301,11 @@ def app_db(app_empty_db):
         ]
     )
     app_empty_db.session.commit()
-    app_empty_db.session.close()
-    app_empty_db.engine.dispose()
 
     yield app_empty_db
+
+    app_empty_db.session.close()
+    app_empty_db.engine.dispose()
 
 
 @pytest.fixture
