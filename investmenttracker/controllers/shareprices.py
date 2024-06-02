@@ -12,6 +12,7 @@ SharePricesController
     Handles user interactions and links all displayed widgets
 """
 
+import logging
 import gettext
 import datetime
 import os
@@ -27,6 +28,7 @@ from models.base import ValidationException, format_number
 from models.shareprice import SharePrice as SharePriceDatabaseModel
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class SharePricesTableModel(QtCore.QAbstractTableModel):
@@ -100,6 +102,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         columns : list of dicts
             Columns to display. Each column should have a name and size key
         """
+        logger.info(f"SharePricesTableModel.__init__ {columns}")
         super().__init__()
         self.columns = columns
         self.database = database
@@ -147,6 +150,9 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         index : QtCore.QModelIndex
             A reference to the cell to display (not used in this method)
         """
+        logger.info(
+            f"SharePricesTableModel.fetchMore at {index.row()}, {index.column()}"
+        )
         # Determine what to fetch
         items_left = self.count_values - len(self.share_prices)
         items_to_fetch = min(items_left, self.row_batch_count)
@@ -266,6 +272,9 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         -------
         bool
             True if the data was successfully edited"""
+        logger.info(
+            f"SharePricesTableModel.setData at {index.row()}, {index.column()} - Value {value} - Role {role}"
+        )
         col = index.column()
         if role == Qt.EditRole:
             price = self.share_prices[index.row()]
@@ -309,6 +318,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             Enabled & selectable for ID and button columns
             Enabled, selectable & editable for other fields
         """
+        logger.info(f"SharePricesTableModel.flags at {index.row()}, {index.column()}")
         if index.column() in (1, 6):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
@@ -350,6 +360,7 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             Only prices after that date will be displayed
             -1 resets the filter
         """
+        logger.info(f"SharePricesTableModel.set_filters Share {share} on {date}")
         self.query = self.base_query
 
         if share:
@@ -397,6 +408,9 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         index : QtCore.QModelIndex
             A reference to the cell to display
         """
+        logger.info(
+            f"SharePricesTableModel.on_table_clicked at {index.row()}, {index.column()}"
+        )
         if index.column() == 6:
             self.on_click_delete_button(index)
 
@@ -410,6 +424,9 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
         index : QtCore.QModelIndex
             A reference to the cell to display
         """
+        logger.info(
+            f"SharePricesTableModel.on_click_delete_button at {index.row()}, {index.column()}"
+        )
         price = self.share_prices[index.row()]
         messagebox = QtWidgets.QMessageBox.critical(
             self.parent(),
@@ -500,6 +517,7 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
         parent_controller : SharePricesController
             The controller displaying this class
         """
+        logger.debug("SharePricesTableView.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -522,6 +540,7 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
         date : datetime.date
             The selected date, used to filter the list of prices displayed
         """
+        logger.info(f"SharePricesTableView.set_filters Share {share} on {date}")
         self.model.set_filters(share, date)
         self.model.layoutChanged.emit()
         self.viewport().update()
@@ -534,6 +553,7 @@ class SharePricesTableView(QtWidgets.QTableView, autoresize.AutoResize):
         index : QtCore.QModelIndex
             A reference to the cell to display (not used in this method)
         """
+        logger.debug("SharePricesTableView.on_table_clicked")
         self.model.on_table_clicked(index)
 
 
@@ -593,6 +613,7 @@ class SharePricesController:
         parent_window : QtWidgets.QMainWindow
             The main window displaying this controller
         """
+        logger.debug("SharePricesController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
 
@@ -605,12 +626,14 @@ class SharePricesController:
 
     def reload_data(self):
         """Reloads the list of shares (in dropdown) & share prices"""
+        logger.debug("SharePricesController.reload_data")
         self.field_share.reload_data()
 
         self.table.set_filters()
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("SharePricesController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -625,6 +648,7 @@ class SharePricesController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("SharePricesController.get_display_widget")
         self.display_widget.setLayout(self.display_widget.layout)
 
         # Create the group of fields at the top
@@ -660,6 +684,7 @@ class SharePricesController:
         index : int
             The index of the item selected in the dropdown
         """
+        logger.info(f"SharePricesController.on_select_share at {index}")
         share_id = self.field_share.itemData(index)
         self.table.set_filters(share=share_id)
 
@@ -671,4 +696,5 @@ class SharePricesController:
         date : datetime.date
             The selected date
         """
+        logger.info(f"SharePricesController.on_select_date {date}")
         self.table.set_filters(date=date)

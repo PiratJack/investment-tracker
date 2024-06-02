@@ -8,6 +8,8 @@ SharePriceStatsTable
 DashboardController
     Controller for dashboard display - handled user interactions & children widgets
 """
+
+import logging
 import datetime
 import gettext
 import os.path
@@ -21,6 +23,7 @@ from controllers.widgets.sharepriceimportdialog import SharePriceImportDialog
 from controllers.widgets.shareexportdialog import ShareExportDialog
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class SharePriceStatsTable(QtWidgets.QTableWidget):
@@ -53,12 +56,14 @@ class SharePriceStatsTable(QtWidgets.QTableWidget):
         parent_controller : DashboardController
             The controller in which this table is displayed
         """
+        logger.debug("SharePriceStatsTable.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
 
     def load_data(self):
         """Loads all data from database and fill the table"""
+        logger.debug("SharePriceStatsTable.load_data")
         self.clear()
         table_rows = []
 
@@ -201,6 +206,7 @@ class DashboardController:
 
     def __init__(self, parent_window):
         """Stores parameters for future use, loads config & prepares UI elements"""
+        logger.debug("DashboardController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
         self.config = parent_window.database.configs_get_all()
@@ -225,6 +231,7 @@ class DashboardController:
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("DashboardController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -239,6 +246,7 @@ class DashboardController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("DashboardController.get_display_widget")
         self.display_widget.layout = QtWidgets.QGridLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
@@ -290,6 +298,7 @@ class DashboardController:
 
     def reload_data(self):
         """Reloads all data from DB"""
+        logger.debug("DashboardController.reload_data")
         self.config = self.database.configs_get_all()
 
         self.export_file_path.setText(self.config.get("export.filename", ""))
@@ -308,6 +317,7 @@ class DashboardController:
 
     def on_choose_export_file(self):
         """User wants to select export file: display dialog & store selection"""
+        logger.debug("DashboardController.on_choose_export_file")
         dialog = QtWidgets.QFileDialog(self.parent_window)
 
         # Re-open last folder (if any)
@@ -332,6 +342,7 @@ class DashboardController:
 
     def on_export_shares(self):
         """User wants to export shares: display export dialog"""
+        logger.debug("DashboardController.on_export_shares")
         file_path = self.export_file_path.text()
         if not file_path:
             self.on_choose_export_file()
@@ -354,6 +365,7 @@ class DashboardController:
 
     def on_choose_import_file(self):
         """User wants to select import file: display dialog & store selection"""
+        logger.debug("DashboardController.on_choose_import_file")
         dialog = QtWidgets.QFileDialog(self.parent_window)
 
         # Re-open last folder (if any)
@@ -382,6 +394,7 @@ class DashboardController:
         Opens file selection if file is not selected yet
         Displays error if user still doesn't want to choose a file
         """
+        logger.debug("DashboardController.on_import_share_prices")
         file_path = self.import_file_path.text()
         if not file_path:
             self.on_choose_import_file()

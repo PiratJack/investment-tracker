@@ -9,6 +9,7 @@ SharesController
     Handles user interactions and links all displayed widgets
 """
 
+import logging
 import gettext
 import os
 
@@ -23,6 +24,7 @@ import controllers.share
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class SharesTree(basetreecontroller.BaseTreeController):
@@ -116,6 +118,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         shares_without_group : list of models.share.Share
             The list of shares without a group to display
         """
+        logger.info(f"SharesTree.fill_groups {groups}, shares {shares_without_group}")
         # Fill in the different groups
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
@@ -224,6 +227,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         QtWidgets.QTreeWidgetItem
             The share group to add in the tree
         """
+        logger.info(f"SharesTree.add_group {name}, ID {group_id}")
         group_widget = QtWidgets.QTreeWidgetItem(
             [name, str(group_id), "group", "", "", "", "", "", ""]
         )
@@ -273,6 +277,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         QtWidgets.QTreeWidgetItem
             The share to add in the tree
         """
+        logger.info(f"SharesTree.add_share {data}")
         share_widget = QtWidgets.QTreeWidgetItem([str(field) for field in data])
         share_widget.setFlags(share_widget.flags() & ~Qt.ItemIsUserCheckable)
         if parent_widget:
@@ -321,6 +326,9 @@ class SharesTree(basetreecontroller.BaseTreeController):
         tree_item : QtWidgets.QTreeWidgetItem
             The tree item being modified
         """
+        logger.info(
+            f"SharesTree.on_double_click {tree_item} - {tree_item.data(0, Qt.DisplayRole)}"
+        )
         if tree_item.text(2) == "group" and tree_item.text(1) != "-1":
             self.group_details = controllers.sharegroup.ShareGroupController(
                 self.parent_controller, tree_item.text(1)
@@ -388,6 +396,7 @@ class SharesController:
         parent_window : QtWidgets.QMainWindow
             The window displaying this controller
         """
+        logger.debug("SharesController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
         self.groups = self.database.share_groups_get_all()
@@ -401,6 +410,7 @@ class SharesController:
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("SharesController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -415,6 +425,7 @@ class SharesController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("SharesController.get_display_widget")
         self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
@@ -430,6 +441,7 @@ class SharesController:
 
     def reload_data(self):
         """Reloads the list of accounts/shares (& triggers tree refresh)"""
+        logger.debug("SharesController.reload_data")
         self.groups = self.database.share_groups_get_all()
         self.shares_without_group = self.database.shares_query().filter(
             models.share.Share.group == None
@@ -444,6 +456,7 @@ class SharesController:
 
     def on_click_display_hidden(self):
         """User clicks on 'display hidden shares' checkbox => reload tree"""
+        logger.debug("SharesController.on_click_display_hidden")
         self.display_hidden = self.display_hidden_widget.isChecked()
         self.reload_data()
         self.tree.setFocus()

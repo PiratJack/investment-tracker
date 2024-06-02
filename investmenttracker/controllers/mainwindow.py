@@ -6,6 +6,7 @@ MainWindow
     Main window for display. Displays a toolbar to access the different screens
 """
 
+import logging
 import gettext
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QSize
@@ -18,6 +19,7 @@ import controllers.graphs
 import controllers.dashboard
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -43,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         database : models.database.Database
             A reference to the application database
         """
+        logger.debug("MainWindow.__init__")
         super().__init__()
         self.database = database
 
@@ -72,6 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_layout(self):
         """Arranges all elements in the window layout"""
+        logger.debug("MainWindow.create_layout")
         for element in self.elements.values():
             element_window = element.get_display_widget()
             if element_window:
@@ -85,6 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def create_toolbar(self):
         """Creates the toolbar based on subwindows"""
+        logger.debug("MainWindow.create_toolbar")
         # Create the toolbar itself
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
@@ -101,5 +106,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def display_tab(self, tab):
         """User clicks on toolbar item => display the subwindow"""
+        logger.debug("MainWindow.display_tab")
         self.layout.setCurrentIndex(list(self.elements).index(tab))
         self.elements[tab].reload_data()

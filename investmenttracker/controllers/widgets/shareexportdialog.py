@@ -8,12 +8,15 @@ SharePriceImportResultsDialog
 SharePriceImportDialog
     A dialog to select mapping information for share price import
 """
+
+import logging
 import gettext
 import os
 
 from PyQt5 import QtWidgets
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class ShareExportDialog:
@@ -123,6 +126,7 @@ class ShareExportDialog:
         parent_controller : controllers.TransactionsController
             The controller displaying this class
         """
+        logger.debug("ShareExportDialog.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -154,6 +158,7 @@ class ShareExportDialog:
 
     def show_window(self):
         """Shows the export dialog"""
+        logger.debug("ShareExportDialog.show_window")
         self.window.setModal(True)
 
         # Display content
@@ -198,6 +203,7 @@ class ShareExportDialog:
 
     def set_file(self, file_path):
         """Sets the path of the file to export"""
+        logger.debug(f"ShareExportDialog.set_file {file_path}")
         self.file_path = file_path
 
     def display_table(self):
@@ -206,6 +212,7 @@ class ShareExportDialog:
         The header will have allow the user to choose the mapping for each column
         All synced shares will be displayed in the table
         """
+        logger.debug("ShareExportDialog.display_table")
         self.data_table.clear()
         self.data_table.setRowCount(len(self.shares) + 1)  # +1 due to headers
         self.data_table.setColumnCount(len(self.possible_fields))
@@ -261,6 +268,7 @@ class ShareExportDialog:
         field_id : str
             The field to display (may be a related object field)
         """
+        logger.info(f"ShareExportDialog.get_share_field {share} - Field {field_id}")
         if field_id in ["name", "id", "main_code", "code_sync_origin"]:
             return getattr(share, field_id)
         if field_id == "sync_origin":
@@ -277,15 +285,18 @@ class ShareExportDialog:
 
     def on_export_headers(self, export_headers):
         """User clicks on 'had headers'"""
+        logger.info(f"ShareExportDialog.on_export_headers {export_headers}")
         self.export_headers = export_headers
 
     def on_change_header(self, column, value):
         """User changes one of the header mapping. Triggers self.check_mapping"""
+        logger.info(f"ShareExportDialog.on_change_header {column} - Value {value}")
         self.mapping[column] = value[1]
         self.display_table()
 
     def on_confirm_export(self):
         """User clicks 'OK'. Export the share list"""
+        logger.debug("ShareExportDialog.on_confirm_export")
         self.save_config()
 
         file_contents = []
@@ -304,9 +315,11 @@ class ShareExportDialog:
             file_contents.append(self.delimiter.join(file_row))
         for share in self.shares:
             file_row = [
-                str(self.get_share_field(share, self.mapping[column]))
-                if column in self.mapping
-                else ""
+                (
+                    str(self.get_share_field(share, self.mapping[column]))
+                    if column in self.mapping
+                    else ""
+                )
                 for column in range(nb_columns)
             ]
             file_contents.append(self.delimiter.join(file_row))
@@ -340,11 +353,13 @@ class ShareExportDialog:
 
     def set_delimiter(self, new_delimiter):
         """Sets the field delimiter"""
+        logger.debug("ShareExportDialog.set_delimiter")
         self.delimiter = "\t" if new_delimiter == "Tab" else new_delimiter
         self.mapping = {}
 
     def save_config(self):
         """Saves the preferences (delimiter, export_headers, mapping)"""
+        logger.debug("ShareExportDialog.save_config")
         delimiter = "Tab" if self.delimiter == "\t" else self.delimiter
         self.database.config_set("export.delimiter", delimiter)
         self.database.config_set("export.export_headers", self.export_headers)

@@ -16,6 +16,7 @@ TransactionsController
     Handles user interactions and links all displayed widgets
 """
 
+import logging
 import gettext
 import os
 
@@ -27,6 +28,7 @@ from models.base import format_number
 from controllers.widgets import basetreecontroller, autoresize
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 # TODO (?): Link transactions ==> what would be the impacts?
 
 
@@ -93,6 +95,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         parent_controller : QtWidgets.QMainWindow
             The main window displaying this widget
         """
+        logger.debug("AccountsSharesTree.__init__")
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
@@ -107,6 +110,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         accounts : list of models.account.Account
             The list of accounts to display
         """
+        logger.debug(f"AccountsSharesTree.fill_tree {accounts}")
         for account in sorted(accounts, key=lambda a: a.name):
             account_item = self.add_account(account)
             self.addTopLevelItem(account_item)
@@ -132,6 +136,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         -------
         QtWidgets.QTreeWidgetItem
             Account item for inclusion in the tree"""
+        logger.debug(f"AccountsSharesTree.add_account {account}")
         account_item = QtWidgets.QTreeWidgetItem(
             [account.name, "account", str(account.id)]
         )
@@ -163,6 +168,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         -------
         QtWidgets.QTreeWidgetItem
             Share item for inclusion in the tree"""
+        logger.debug(f"AccountsSharesTree.add_share {share} - Parent {parent_item}")
         share_item = QtWidgets.QTreeWidgetItem(
             [
                 share.name,
@@ -179,10 +185,12 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
     def on_select_item(self):
         """Handler for user selection: triggers controller's handler"""
+        logger.debug("AccountsSharesTree.on_select_item")
         self.parent_controller.on_change_selection(*self.get_selected_items())
 
     def store_item_selection(self):
         """Stores selected accounts/shares (for re-selection after refresh)"""
+        logger.debug("AccountsSharesTree.store_item_selection")
         self.selected_accounts, self.selected_shares = self.get_selected_items()
 
     def get_selected_items(self):
@@ -195,6 +203,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
         selected_shares : dict of list of int
             A dict of the format {account_id:[share_id]}
         """
+        logger.debug("AccountsSharesTree.get_selected_items")
         role = Qt.DisplayRole
         self.selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()
@@ -219,6 +228,7 @@ class AccountsSharesTree(basetreecontroller.BaseTreeController):
 
     def restore_item_selection(self):
         """Restores previous selection of accounts/shares (used after tree refresh)"""
+        logger.debug("AccountsSharesTree.restore_item_selection")
         role = Qt.DisplayRole
         # Restore selected accounts
         for account_id in self.selected_accounts:
@@ -288,6 +298,7 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
             Columns to display.
             Each column needs a name key (alignment & size are optional)
         """
+        logger.debug("TransactionsTableModel.__init__")
         super().__init__()
         self.columns = columns
         self.database = database
@@ -425,6 +436,9 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         account_shares : dict of dict of int
             The shares for filtering, in the form {account_id:[share_id]}
         """
+        logger.info(
+            f"TransactionsTableModel.set_filters - Accounts {selected_accounts} - Shares {selected_shares}"
+        )
         self.transactions = self.database.transactions_get_by_account_and_shares(
             selected_accounts, selected_shares
         )
@@ -443,6 +457,9 @@ class TransactionsTableModel(QtCore.QAbstractTableModel):
         models.transaction.Transaction
             The transaction to display for the provided index/row
         """
+        logger.debug(
+            f"TransactionsTableModel.get_transaction at {index.row()}, {index.column()}"
+        )
         return self.transactions[index.row()]
 
 
@@ -550,6 +567,7 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         parent_controller : TransactionsController
             The controller in which this table is displayed
         """
+        logger.debug("TransactionsTableView.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -570,6 +588,9 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         account_shares : dict of dict of int
             The shares for filtering, in the form {account_id:[share_id]}
         """
+        logger.info(
+            f"TransactionsTableModel.set_filters - Accounts {selected_accounts} - Shares {selected_shares}"
+        )
         self.model.set_filters(selected_accounts, selected_shares)
         self.model.layoutChanged.emit()
         self.viewport().update()
@@ -584,6 +605,9 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         index : QtCore.QModelIndex
             A reference to the cell clicked
         """
+        logger.debug(
+            f"TransactionsTableView.on_table_clicked at {index.row()}, {index.column()}"
+        )
         self.parent_controller.store_tree_item_selection()
         # New transaction
         if index.row() == len(self.model.transactions):
@@ -646,6 +670,9 @@ class TransactionsTableView(QtWidgets.QTableView, autoresize.AutoResize):
         index : QtCore.QModelIndex
             A reference to the cell clicked
         """
+        logger.debug(
+            f"TransactionsTableView.on_table_double_clicked at {index.row()}, {index.column()}"
+        )
         self.parent_controller.store_tree_item_selection()
         # New transaction
         if index.row() == len(self.model.transactions):
@@ -733,6 +760,7 @@ class TransactionsController:
         parent_window : QtWidgets.QMainWindow
             The main window displaying this controller
         """
+        logger.debug("TransactionsController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
 
@@ -759,6 +787,7 @@ class TransactionsController:
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("TransactionsController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -773,6 +802,7 @@ class TransactionsController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("TransactionsController.get_display_widget")
         self.parent_window.setCentralWidget(self.display_widget)
 
         self.display_widget.setLayout(self.display_widget.layout)
@@ -802,6 +832,7 @@ class TransactionsController:
 
     def reload_data(self):
         """Reloads the list of accounts/shares"""
+        logger.debug("TransactionsController.reload_data")
         self.accounts = self.database.accounts_get(
             with_hidden=self.display_hidden_accounts,
             with_disabled=self.display_disabled_accounts,
@@ -814,12 +845,14 @@ class TransactionsController:
 
     def on_click_hidden_accounts(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""
+        logger.debug("TransactionsController.on_click_hidden_accounts")
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_disabled_accounts(self):
         """User clicks on 'display disabled accounts' checkbox => reload tree"""
+        logger.debug("TransactionsController.on_click_disabled_accounts")
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()
@@ -834,13 +867,16 @@ class TransactionsController:
         account_shares : dict of dict of int
             The shares for filtering, in the form {account_id:[share_id]}
         """
+        logger.debug("TransactionsController.on_change_selection")
         self.table.set_filters(selected_accounts, selected_shares)
 
     def store_tree_item_selection(self):
         """Stores selected accounts/shares (for re-selection after refresh)"""
+        logger.debug("TransactionsController.store_tree_item_selection")
         self.tree.store_item_selection()
 
     def restore_tree_item_selection(self):
         """Restores selected accounts/shares (used after tree refresh)"""
+        logger.debug("TransactionsController.restore_tree_item_selection")
         self.tree.restore_item_selection()
         self.table.set_filters(self.tree.selected_accounts, self.tree.selected_shares)

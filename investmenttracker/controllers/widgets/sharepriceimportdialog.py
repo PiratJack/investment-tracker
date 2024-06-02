@@ -8,6 +8,8 @@ SharePriceImportResultsDialog
 SharePriceImportDialog
     A dialog to select mapping information for share price import
 """
+
+import logging
 import datetime
 import gettext
 import os
@@ -20,6 +22,7 @@ import sqlalchemy
 from models.shareprice import SharePrice
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class SharePriceImportResultsDialog:
@@ -71,6 +74,7 @@ class SharePriceImportResultsDialog:
         load_results : dict of format {share_id: {'loaded': int, 'duplicate': int}}
             The summary of the load per share
         """
+        logger.debug("SharePriceImportResultsDialog.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.shares = shares
@@ -82,6 +86,7 @@ class SharePriceImportResultsDialog:
 
     def show_window(self):
         """Displays the dialog with load results"""
+        logger.debug("SharePriceImportResultsDialog.show_window")
         self.window.setModal(True)
         self.window.rejected.connect(self.parent_controller.window.close)
         self.window.accepted.connect(self.parent_controller.window.close)
@@ -108,6 +113,7 @@ class SharePriceImportResultsDialog:
 
     def fill_results_table(self):
         """Fills in the results table"""
+        logger.debug("SharePriceImportResultsDialog.fill_results_table")
         self.results_table.setRowCount(len(self.load_results) + 1)
         self.results_table.setColumnCount(4)
 
@@ -329,6 +335,7 @@ class SharePriceImportDialog:
         parent_controller : controllers.TransactionsController
             The controller displaying this class
         """
+        logger.debug("SharePriceImportDialog.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -357,6 +364,7 @@ class SharePriceImportDialog:
 
     def show_window(self):
         """Shows the import dialog"""
+        logger.debug("SharePriceImportDialog.show_window")
         self.window.setModal(True)
 
         # Display content
@@ -408,6 +416,7 @@ class SharePriceImportDialog:
 
     def set_file(self, file_path):
         """Sets the path of the file to import"""
+        logger.debug(f"SharePriceImportDialog.set_file {file_path}")
         self.file_path = file_path
         self.file_contents = open(file_path, "r+", encoding="UTF-8").read().splitlines()
 
@@ -422,6 +431,7 @@ class SharePriceImportDialog:
         - Check data (if all headers are known)
         - Display results
         """
+        logger.debug("SharePriceImportDialog.process_data")
         self.data_errors = {}
         self.data_checked = False
 
@@ -436,6 +446,7 @@ class SharePriceImportDialog:
 
     def parse_headers(self):
         """Reads the file headers to guess possible headers"""
+        logger.debug("SharePriceImportDialog.parse_headers")
         if self.mapping:
             return
 
@@ -452,6 +463,7 @@ class SharePriceImportDialog:
 
         Updates self.data and self.nb_columns
         """
+        logger.debug("SharePriceImportDialog.load_file_in_memory")
         self.data = []
         self.nb_columns = 0
         for row, line in enumerate(self.file_contents):
@@ -463,6 +475,7 @@ class SharePriceImportDialog:
 
     def refine_mapping(self):
         """Refines the mapping by guessing special formats (like date format)"""
+        logger.debug("SharePriceImportDialog.refine_mapping")
         if not self.mapping:
             return
 
@@ -474,6 +487,7 @@ class SharePriceImportDialog:
 
     def is_mapping_complete(self):
         """Returns True if all required fields are mapped without duplicate"""
+        logger.debug("SharePriceImportDialog.is_mapping_complete")
         # Convert format ID (in self.mapping) to a field list
         mapped_fields = [
             self.header_to_field[f]
@@ -517,6 +531,7 @@ class SharePriceImportDialog:
         nb_rows : int
             The number of rows to check in the file
         """
+        logger.debug(f"SharePriceImportDialog.check_data {nb_rows}")
         self.data_checked = False
         if not self.mapping or not self.data:
             return
@@ -572,6 +587,7 @@ class SharePriceImportDialog:
         """Returns True if a share price is NOT a duplicate of existing data
 
         Also updates self.load_results"""
+        logger.debug(f"SharePriceImportDialog.check_duplicate {share_price}")
         # Check for duplicates
         existing = self.database.share_prices_get(
             share_id=share_price.share_id,
@@ -595,6 +611,7 @@ class SharePriceImportDialog:
         The first 30 rows of the file are displayed
         Each cell may be colored in red in case data errors are detected
         """
+        logger.debug("SharePriceImportDialog.display_table")
         self.data_table.clear()
         self.data_table.setRowCount(min(31, len(self.data) + 1))  # +1 due to headers
         self.data_table.setColumnCount(self.nb_columns)
@@ -659,6 +676,7 @@ class SharePriceImportDialog:
 
     def on_has_headers(self, has_headers):
         """User clicks on 'had headers'. Triggers a remapping of the file."""
+        logger.debug(f"SharePriceImportDialog.on_has_headers {has_headers}")
         self.has_headers = has_headers
         self.mapping = {}
         self.load_file_in_memory()
@@ -671,6 +689,7 @@ class SharePriceImportDialog:
 
     def on_change_header(self, column, value):
         """User changes one of the header mapping. Triggers self.check_data"""
+        logger.info(f"SharePriceImportDialog.on_change_header {column} - Value {value}")
         self.mapping[column] = value[1]
         if self.is_mapping_complete():
             self.check_data(30)
@@ -684,6 +703,7 @@ class SharePriceImportDialog:
         Updated load results
         Displays the SharePriceImportResultsDialog
         """
+        logger.debug("SharePriceImportDialog.on_confirm_load")
         # Check if the data is at the right format
         if not self.is_mapping_complete():
             return
@@ -778,6 +798,9 @@ class SharePriceImportDialog:
 
     def parse_date_format(self, table_rows, column):
         """Guesses the date format for a given column"""
+        logger.info(
+            f"SharePriceImportDialog.parse_date_format {table_rows} - Column {column}"
+        )
         data_to_check = [
             i[column] for i in table_rows if column in i and i[column] != ""
         ][:50]
@@ -792,6 +815,7 @@ class SharePriceImportDialog:
 
     def set_delimiter(self, new_delimiter):
         """Sets the field delimiter"""
+        logger.info(f"SharePriceImportDialog.set_delimiter {new_delimiter}")
         if new_delimiter == self.decimal_dot:
             self.delimiter_widget.setCurrentText("Tab")
             return
@@ -801,6 +825,7 @@ class SharePriceImportDialog:
 
     def set_decimal_dot(self, new_decimal_dot):
         """Sets the decimal separator"""
+        logger.info(f"SharePriceImportDialog.set_decimal_dot {new_decimal_dot}")
         if new_decimal_dot == self.delimiter:
             self.decimal_dot_widget.setCurrentText(".")
             return
@@ -810,6 +835,7 @@ class SharePriceImportDialog:
 
     def save_config(self):
         """Saves the preferences (delimiter, decimal_dot, has_headers, mapping)"""
+        logger.debug("SharePriceImportDialog.save_config")
         delimiter = "Tab" if self.delimiter == "\t" else self.delimiter
         self.database.config_set("import.delimiter", delimiter)
         self.database.config_set("import.decimal_dot", self.decimal_dot)

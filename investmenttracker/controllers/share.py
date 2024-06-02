@@ -5,6 +5,8 @@ Classes
 AccountController
     Controller for creating or editing a single share
 """
+
+import logging
 import gettext
 
 import models.share
@@ -13,6 +15,7 @@ from controllers.widgets.editcontroller import EditController
 from models.base import ValidationException
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class ShareController(EditController):
@@ -91,6 +94,7 @@ class ShareController(EditController):
         share_id : int
             The ID of the share to edit. 0 for new shares.
         """
+        logger.info(f"ShareController.__init__ {share_id}")
         super().__init__(parent_controller)
         self.share_id = int(share_id)
         self.fields["group_id"]["possible_values"] = [
@@ -140,6 +144,7 @@ class ShareController(EditController):
             If the sync origin is defined, but there is no corresponding code
             (Therefore any syncing will fail)
         """
+        logger.debug("ShareController.after_item_save")
         # This refreshes the data from DB, so that self.item.id is set
         self.database.session.flush()
 

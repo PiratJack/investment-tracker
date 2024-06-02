@@ -6,6 +6,7 @@ TransactionController
     Controller for creating or editing a single transaction
 """
 
+import logging
 import gettext
 import datetime
 
@@ -16,6 +17,7 @@ from models.base import ValidationWarningException
 from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class TransactionController(EditController):
@@ -137,6 +139,7 @@ class TransactionController(EditController):
         transaction_id : int
             The ID of the transaction to edit. 0 for creating a new one.
         """
+        logger.debug("TransactionController.__init__")
         super().__init__(parent_controller)
         self.transaction_id = int(transaction_id)
 
@@ -190,10 +193,12 @@ class TransactionController(EditController):
 
     def on_change_any_value(self):
         """Handler when any data changes. Clears the errors."""
+        logger.debug("TransactionController.on_change_any_value")
         self.clear_errors()
 
     def on_change_type(self):
         """Handler when transaction type changes. Changes which fields are visible."""
+        logger.debug("TransactionController.on_change_type")
         # Somewhat, doing this increases the height to the wanted one
         self.window.sizeHint()
 
@@ -244,6 +249,7 @@ class TransactionController(EditController):
 
     def on_change_quantity_or_unit_price(self):
         """Handler for quantity or unit price change. Updates total amount."""
+        logger.debug("TransactionController.on_change_quantity_or_unit_price")
         total = self.get_quantity() * self.get_unit_price()
         self.fields["currency_delta"]["widget"].setValue(total)
 
@@ -251,6 +257,7 @@ class TransactionController(EditController):
 
     def on_change_currency_delta(self):
         """Handler for total value change. Updates unit price."""
+        logger.debug("TransactionController.on_change_currency_delta")
         try:
             unit_price = self.get_currency_delta() / self.get_quantity()
             self.fields["unit_price"]["widget"].setValue(unit_price)
@@ -261,6 +268,7 @@ class TransactionController(EditController):
 
     def on_change_share_or_date(self):
         """Handler for share or date changes. Updates known price dropdown."""
+        logger.debug("TransactionController.on_change_share_or_date")
         date = datetime.datetime.fromisoformat(
             self.fields["date"]["widget"].date().toString(Qt.ISODate)
         )
@@ -291,6 +299,7 @@ class TransactionController(EditController):
 
     def on_change_known_unit_price(self):
         """Handler for selection of a known price. Updates unit price."""
+        logger.debug("TransactionController.on_change_known_unit_price")
         chosen_price = self.fields["known_unit_price"]["widget"].currentData()
         if chosen_price and not isinstance(chosen_price, int):
             self.fields["unit_price"]["widget"].setValue(chosen_price.price)
@@ -305,6 +314,7 @@ class TransactionController(EditController):
         ValidationWarningException
             A validation warning about negative balance (which the user can ignore)
         """
+        logger.debug("TransactionController.on_validation_end")
         if not self.item.account:
             account = self.database.account_get_by_id(self.item.account_id)
         else:
@@ -322,20 +332,24 @@ class TransactionController(EditController):
 
     def get_quantity(self):
         """Returns user-entered quantity"""
+        logger.debug("TransactionController.get_quantity")
         return self.fields["quantity"]["widget"].value()
 
     def get_unit_price(self):
         """Returns user-entered unit price"""
+        logger.debug("TransactionController.get_unit_price")
         return self.fields["unit_price"]["widget"].value()
 
     def get_currency_delta(self):
         """Returns user-entered total amount"""
+        logger.debug("TransactionController.get_currency_delta")
         return self.fields["currency_delta"]["widget"].value()
 
     def save(self):
         """Converts entered data to expected database format
 
         If the transaction has no asset, the unit price should be 1"""
+        logger.debug("TransactionController.save")
         value = self.fields["type"]["widget"].currentData()
         transaction_type = [
             v for v in models.transaction.TransactionTypes if v.name == value

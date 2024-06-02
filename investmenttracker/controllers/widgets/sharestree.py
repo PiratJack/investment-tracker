@@ -6,6 +6,7 @@ SharesTree
     Displays shares the user can select
 """
 
+import logging
 import gettext
 
 from PyQt5 import QtWidgets
@@ -14,6 +15,7 @@ from PyQt5.QtCore import Qt
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class SharesTree(basetreecontroller.BaseTreeController):
@@ -75,6 +77,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         parent_controller : QtWidgets.QMainWindow
             The main window displaying this widget
         """
+        logger.debug("SharesTree.__init__")
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
@@ -91,6 +94,9 @@ class SharesTree(basetreecontroller.BaseTreeController):
         shares_without_group : list of models.share.Share
             The list of shares without a group to display
         """
+        logger.info(
+            f"SharesTree.fill_tree {groups} - Ungrouped: {shares_without_group}"
+        )
         # Add shares within a group
         for group in groups:
             group_widget = self.add_group(group.name, group.id)
@@ -123,6 +129,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         QtWidgets.QTreeWidgetItem
             The share group to add in the tree
         """
+        logger.debug(f"SharesTree.add_group {name} - {group_id}")
         group_widget = QtWidgets.QTreeWidgetItem([name, "Group", str(group_id)])
         self.addTopLevelItem(group_widget)
 
@@ -151,6 +158,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         -------
         QtWidgets.QTreeWidgetItem
             Share item for inclusion in the tree"""
+        logger.debug(f"SharesTree.add_share {data}")
         share_widget = QtWidgets.QTreeWidgetItem([str(field) for field in data])
         share_widget.setFlags(share_widget.flags() & ~Qt.ItemIsUserCheckable)
         if parent_item:
@@ -171,6 +179,7 @@ class SharesTree(basetreecontroller.BaseTreeController):
         list of int
             A list of share IDs
         """
+        logger.debug("SharesTree.get_selected_items")
         role = Qt.DisplayRole
 
         self.selected_shares = [
@@ -181,4 +190,5 @@ class SharesTree(basetreecontroller.BaseTreeController):
 
     def on_select_item(self):
         """Handler for user selection: triggers controller's handler"""
+        logger.debug("SharesTree.on_select_item")
         self.parent_controller.on_change_share_selection(self.get_selected_items())

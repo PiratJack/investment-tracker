@@ -5,12 +5,15 @@ Classes
 ShareGroupController
     Controller for creating or editing a single share group
 """
+
+import logging
 import gettext
 
 import models.sharegroup
 from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class ShareGroupController(EditController):
@@ -60,6 +63,7 @@ class ShareGroupController(EditController):
         group_id : int
             The ID of the share group to edit. 0 for new share groups.
         """
+        logger.info(f"ShareGroupController.__init__ {group_id}")
         super().__init__(parent_controller)
         self.group_id = int(group_id)
         if self.group_id:

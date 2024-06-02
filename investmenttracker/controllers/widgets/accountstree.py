@@ -6,6 +6,7 @@ AccountsTree
     Displays accounts so the user can select
 """
 
+import logging
 import gettext
 
 from PyQt5 import QtGui, QtWidgets
@@ -14,6 +15,7 @@ from PyQt5.QtCore import Qt
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class AccountsTree(basetreecontroller.BaseTreeController):
@@ -73,6 +75,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         parent_controller : DashboardController
             The controller in which this table is displayed
         """
+        logger.info("AccountsTree.__init__")
         super().__init__(parent_controller)
         self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         self.itemSelectionChanged.connect(self.on_select_item)
@@ -87,6 +90,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         accounts : list of models.account.Account
             The list of accounts to display
         """
+        logger.info(f"AccountsTree.fill_tree {accounts}")
         for account in accounts:
             if account.hidden and not self.parent_controller.display_hidden_accounts:
                 continue
@@ -110,6 +114,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         -------
         QtWidgets.QTreeWidgetItem
             Account item for inclusion in the tree"""
+        logger.debug(f"AccountsTree.add_account {account}")
         account_item = QtWidgets.QTreeWidgetItem(
             [account.name, "account", str(account.id)]
         )
@@ -129,6 +134,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
 
     def on_select_item(self):
         """Handler for user selection: triggers controller's handler"""
+        logger.debug("AccountsTree.on_select_item")
         self.parent_controller.on_change_account_selection(self.get_selected_items())
 
     def get_selected_items(self):
@@ -139,6 +145,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         list of int
             A list of account IDs
         """
+        logger.debug("AccountsTree.get_selected_items")
         role = Qt.DisplayRole
         self.selected_accounts = [
             int(i.data(2, role)) for i in self.selectedItems() if not i.parent()

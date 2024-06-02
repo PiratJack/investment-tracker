@@ -6,6 +6,7 @@ GraphsArea
     The graph displaying the evolution of share & account price over time
 """
 
+import logging
 import gettext
 import datetime
 
@@ -15,6 +16,7 @@ from models.base import NoPriceException, ValidationException, format_number
 from controllers.widgets import percentageaxisitem
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class GraphsArea(pyqtgraph.PlotWidget):
@@ -198,6 +200,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         parent_controller : QtWidgets.QMainWindow
             The main window displaying this widget
         """
+        logger.debug("GraphsArea.__init__")
         super().__init__()
         self.setAxisItems({"bottom": pyqtgraph.DateAxisItem()})
         self.setAxisItems({"left": percentageaxisitem.PercentageAxisItem("left")})
@@ -211,6 +214,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.plots["legend"] = self.addLegend()
 
     def reload_data(self):
+        logger.debug("GraphsArea.reload_data")
         self.all_accounts = {a.id: a for a in self.database.accounts_get(True, True)}
         self.accounts_graph_values = {a: {} for a in self.all_accounts}
         self.all_shares = {s.id: s for s in self.database.shares_get(True)}
@@ -228,6 +232,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         selected_accounts : list of int
             List of selected account IDs
         """
+        logger.info(f"GraphsArea.set_accounts {selected_accounts}")
         self.selected_accounts = selected_accounts if selected_accounts else []
         if selected_accounts:
             self.calculate_accounts(selected_accounts)
@@ -247,6 +252,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         selected_shares : list of int
             List of selected share IDs
         """
+        logger.info(f"GraphsArea.set_shares {selected_shares}")
         self.selected_shares = selected_shares if selected_shares else []
         if selected_shares:
             self.calculate_shares(selected_shares)
@@ -263,6 +269,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         end_date : datetime.date
             The last date to display in the graph
         """
+        logger.info(f"GraphsArea.set_dates {start_date} to {end_date}")
         if start_date and end_date and start_date > end_date:
             exception = ValidationException(
                 _("Start date must be before end date"), None, None, None
@@ -294,6 +301,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         baseline_net : bool
             Whether the baseline changes after each entry/exit out of the account
         """
+        logger.info(
+            f"GraphsArea.set_baseline {enabled} at {baseline_date} - Net? {baseline_net}"
+        )
         self.calculate_accounts(self.selected_accounts)
         self.calculate_shares(self.selected_shares)
         if enabled:
@@ -316,6 +326,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         enabled : bool
             Whether the graph should display the composition of an account
         """
+        logger.info(f"GraphsArea.set_account_split {enabled}")
         if enabled != -1:
             self.graph_type = "split" if enabled else "value"
 
@@ -413,6 +424,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         visible : bool
             Whether to display markers
         """
+        logger.info(f"GraphsArea.set_markers_visible {visible}")
         self.display_markers = visible
 
         if visible:
@@ -434,6 +446,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         shares : list of int
             The list of shares to calculate
         """
+        logger.info(f"GraphsArea.calculate_shares {shares}")
         if not self.start_date or not self.end_date or not shares:
             return
 
@@ -471,6 +484,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         accounts : list of int
             The list of shares to calculate
         """
+        logger.info(f"GraphsArea.calculate_accounts {accounts}")
         if not self.start_date or not self.end_date or not accounts:
             return
         # Evaluate the value from the start date until the end date
@@ -581,6 +595,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def plot_graph(self):
         """Calculates the raw values for a list of accounts"""
+        logger.debug("GraphsArea.plot_graph")
         self.clear_plots()
         color_set = (
             self.color_set_split if self.graph_type == "split" else self.color_set
@@ -653,6 +668,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         values : dict of format {x:y}
             All the graph values
         """
+        logger.info(f"GraphsArea.add_markers {values}")
         if not self.display_markers:
             return
 
@@ -690,6 +706,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         element_id : int
             The ID of the element to calculate
         """
+        logger.info(f"GraphsArea.convert_raw_to_graph {element_type} {element_id}")
         # in "split" mode, the graph values are already calculated
         # Therefore, only the date filtering is needed
         if element_type == "share":
@@ -775,6 +792,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def clear_plots(self):
         """Clears all plots"""
+        logger.debug("GraphsArea.clear_plots")
         for plot_id, plot in self.plots.items():
             if plot_id == "legend":
                 continue
@@ -788,6 +806,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
 
     def set_axis_range(self):
         """Defines the displayed range of both axis"""
+        logger.debug("GraphsArea.set_axis_range")
         start, end = (
             datetime.datetime(d.year, d.month, d.day).timestamp()
             for d in (self.start_date, self.end_date)
@@ -825,6 +844,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         first_date : datetime.date
             The 'start of the world' so nothing can be before
         """
+        logger.debug(
+            f"GraphsArea.find_missing_date_ranges {element_id} starting on {first_date}"
+        )
         ranges_missing = []
         if not first_date:
             first_date = datetime.date(1, 1, 1)
@@ -858,6 +880,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         currency : models.share.Share
             In which currency the share price should be
         """
+        logger.info(
+            f"GraphsArea.get_share_value_as_of {share_id} starting on {start_date} with currency {currency}"
+        )
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -887,6 +912,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
         currency : models.share.Share
             In which currency the share prices should be
         """
+        logger.info(
+            f"GraphsArea.get_share_value_in_range {share_id} - {start_date} to {end_date} with currency {currency}"
+        )
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
@@ -916,4 +944,5 @@ class GraphsArea(pyqtgraph.PlotWidget):
         exception : Exception
             The exception raised during the calculation
         """
+        logger.info(f"GraphsArea.add_error {exception}")
         self.parent_controller.add_error(exception)

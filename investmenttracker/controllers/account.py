@@ -5,12 +5,15 @@ Classes
 AccountController
     Controller for creating or editing a single account
 """
+
+import logging
 import gettext
 
 import models.account
 from controllers.widgets.editcontroller import EditController
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class AccountController(EditController):
@@ -77,6 +80,7 @@ class AccountController(EditController):
         account_id : int
             The ID of the account to edit. 0 for creating a new one.
         """
+        logger.debug(f"AccountController.__init__ {account_id}")
         super().__init__(parent_controller)
         self.account_id = int(account_id) if account_id else 0
 

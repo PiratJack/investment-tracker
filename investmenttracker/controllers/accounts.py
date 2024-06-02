@@ -9,6 +9,7 @@ AccountsController
     Handles user interactions and links all displayed widgets
 """
 
+import logging
 import gettext
 import os
 
@@ -20,6 +21,7 @@ import controllers.account
 from controllers.widgets import basetreecontroller
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class AccountsTree(basetreecontroller.BaseTreeController):
@@ -95,6 +97,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         accounts : list of models.account.Account
             The list of accounts to display
         """
+        logger.info(f"AccountsTree.fill_accounts {accounts}")
         tree_items = []
 
         # Fill in the data
@@ -227,6 +230,7 @@ class AccountsTree(basetreecontroller.BaseTreeController):
         tree_item : QtWidgets.QTreeWidgetItem
             The tree item being modified
         """
+        logger.info(f"AccountsTree.on_double_click {tree_item}")
         if tree_item.parent():
             return
         self.account_details = controllers.account.AccountController(
@@ -294,6 +298,7 @@ class AccountsController:
         parent_window : QtWidgets.QMainWindow
             The window displaying this controller
         """
+        logger.debug("AccountsController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
         self.accounts = self.database.accounts_get()
@@ -309,6 +314,7 @@ class AccountsController:
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("AccountsController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -323,6 +329,7 @@ class AccountsController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("AccountsController.get_display_widget")
         self.display_widget.layout = QtWidgets.QVBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
@@ -345,6 +352,7 @@ class AccountsController:
 
     def reload_data(self):
         """Reloads the list of accounts/shares (& triggers tree refresh)"""
+        logger.debug("AccountsController.reload_data")
         self.accounts = self.database.accounts_get(
             with_hidden=self.display_hidden_accounts,
             with_disabled=self.display_disabled_accounts,
@@ -354,12 +362,14 @@ class AccountsController:
 
     def on_click_checkbox_hidden(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""
+        logger.info("AccountsController.on_click_checkbox_hidden")
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_checkbox_disabled(self):
         """User clicks on 'display disabled accounts' checkbox => reload tree"""
+        logger.info("AccountsController.on_click_checkbox_disabled")
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()

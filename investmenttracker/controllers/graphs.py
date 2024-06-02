@@ -9,6 +9,7 @@ GraphsController
     Controller for graph display - handles user interactions & children widgets
 """
 
+import logging
 import gettext
 import datetime
 import locale
@@ -24,6 +25,7 @@ import controllers.widgets.graphsarea
 from models.base import NoPriceException, format_number, ValidationException
 
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class PerformanceTable(QtWidgets.QTableWidget):
@@ -77,6 +79,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
         parent_controller : GraphsController
             The controller in which this class is displayed
         """
+        logger.debug("PerformanceTable.__init__")
         super().__init__()
         self.parent_controller = parent_controller
         self.database = parent_controller.database
@@ -91,6 +94,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
         end_date : datetime.date
             The last date to display in the table
         """
+        logger.info(f"PerformanceTable.set_dates {start_date} {end_date}")
         self.start_date = start_date
         self.end_date = end_date
         self.reload_data()
@@ -103,6 +107,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
         selected_shares : list of int
             The list of selected share IDs
         """
+        logger.info(f"PerformanceTable.set_shares {selected_shares}")
         self.selected_shares = selected_shares
         self.reload_data()
 
@@ -114,11 +119,13 @@ class PerformanceTable(QtWidgets.QTableWidget):
         selected_accounts : list of int
             The list of selected account IDs
         """
+        logger.info(f"PerformanceTable.set_accounts {selected_accounts}")
         self.selected_accounts = selected_accounts
         self.reload_data()
 
     def reload_data(self):
         """Recalculates the table contents"""
+        logger.debug("PerformanceTable.reload_data")
         table_rows = []
 
         # Determine dates & set headers
@@ -346,6 +353,7 @@ class GraphsController:
         parent_window : QtWidgets.QMainWindow
             The window displaying this controller
         """
+        logger.debug("GraphsController.__init__")
         self.parent_window = parent_window
         self.database = parent_window.database
 
@@ -393,6 +401,7 @@ class GraphsController:
 
     def get_toolbar_button(self):
         """Returns a QtWidgets.QAction for display in the main window toolbar"""
+        logger.debug("GraphsController.get_toolbar_button")
         button = QtWidgets.QAction(
             QtGui.QIcon(
                 os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -407,6 +416,7 @@ class GraphsController:
 
     def get_display_widget(self):
         """Returns the main QtWidgets.QWidget for this controller"""
+        logger.debug("GraphsController.get_display_widget")
         self.display_widget.layout = QtWidgets.QHBoxLayout()
         self.display_widget.setLayout(self.display_widget.layout)
 
@@ -423,6 +433,7 @@ class GraphsController:
 
     def render_left_column(self):
         """Renders the left column of the display"""
+        logger.debug("GraphsController.render_left_column")
         self.left_column.layout = QtWidgets.QVBoxLayout()
         self.left_column.setLayout(self.left_column.layout)
 
@@ -445,6 +456,7 @@ class GraphsController:
 
     def render_right_column(self):
         """Renders the right column of the display"""
+        logger.debug("GraphsController.render_right_column")
         self.right_column.layout = QtWidgets.QGridLayout()
         self.right_column.setLayout(self.right_column.layout)
 
@@ -504,6 +516,7 @@ class GraphsController:
 
     def reload_data(self):
         """Reloads the list of accounts & shares"""
+        logger.debug("GraphsController.reload_data")
         self.accounts = self.database.accounts_get(
             with_hidden=self.display_hidden_accounts,
             with_disabled=self.display_disabled_accounts,
@@ -530,24 +543,28 @@ class GraphsController:
 
     def on_click_hidden_accounts(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""
+        logger.debug("GraphsController.on_click_hidden_accounts")
         self.display_hidden_accounts = self.checkbox_hidden_accounts.isChecked()
         self.reload_data()
         self.checkbox_hidden_accounts.clearFocus()
 
     def on_click_disabled_accounts(self):
         """User clicks on 'display disabled accounts' checkbox => reload tree"""
+        logger.debug("GraphsController.on_click_disabled_accounts")
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()
 
     def on_click_hidden_shares(self):
         """User clicks on 'display hidden accounts' checkbox => reload tree"""
+        logger.debug("GraphsController.on_click_hidden_shares")
         self.display_hidden_shares = self.checkbox_hidden_shares.isChecked()
         self.reload_data()
         self.checkbox_hidden_shares.clearFocus()
 
     def on_change_dates(self):
         """User changes one of the dates => calculate & render graph with new dates"""
+        logger.debug("GraphsController.on_change_dates")
         self.reset_errors()
         start_date = datetime.date.fromisoformat(
             self.start_date.date().toString(Qt.ISODate)
@@ -566,6 +583,7 @@ class GraphsController:
         selected_accounts : list of int
             The list of selected account IDs
         """
+        logger.info(f"GraphsController.on_change_account_selection {selected_accounts}")
         self.reset_errors()
         self.graph.set_accounts(selected_accounts)
         self.performance_table.set_accounts(selected_accounts)
@@ -578,12 +596,14 @@ class GraphsController:
         selected_shares : list of int
             The list of selected share IDs
         """
+        logger.info(f"GraphsController.on_change_share_selection {selected_shares}")
         self.reset_errors()
         self.graph.set_shares(selected_shares)
         self.performance_table.set_shares(selected_shares)
 
     def on_baseline_change(self):
         """User clicks on 'Display evolution' checkbox => reload graph"""
+        logger.debug("GraphsController.on_baseline_change")
         baseline_date = datetime.date.fromisoformat(
             self.baseline_date.date().toString(Qt.ISODate)
         )
@@ -599,6 +619,7 @@ class GraphsController:
 
     def on_display_split_change(self):
         """User clicks on 'Display composition' checkbox => reload graph"""
+        logger.debug("GraphsController.on_display_split_change")
         self.baseline_enabled.setEnabled(not self.split_enabled.isChecked())
         self.baseline_date.setEnabled(not self.split_enabled.isChecked())
         try:
@@ -612,10 +633,12 @@ class GraphsController:
 
     def on_markers_change(self):
         """User clicks on 'Display markers' checkbox => display/hide them"""
+        logger.debug("GraphsController.on_markers_change")
         self.graph.set_markers_visible(self.markers_visible.isChecked())
 
     def reset_errors(self):
         """Removes all errors being displayed"""
+        logger.debug("GraphsController.reset_errors")
         self.errors = []
         self.error_messages.setText("")
 
@@ -627,6 +650,7 @@ class GraphsController:
         exception : Exception
             The exception raised during the calculation
         """
+        logger.debug(f"GraphsController.add_error {exception}")
         self.errors.append(exception)
         messages = []
         for error in self.errors:

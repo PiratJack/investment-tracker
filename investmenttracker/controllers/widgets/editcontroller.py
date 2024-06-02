@@ -6,6 +6,7 @@ AccountController
     Controller for editing items - should be used only as base class (not directly)
 """
 
+import logging
 import gettext
 import datetime
 
@@ -15,8 +16,8 @@ from PyQt5.QtCore import Qt
 from models.base import ValidationException, ValidationWarningException
 from controllers.widgets.sharecombobox import ShareComboBox
 
-
 _ = gettext.gettext
+logger = logging.getLogger(__name__)
 
 
 class EditController:
@@ -104,6 +105,7 @@ class EditController:
         parent_controller : QtWidgets.QMainWindow
             The main window displaying this controller
         """
+        logger.debug("EditController.__init__")
         self.parent_controller = parent_controller
         self.database = parent_controller.database
         self.item = None
@@ -117,6 +119,7 @@ class EditController:
 
     def show_window(self):
         """Displays the dialog based on self.fields"""
+        logger.debug("EditController.show_window")
         # Discard previous windows
         if self.window:
             self.window.close()
@@ -253,6 +256,7 @@ class EditController:
 
         Triggers self.on_validation_end() for additional validations
         """
+        logger.debug("EditController.validate_data")
 
         # Clear previous errors
         has_error = False
@@ -315,6 +319,9 @@ class EditController:
         is_warning : bool
             Whether the error is a warning or not (displays differently)
         """
+        logger.info(
+            f"EditController.add_error_field {message} for {error_field} - Warning? {is_warning}"
+        )
         error_widget = QtWidgets.QLabel(message)
         if is_warning:
             error_widget.setProperty("class", "validation_warning")
@@ -327,6 +334,7 @@ class EditController:
 
     def clear_errors(self):
         """Removes all errors being displayed"""
+        logger.debug("EditController.clear_errors")
         for error_widget in self.error_widgets:
             self.form_layout.removeRow(error_widget)
         self.error_widgets = []
@@ -341,6 +349,7 @@ class EditController:
         ----------
         field_id : str
             The ID of the field being validated/Set"""
+        logger.debug(f"EditController.set_value {field_id}")
         field_widget = self.fields[field_id]["widget"]
         if self.fields[field_id]["type"] == "text":
             value = field_widget.text()
@@ -375,6 +384,7 @@ class EditController:
 
         Calls self.after_item_save() after saving.
         If that raises exceptions, they will be displayed (data will not be saved)"""
+        logger.debug("EditController.save")
         has_error = self.validate_data()
         has_new_warnings = False
 
@@ -412,4 +422,5 @@ class EditController:
 
     def close(self):
         """Closes the dialog"""
+        logger.debug("EditController.close")
         self.window.close()
