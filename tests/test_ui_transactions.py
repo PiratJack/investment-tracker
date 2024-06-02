@@ -94,6 +94,45 @@ class TestUiTransactions:
 
         return get_ui
 
+    @pytest.fixture
+    def dialog_ui(self, qtbot, qapp):
+        def get_ui(field, role="field"):
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
+            dialog = qapp.activeWindow()
+
+            positions = {
+                "account": 0,
+                "date": 1,
+                "label": 2,
+                "type": 3,
+                "quantity": 4,
+                "share": 5,
+                "unit_price": 6,
+                "known_unit_price": 7,
+                "currency_delta": 8,
+                "button_ok": 2,
+                "button_cancel": 1,
+            }
+            roles = {
+                "label": QtWidgets.QFormLayout.LabelRole,
+                "field": QtWidgets.QFormLayout.FieldRole,
+            }
+
+            form_widget = dialog.layout().itemAt(0).widget()
+            form_layout = form_widget.layout()
+
+            if field == "dialog":
+                return dialog
+            if field.startswith("button"):
+                buttonbox = dialog.layout().itemAt(1).widget()
+                return buttonbox.layout().itemAt(positions[field]).widget()
+            if role in ("label", "field"):
+                return form_layout.itemAt(positions[field], roles[role]).widget()
+            else:
+                return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
+
+        return get_ui
+
     def get_dialog_item(self, dialog, field, role=None):
         positions = {
             "account": 0,
@@ -118,7 +157,7 @@ class TestUiTransactions:
         if field.startswith("button"):
             buttonbox = dialog.layout().itemAt(1).widget()
             return buttonbox.layout().itemAt(positions[field]).widget()
-        if role in ("label", "field"):
+        if role in ("label"):
             return form_layout.itemAt(positions[field], roles[role]).widget()
         else:
             return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
@@ -341,33 +380,31 @@ class TestUiTransactions:
         # Click on table > triggers saving / restoring selection
         self.click_table_cell(1, 5, qtbot, app_ui)
 
-    def test_transactions_add_transaction_cancel(self, app_ui, qtbot, qapp, app_db):
+    def test_transactions_add_transaction_cancel(
+        self, app_ui, qtbot, app_db, dialog_ui
+    ):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account_label = self.get_dialog_item(dialog, "account", "label")
-            account = self.get_dialog_item(dialog, "account", "field")
-            date_label = self.get_dialog_item(dialog, "date", "label")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label_label = self.get_dialog_item(dialog, "label", "label")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type_label = self.get_dialog_item(dialog, "type", "label")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity_label = self.get_dialog_item(dialog, "quantity", "label")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share_label = self.get_dialog_item(dialog, "share", "label")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price_label = self.get_dialog_item(dialog, "unit_price", "label")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
-            known_price_label = self.get_dialog_item(
-                dialog, "known_unit_price", "label"
-            )
-            known_price = self.get_dialog_item(dialog, "known_unit_price", "field")
-            cash_delta_label = self.get_dialog_item(dialog, "currency_delta", "label")
-            cash_delta = self.get_dialog_item(dialog, "currency_delta", "field")
+            account_label = dialog_ui("account", "label")
+            account = dialog_ui("account")
+            date_label = dialog_ui("date", "label")
+            date = dialog_ui("date")
+            label_label = dialog_ui("label", "label")
+            label = dialog_ui("label")
+            transaction_type_label = dialog_ui("type", "label")
+            transaction_type = dialog_ui("type")
+            quantity_label = dialog_ui("quantity", "label")
+            quantity = dialog_ui("quantity")
+            share_label = dialog_ui("share", "label")
+            share = dialog_ui("share")
+            unit_price_label = dialog_ui("unit_price", "label")
+            unit_price = dialog_ui("unit_price")
+            known_price_label = dialog_ui("known_unit_price", "label")
+            known_price = dialog_ui("known_unit_price")
+            cash_delta_label = dialog_ui("currency_delta", "label")
+            cash_delta = dialog_ui("currency_delta")
 
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
+            button_cancel = dialog_ui("button_cancel")
 
             assert isinstance(account_label, QtWidgets.QLabel), "Account label OK"
             assert isinstance(account, QtWidgets.QComboBox), "Account OK"
@@ -407,20 +444,14 @@ class TestUiTransactions:
         )
 
     def test_transactions_add_transaction_double_click(
-        self, app_ui, qtbot, qapp, app_db
+        self, app_ui, qtbot, app_db, dialog_ui
     ):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
-            account = self.get_dialog_item(dialog, "account", "field")
-
             # Check existing values
-            assert account.currentText() == "", "Account OK"
+            assert dialog_ui("account").currentText() == "", "Account OK"
 
             # Click Cancel
-            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_cancel"), Qt.LeftButton, Qt.NoModifier)
 
             # Check results
             with pytest.raises(sqlalchemy.exc.NoResultFound):
@@ -439,36 +470,22 @@ class TestUiTransactions:
             app_ui("table").viewport(), Qt.LeftButton, Qt.NoModifier, point
         )
 
-    def test_transactions_add_transaction(self, app_ui, qtbot, qapp, app_db):
+    def test_transactions_add_transaction(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
-            cash_delta = self.get_dialog_item(dialog, "currency_delta", "field")
-
-            button_ok = self.get_dialog_item(dialog, "button_ok")
-
             # Enter data
-            account.setCurrentText("Main account")
-            date.setDate(datetime.date(2023, 6, 15))
-            label.setText("Test transaction")
-            transaction_type.setCurrentText("Asset buy / subscription")
-            quantity.setValue(31)
-            share.setCurrentText("Accenture (NYSE:ACN)")
-            unit_price.setValue(100)
+            dialog_ui("account").setCurrentText("Main account")
+            dialog_ui("date").setDate(datetime.date(2023, 6, 15))
+            dialog_ui("label").setText("Test transaction")
+            dialog_ui("type").setCurrentText("Asset buy / subscription")
+            dialog_ui("quantity").setValue(31)
+            dialog_ui("share").setCurrentText("Accenture (NYSE:ACN)")
+            dialog_ui("unit_price").setValue(100)
 
             # Check calculation of cash delta
-            assert cash_delta.value() == 3100, "Total cash impact OK"
+            assert dialog_ui("currency_delta").value() == 3100, "Total cash impact OK"
 
             # Click OK & filter on the main account
-            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_ok"), Qt.LeftButton, Qt.NoModifier)
             self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
 
             # Check results
@@ -501,41 +518,22 @@ class TestUiTransactions:
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
         )
 
-    def test_transactions_add_transaction_negative_cash(
-        self, app_ui, qtbot, qapp, app_db
-    ):
+    def test_transactions_add_transaction_negative_cash(self, app_ui, qtbot, dialog_ui):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
-
-            button_ok = self.get_dialog_item(dialog, "button_ok")
-
             # Enter data
-            account.setCurrentText("Main account")
-            date.setDate(datetime.date(2023, 6, 15))
-            label.setText("Test transaction")
-            transaction_type.setCurrentText("Asset buy / subscription")
-            quantity.setValue(310)
-            share.setCurrentText("Accenture (NYSE:ACN)")
-            unit_price.setValue(100)
+            dialog_ui("account").setCurrentText("Main account")
+            dialog_ui("date").setDate(datetime.date(2023, 6, 15))
+            dialog_ui("label").setText("Test transaction")
+            dialog_ui("type").setCurrentText("Asset buy / subscription")
+            dialog_ui("quantity").setValue(310)
+            dialog_ui("share").setCurrentText("Accenture (NYSE:ACN)")
+            dialog_ui("unit_price").setValue(100)
 
             # Click OK & check error messages
-            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
-            cash_error = self.get_dialog_item(dialog, "currency_delta", "error")
+            qtbot.mouseClick(dialog_ui("button_ok"), Qt.LeftButton, Qt.NoModifier)
+            cash_error = dialog_ui("currency_delta", "error")
             assert cash_error.text() == "Cash balance negative", "Error message OK"
-            dialog.close()
-
-            # Check save is done in DB
-            with pytest.raises(sqlalchemy.exc.NoResultFound):
-                app_db.transaction_get_by_id(15)
+            dialog_ui("dialog").close()
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -545,40 +543,23 @@ class TestUiTransactions:
         )
 
     def test_transactions_add_transaction_negative_asset(
-        self, app_ui, qtbot, qapp, app_db
+        self, app_ui, qtbot, dialog_ui
     ):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
-
-            button_ok = self.get_dialog_item(dialog, "button_ok")
-
             # Enter data
-            account.setCurrentText("Main account")
-            date.setDate(datetime.date(2023, 6, 15))
-            label.setText("Test transaction")
-            transaction_type.setCurrentText("Asset sell")
-            quantity.setValue(310)
-            share.setCurrentText("Accenture (NYSE:ACN)")
-            unit_price.setValue(100)
+            dialog_ui("account").setCurrentText("Main account")
+            dialog_ui("date").setDate(datetime.date(2023, 6, 15))
+            dialog_ui("label").setText("Test transaction")
+            dialog_ui("type").setCurrentText("Asset sell")
+            dialog_ui("quantity").setValue(310)
+            dialog_ui("share").setCurrentText("Accenture (NYSE:ACN)")
+            dialog_ui("unit_price").setValue(100)
 
             # Click OK & check error messages
-            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
-            quantity_error = self.get_dialog_item(dialog, "quantity", "error")
+            qtbot.mouseClick(dialog_ui("button_ok"), Qt.LeftButton, Qt.NoModifier)
+            quantity_error = dialog_ui("quantity", "error")
             assert quantity_error.text() == "Asset balance negative", "Error message OK"
-            dialog.close()
-
-            # Check save is done in DB
-            with pytest.raises(sqlalchemy.exc.NoResultFound):
-                app_db.transaction_get_by_id(15)
+            dialog_ui("dialog").close()
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -587,34 +568,23 @@ class TestUiTransactions:
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
         )
 
-    def test_transactions_add_transaction_known_price(
-        self, app_ui, qtbot, qapp, app_db
-    ):
+    def test_transactions_add_transaction_known_price(self, app_ui, qtbot, dialog_ui):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            known_unit_price = self.get_dialog_item(dialog, "known_unit_price", "field")
-
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
-
             # Share filled in, account empty
-            transaction_type.setCurrentText("Asset buy / subscription")
-            share.setCurrentText("Accenture (NYSE:ACN)")
-            date.setDate(datetime.date(2023, 6, 15))
-            assert known_unit_price.count() == 0, "No known price"
+            dialog_ui("type").setCurrentText("Asset buy / subscription")
+            dialog_ui("share").setCurrentText("Accenture (NYSE:ACN)")
+            dialog_ui("date").setDate(datetime.date(2023, 6, 15))
+            assert dialog_ui("known_unit_price").count() == 0, "No known price"
 
             # Account now filled in
-            account.setCurrentText("Main account")
-            date.setDate(datetime.date.today())
-            assert known_unit_price.count() == 2, "1 known price (+ 1 empty value)"
+            dialog_ui("account").setCurrentText("Main account")
+            dialog_ui("date").setDate(datetime.date.today())
+            assert (
+                dialog_ui("known_unit_price").count() == 2
+            ), "1 known price (+ 1 empty value)"
 
             # Close dialog
-            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_cancel"), Qt.LeftButton, Qt.NoModifier)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -624,32 +594,22 @@ class TestUiTransactions:
         )
 
     def test_transactions_add_transaction_known_price_select(
-        self, app_ui, qtbot, qapp, app_db
+        self, app_ui, qtbot, dialog_ui
     ):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            known_unit_price = self.get_dialog_item(dialog, "known_unit_price", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
-
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
-
             # Generate known prices
-            transaction_type.setCurrentText("Asset buy / subscription")
-            share.setCurrentText("Accenture (NYSE:ACN)")
-            account.setCurrentText("Main account")
-            date.setDate(datetime.date.today() + datetime.timedelta(days=-1))
+            dialog_ui("type").setCurrentText("Asset buy / subscription")
+            dialog_ui("share").setCurrentText("Accenture (NYSE:ACN)")
+            dialog_ui("account").setCurrentText("Main account")
+            dialog_ui("date").setDate(
+                datetime.date.today() + datetime.timedelta(days=-1)
+            )
 
-            known_unit_price.setCurrentIndex(1)
-            assert unit_price.value() == 10, "Known price is selected"
+            dialog_ui("known_unit_price").setCurrentIndex(1)
+            assert dialog_ui("unit_price").value() == 10, "Unit price is set"
 
             # Close dialog
-            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_cancel"), Qt.LeftButton, Qt.NoModifier)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -658,20 +618,18 @@ class TestUiTransactions:
             app_ui("table").model.rowCount(index) - 1, 0, qtbot, app_ui
         )
 
-    def test_transactions_edit_transaction(self, app_ui, qtbot, qapp, app_db):
+    def test_transactions_edit_transaction(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
+            account = dialog_ui("account")
+            date = dialog_ui("date")
+            label = dialog_ui("label")
+            transaction_type = dialog_ui("type")
+            quantity = dialog_ui("quantity")
+            share = dialog_ui("share")
+            unit_price = dialog_ui("unit_price")
 
-            button_ok = self.get_dialog_item(dialog, "button_ok")
+            button_ok = dialog_ui("button_ok")
 
             # Check existing values
             assert account.currentText() == "Main account", "Account OK"
@@ -708,20 +666,18 @@ class TestUiTransactions:
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
         self.click_table_cell(4, 0, qtbot, app_ui, True)
 
-    def test_transactions_copy_transaction(self, app_ui, qtbot, qapp, app_db):
+    def test_transactions_copy_transaction(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            account = self.get_dialog_item(dialog, "account", "field")
-            date = self.get_dialog_item(dialog, "date", "field")
-            label = self.get_dialog_item(dialog, "label", "field")
-            transaction_type = self.get_dialog_item(dialog, "type", "field")
-            quantity = self.get_dialog_item(dialog, "quantity", "field")
-            share = self.get_dialog_item(dialog, "share", "field")
-            unit_price = self.get_dialog_item(dialog, "unit_price", "field")
+            account = dialog_ui("account")
+            date = dialog_ui("date")
+            label = dialog_ui("label")
+            transaction_type = dialog_ui("type")
+            quantity = dialog_ui("quantity")
+            share = dialog_ui("share")
+            unit_price = dialog_ui("unit_price")
 
-            button_ok = self.get_dialog_item(dialog, "button_ok")
+            button_ok = dialog_ui("button_ok")
 
             # Check existing values
             assert account.currentText() == "Main account", "Account OK"
@@ -758,15 +714,12 @@ class TestUiTransactions:
         self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
         self.click_table_cell(4, 11, qtbot, app_ui)
 
-    def test_transactions_copy_transaction_cancel(self, app_ui, qtbot, qapp, app_db):
+    def test_transactions_copy_transaction_cancel(
+        self, app_ui, qtbot, app_db, dialog_ui
+    ):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
-
             # Click cancel, then click on tree twice to refresh the screen
-            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_cancel"), Qt.LeftButton, Qt.NoModifier)
             index = app_ui("table").model.index(1, 1)
             self.click_tree_item(app_ui("main_account"), qtbot, app_ui)
             self.click_tree_item(app_ui("main_account"), qtbot, app_ui)

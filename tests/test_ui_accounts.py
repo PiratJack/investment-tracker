@@ -96,6 +96,41 @@ class TestUiAccounts:
 
         return get_ui
 
+    @pytest.fixture
+    def dialog_ui(self, qtbot, qapp):
+        def get_ui(field, role="field"):
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
+            dialog = qapp.activeWindow()
+
+            positions = {
+                "name": 0,
+                "code": 1,
+                "base_currency": 2,
+                "enabled": 3,
+                "hidden": 4,
+                "button_ok": 2,
+                "button_cancel": 1,
+            }
+            roles = {
+                "label": QtWidgets.QFormLayout.LabelRole,
+                "field": QtWidgets.QFormLayout.FieldRole,
+            }
+
+            form_widget = dialog.layout().itemAt(0).widget()
+            form_layout = form_widget.layout()
+
+            if field == "dialog":
+                return dialog
+            if field.startswith("button"):
+                buttonbox = dialog.layout().itemAt(1).widget()
+                return buttonbox.layout().itemAt(positions[field]).widget()
+            if role in ("label", "field"):
+                return form_layout.itemAt(positions[field], roles[role]).widget()
+            else:
+                return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
+
+        return get_ui
+
     def click_tree_item(self, item, qtbot, app_ui):
         if item.parent():
             item.parent().setExpanded(True)
@@ -106,31 +141,6 @@ class TestUiAccounts:
         qtbot.mouseDClick(
             app_ui("account_tree").viewport(), Qt.LeftButton, Qt.NoModifier, topleft
         )
-
-    def get_dialog_item(self, dialog, field, role=None):
-        positions = {
-            "name": 0,
-            "code": 1,
-            "base_currency": 2,
-            "enabled": 3,
-            "hidden": 4,
-            "button_ok": 2,
-            "button_cancel": 1,
-        }
-        form_widget = dialog.layout().itemAt(0).widget()
-        form_layout = form_widget.layout()
-        roles = {
-            "label": QtWidgets.QFormLayout.LabelRole,
-            "field": QtWidgets.QFormLayout.FieldRole,
-        }
-
-        if field.startswith("button"):
-            buttonbox = dialog.layout().itemAt(1).widget()
-            return buttonbox.layout().itemAt(positions[field]).widget()
-        if role in ("label", "field"):
-            return form_layout.itemAt(positions[field], roles[role]).widget()
-        else:
-            return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
 
     def test_accounts_display(self, app_ui):
         # Check overall structure
@@ -267,23 +277,21 @@ class TestUiAccounts:
         assert app_ui("disabled_account_6") == "10,00000", "Account invested OK"
         assert app_ui("disabled_account").childCount() == 2, "Account has 2 children"
 
-    def test_accounts_add_account_cancel(self, app_ui, qtbot, qapp, app_db):
+    def test_accounts_add_account_cancel(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name_label = self.get_dialog_item(dialog, "name", "label")
-            name = self.get_dialog_item(dialog, "name", "field")
-            code_label = self.get_dialog_item(dialog, "code", "label")
-            code = self.get_dialog_item(dialog, "code", "field")
-            base_currency_label = self.get_dialog_item(dialog, "base_currency", "label")
-            base_currency = self.get_dialog_item(dialog, "base_currency", "field")
-            enabled_label = self.get_dialog_item(dialog, "enabled", "label")
-            enabled = self.get_dialog_item(dialog, "enabled", "field")
-            hidden_label = self.get_dialog_item(dialog, "hidden", "label")
-            hidden = self.get_dialog_item(dialog, "hidden", "field")
+            name_label = dialog_ui("name", "label")
+            name = dialog_ui("name")
+            code_label = dialog_ui("code", "label")
+            code = dialog_ui("code")
+            base_currency_label = dialog_ui("base_currency", "label")
+            base_currency = dialog_ui("base_currency")
+            enabled_label = dialog_ui("enabled", "label")
+            enabled = dialog_ui("enabled")
+            hidden_label = dialog_ui("hidden", "label")
+            hidden = dialog_ui("hidden")
 
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
+            button_cancel = dialog_ui("button_cancel")
 
             assert isinstance(name_label, QtWidgets.QLabel), "Account label OK"
             assert isinstance(name, QtWidgets.QLineEdit), "Account OK"
@@ -308,31 +316,22 @@ class TestUiAccounts:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_account"), qtbot, app_ui)
 
-    def test_accounts_edit_account_cancel(self, app_ui, qtbot, qapp, app_db):
+    def test_accounts_edit_account_cancel(self, app_ui, qtbot, dialog_ui):
         def handle_dialog():
-            # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name = self.get_dialog_item(dialog, "name", "field")
-            code = self.get_dialog_item(dialog, "code", "field")
-            enabled = self.get_dialog_item(dialog, "enabled", "field")
-            hidden = self.get_dialog_item(dialog, "hidden", "field")
-
-            button_cancel = self.get_dialog_item(dialog, "button_cancel")
-
-            assert name.text() == "Account with lots of history", "Account OK"
-            assert code.text() == "HIST", "Code OK"
-            assert enabled.isChecked(), "Enabled OK"
-            assert hidden.isChecked() == False, "Hidden OK"
+            # Check display
+            assert dialog_ui("name").text() == "Account with lots of history", "Name OK"
+            assert dialog_ui("code").text() == "HIST", "Code OK"
+            assert dialog_ui("enabled").isChecked(), "Enabled OK"
+            assert dialog_ui("hidden").isChecked() == False, "Hidden OK"
 
             # Click Cancel
-            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(dialog_ui("button_cancel"), Qt.LeftButton, Qt.NoModifier)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("account_history"), qtbot, app_ui)
 
-    def test_accounts_double_click_share(self, app_ui, qtbot, qapp, app_db):
+    def test_accounts_double_click_share(self, app_ui, qtbot, qapp):
         def handle_dialog():
             assert qapp.activeWindow() is None
 

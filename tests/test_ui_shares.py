@@ -86,6 +86,33 @@ class TestUiShares:
 
         return get_ui
 
+    @pytest.fixture
+    def dialog_ui(self, qtbot, qapp):
+        def get_ui(item_type, field, role="field"):
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
+            dialog = qapp.activeWindow()
+
+            positions = self.dialog_items[item_type]
+            roles = {
+                "label": QtWidgets.QFormLayout.LabelRole,
+                "field": QtWidgets.QFormLayout.FieldRole,
+            }
+
+            form_widget = dialog.layout().itemAt(0).widget()
+            form_layout = form_widget.layout()
+
+            if field == "dialog":
+                return dialog
+            if field.startswith("button"):
+                buttonbox = dialog.layout().itemAt(1).widget()
+                return buttonbox.layout().itemAt(positions[field]).widget()
+            if role in ("label", "field"):
+                return form_layout.itemAt(positions[field], roles[role]).widget()
+            else:  # Error fields
+                return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
+
+        return get_ui
+
     def click_tree_item(self, item, qtbot, app_ui):
         if item.parent():
             item.parent().setExpanded(True)
@@ -98,23 +125,6 @@ class TestUiShares:
         qtbot.mouseDClick(
             app_ui("share_tree").viewport(), Qt.LeftButton, Qt.NoModifier, topleft
         )
-
-    def get_dialog_item(self, dialog, item_type, field, role=None):
-        form_widget = dialog.layout().itemAt(0).widget()
-        form_layout = form_widget.layout()
-        positions = self.dialog_items[item_type]
-        roles = {
-            "label": QtWidgets.QFormLayout.LabelRole,
-            "field": QtWidgets.QFormLayout.FieldRole,
-        }
-
-        if field.startswith("button"):
-            buttonbox = dialog.layout().itemAt(1).widget()
-            return buttonbox.layout().itemAt(positions[field]).widget()
-        if role in ("label", "field"):
-            return form_layout.itemAt(positions[field], roles[role]).widget()
-        else:
-            return form_layout.itemAt(positions[field] + 1, roles["field"]).widget()
 
     def test_shares_display(self, app_ui):
         # Check overall structure
@@ -221,28 +231,24 @@ class TestUiShares:
         assert app_ui("share_HSBC").checkState(8) == Qt.Checked, "HSBC hidden OK"
         assert app_ui("share_HSBC").childCount() == 0, "HSBC has 0 child"
 
-    def test_shares_add_sharegroup_cancel(self, app_ui, qtbot, qapp):
+    def test_shares_add_sharegroup_cancel(self, app_ui, qtbot, dialog_ui):
         def handle_dialog():
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            assert dialog is not None, "Dialog gets displayed"
-
             # Check overall structure
             assert isinstance(
-                dialog.layout(), QtWidgets.QVBoxLayout
+                dialog_ui("sharegroup", "dialog").layout(), QtWidgets.QVBoxLayout
             ), "Dialog layout OK"
-            form_widget = dialog.layout().itemAt(0).widget()
+            form_widget = dialog_ui("sharegroup", "dialog").layout().itemAt(0).widget()
             form_layout = form_widget.layout()
             assert isinstance(form_layout, QtWidgets.QFormLayout), "Form layout OK"
             assert form_layout.rowCount() == 1, "Form item count OK"
-            name_label = self.get_dialog_item(dialog, "sharegroup", "name", "label")
-            name_field = self.get_dialog_item(dialog, "sharegroup", "name", "field")
+            name_label = dialog_ui("sharegroup", "name", "label")
+            name_field = dialog_ui("sharegroup", "name")
             assert isinstance(name_label, QtWidgets.QLabel), "Name label OK"
             assert isinstance(name_field, QtWidgets.QLineEdit), "Name field OK"
-            buttonbox = dialog.layout().itemAt(1).widget()
+            buttonbox = dialog_ui("sharegroup", "dialog").layout().itemAt(1).widget()
             assert isinstance(buttonbox, QtWidgets.QDialogButtonBox), "Buttonbox OK"
 
-            button = self.get_dialog_item(dialog, "sharegroup", "button_cancel")
+            button = dialog_ui("sharegroup", "button_cancel")
 
             # Enter the name & click OK
             qtbot.keyClicks(name_field, "New group")
@@ -254,17 +260,13 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
-    def test_shares_add_sharegroup_empty_name(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_sharegroup_empty_name(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
-            # Gather variables
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
-
-            # Enter the name & click OK
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
-            error_field = self.get_dialog_item(dialog, "sharegroup", "name", "error")
-            dialog.close()
+            # Click OK
+            button_ok = dialog_ui("sharegroup", "button_ok")
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+            error_field = dialog_ui("sharegroup", "name", "error")
+            dialog_ui("sharegroup", "dialog").close()
 
             # Check results
             assert error_field.text() == "Missing share group name", "Error display OK"
@@ -276,17 +278,12 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
-    def test_shares_add_sharegroup_confirm(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_sharegroup_confirm(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
-            # Gather variables
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name_field = self.get_dialog_item(dialog, "sharegroup", "name", "field")
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
-
             # Enter the name & click OK
-            qtbot.keyClicks(name_field, "New group")
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
+            qtbot.keyClicks(dialog_ui("sharegroup", "name"), "New group")
+            button_ok = dialog_ui("sharegroup", "button_ok")
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
 
             # Check results
             assert app_ui("share_tree").topLevelItemCount() == 7, "Element count OK"
@@ -296,17 +293,14 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_group"), qtbot, app_ui)
 
-    def test_shares_edit_sharegroup(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_edit_sharegroup(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Gather variables
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name_field = self.get_dialog_item(dialog, "sharegroup", "name", "field")
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            button_ok = dialog_ui("sharegroup", "button_ok")
 
             # Enter the name & click OK
-            qtbot.keyClicks(name_field, " markets")
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
+            qtbot.keyClicks(dialog_ui("sharegroup", "name"), " markets")
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
 
             # Check results
             assert app_ui("share_tree").topLevelItemCount() == 6, "Element count OK"
@@ -316,59 +310,44 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("group_amex"), qtbot, app_ui)
 
-    def test_shares_add_share_cancel(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_share_cancel(self, app_ui, qtbot, dialog_ui):
         def handle_dialog():
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-
             # Check overall structure
             assert isinstance(
-                dialog.layout(), QtWidgets.QVBoxLayout
+                dialog_ui("sharegroup", "dialog").layout(), QtWidgets.QVBoxLayout
             ), "Dialog layout OK"
-            form_widget = dialog.layout().itemAt(0).widget()
+            form_widget = dialog_ui("sharegroup", "dialog").layout().itemAt(0).widget()
             form_layout = form_widget.layout()
             assert isinstance(form_layout, QtWidgets.QFormLayout), "Form layout OK"
             assert form_layout.rowCount() == 9, "Form item count OK"
 
-            name_label = self.get_dialog_item(dialog, "share", "name", "label")
-            name_field = self.get_dialog_item(dialog, "share", "name", "field")
+            name_label = dialog_ui("share", "name", "label")
+            name_field = dialog_ui("share", "name")
             assert isinstance(name_label, QtWidgets.QLabel), "Name label OK"
             assert isinstance(name_field, QtWidgets.QLineEdit), "Name field OK"
 
-            main_code_label = self.get_dialog_item(
-                dialog, "share", "main_code", "label"
-            )
-            main_code_field = self.get_dialog_item(
-                dialog, "share", "main_code", "field"
-            )
+            main_code_label = dialog_ui("share", "main_code", "label")
+            main_code_field = dialog_ui("share", "main_code")
             assert isinstance(main_code_label, QtWidgets.QLabel), "Code label OK"
             assert isinstance(main_code_field, QtWidgets.QLineEdit), "Code field OK"
 
-            currency_label = self.get_dialog_item(
-                dialog, "share", "base_currency_id", "label"
-            )
-            currency_field = self.get_dialog_item(
-                dialog, "share", "base_currency_id", "field"
-            )
+            currency_label = dialog_ui("share", "base_currency_id", "label")
+            currency_field = dialog_ui("share", "base_currency_id")
             assert isinstance(currency_label, QtWidgets.QLabel), "Currency label OK"
             assert isinstance(currency_field, QtWidgets.QComboBox), "Currency field OK"
 
-            hidden_label = self.get_dialog_item(dialog, "share", "hidden", "label")
-            hidden_field = self.get_dialog_item(dialog, "share", "hidden", "field")
+            hidden_label = dialog_ui("share", "hidden", "label")
+            hidden_field = dialog_ui("share", "hidden")
             assert isinstance(hidden_label, QtWidgets.QLabel), "Hidden label OK"
             assert isinstance(hidden_field, QtWidgets.QCheckBox), "Hidden field OK"
 
-            group_id_label = self.get_dialog_item(dialog, "share", "group_id", "label")
-            group_id_field = self.get_dialog_item(dialog, "share", "group_id", "field")
+            group_id_label = dialog_ui("share", "group_id", "label")
+            group_id_field = dialog_ui("share", "group_id")
             assert isinstance(group_id_label, QtWidgets.QLabel), "Group ID label OK"
             assert isinstance(group_id_field, QtWidgets.QComboBox), "Group ID field OK"
 
-            sync_origin_label = self.get_dialog_item(
-                dialog, "share", "sync_origin", "label"
-            )
-            sync_origin_field = self.get_dialog_item(
-                dialog, "share", "sync_origin", "field"
-            )
+            sync_origin_label = dialog_ui("share", "sync_origin", "label")
+            sync_origin_field = dialog_ui("share", "sync_origin")
             assert isinstance(
                 sync_origin_label, QtWidgets.QLabel
             ), "Sync origin label OK"
@@ -376,34 +355,30 @@ class TestUiShares:
                 sync_origin_field, QtWidgets.QComboBox
             ), "Sync origin field OK"
 
-            alpha_label = self.get_dialog_item(dialog, "share", "alpha_code", "label")
-            alpha_field = self.get_dialog_item(dialog, "share", "alpha_code", "field")
+            alpha_label = dialog_ui("share", "alpha_code", "label")
+            alpha_field = dialog_ui("share", "alpha_code")
             assert isinstance(alpha_label, QtWidgets.QLabel), "Alpha code label OK"
             assert isinstance(alpha_field, QtWidgets.QLineEdit), "Alpha code field OK"
 
-            bourso_label = self.get_dialog_item(dialog, "share", "bourso_code", "label")
-            bourso_field = self.get_dialog_item(dialog, "share", "bourso_code", "field")
+            bourso_label = dialog_ui("share", "bourso_code", "label")
+            bourso_field = dialog_ui("share", "bourso_code")
             assert isinstance(bourso_label, QtWidgets.QLabel), "Bourso code label OK"
             assert isinstance(bourso_field, QtWidgets.QLineEdit), "Bourso code field OK"
 
-            quanta_label = self.get_dialog_item(
-                dialog, "share", "quantalys_code", "label"
-            )
-            quanta_field = self.get_dialog_item(
-                dialog, "share", "quantalys_code", "field"
-            )
+            quanta_label = dialog_ui("share", "quantalys_code", "label")
+            quanta_field = dialog_ui("share", "quantalys_code")
             assert isinstance(quanta_label, QtWidgets.QLabel), "Quantalys code label OK"
             assert isinstance(
                 quanta_field, QtWidgets.QLineEdit
             ), "Quantalys code field OK"
 
-            buttonbox = dialog.layout().itemAt(1).widget()
+            buttonbox = dialog_ui("sharegroup", "dialog").layout().itemAt(1).widget()
             assert isinstance(buttonbox, QtWidgets.QDialogButtonBox), "Buttonbox OK"
 
-            button = self.get_dialog_item(dialog, "sharegroup", "button_cancel")
+            button_cancel = dialog_ui("sharegroup", "button_cancel")
 
             # Click cancel
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
 
             # Check results
             assert app_ui("share_tree").topLevelItemCount() == 6, "Element count OK"
@@ -412,16 +387,14 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
-    def test_shares_add_share_confirm(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_share_confirm(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name = self.get_dialog_item(dialog, "share", "name", "field")
-            sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
-            bourso = self.get_dialog_item(dialog, "share", "bourso_code", "field")
+            name = dialog_ui("share", "name")
+            sync_origin = dialog_ui("share", "sync_origin")
+            bourso = dialog_ui("share", "bourso_code")
 
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            button_ok = dialog_ui("sharegroup", "button_ok")
 
             # Set the different values
             qtbot.keyClicks(name, "New share")
@@ -429,7 +402,7 @@ class TestUiShares:
             qtbot.keyClicks(bourso, "1rNEW")
 
             # Click OK
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
 
             # Check results
             assert app_ui("group_ungrouped").childCount() == 2, "Element count OK"
@@ -441,18 +414,17 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
-    def test_shares_add_share_confirm_empty_name(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_share_confirm_empty_name(
+        self, app_ui, qtbot, app_db, dialog_ui
+    ):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            button_ok = dialog_ui("sharegroup", "button_ok")
 
             # Click OK
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
-            error_field = self.get_dialog_item(dialog, "share", "name", "error")
-            dialog.close()
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+            error_field = dialog_ui("share", "name", "error")
+            dialog_ui("sharegroup", "dialog").close()
 
             # Check results
             assert error_field.text() == "Missing share name", "Error display OK"
@@ -464,24 +436,24 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
-    def test_shares_add_share_sync_origin_no_code(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_add_share_sync_origin_no_code(
+        self, app_ui, qtbot, app_db, dialog_ui
+    ):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            name = self.get_dialog_item(dialog, "share", "name", "field")
-            sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
+            name = dialog_ui("share", "name")
+            sync_origin = dialog_ui("share", "sync_origin")
 
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            button_ok = dialog_ui("sharegroup", "button_ok")
 
             # Set the different values
             qtbot.keyClicks(name, "New share")
             qtbot.keyClicks(sync_origin, "Boursorama")
 
             # Click OK
-            qtbot.mouseClick(button, Qt.LeftButton, Qt.NoModifier)
-            error_field = self.get_dialog_item(dialog, "share", "bourso_code", "error")
-            dialog.close()
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+            error_field = dialog_ui("share", "bourso_code", "error")
+            dialog_ui("sharegroup", "dialog").close()
 
             # Check results
             assert error_field.text() == "Missing code for sync", "Error display OK"
@@ -493,16 +465,14 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("add_share"), qtbot, app_ui)
 
-    def test_shares_edit_share(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_edit_share(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            sync_origin = self.get_dialog_item(dialog, "share", "sync_origin", "field")
-            alpha = self.get_dialog_item(dialog, "share", "alpha_code", "field")
-            quanta = self.get_dialog_item(dialog, "share", "quantalys_code", "field")
+            sync_origin = dialog_ui("share", "sync_origin")
+            alpha = dialog_ui("share", "alpha_code")
+            quanta = dialog_ui("share", "quantalys_code")
 
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            button = dialog_ui("sharegroup", "button_ok")
 
             # Set the different values
             # Setting combobox values to an empty value is tricky
@@ -524,14 +494,11 @@ class TestUiShares:
         QtCore.QTimer.singleShot(0, handle_dialog)
         self.click_tree_item(app_ui("share_WDAY"), qtbot, app_ui)
 
-    def test_shares_edit_share_code(self, app_ui, qtbot, qapp, app_db):
+    def test_shares_edit_share_code(self, app_ui, qtbot, app_db, dialog_ui):
         def handle_dialog():
             # Get the different fields
-            qtbot.waitUntil(lambda: qapp.activeWindow() is not None)
-            dialog = qapp.activeWindow()
-            alpha = self.get_dialog_item(dialog, "share", "alpha_code", "field")
-
-            button = self.get_dialog_item(dialog, "sharegroup", "button_ok")
+            alpha = dialog_ui("share", "alpha_code")
+            button = dialog_ui("sharegroup", "button_ok")
 
             # Set the different values
             alpha.setText("1wACN")
