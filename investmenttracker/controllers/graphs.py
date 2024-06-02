@@ -440,9 +440,7 @@ class GraphsController:
 
         self.left_column.layout.addWidget(self.shares_tree)
 
-        self.checkbox_hidden_shares.stateChanged.connect(
-            self.on_click_disabled_accounts
-        )
+        self.checkbox_hidden_shares.stateChanged.connect(self.on_click_hidden_shares)
         self.left_column.layout.addWidget(self.checkbox_hidden_shares)
 
     def render_right_column(self):
@@ -488,10 +486,10 @@ class GraphsController:
 
         # Error messages
         self.error_messages.setProperty("class", "validation_warning")
-        self.right_column.layout.addWidget(self.error_messages, 3, 0, 1, 5)
+        self.right_column.layout.addWidget(self.error_messages, 3, 0, 1, 4)
 
         # Add the graph
-        self.right_column.layout.addWidget(self.graph, 4, 0, 1, 5)
+        self.right_column.layout.addWidget(self.graph, 4, 0, 1, 4)
 
         # Choose whether to display markers
         self.markers_visible.setChecked(True)
@@ -499,7 +497,7 @@ class GraphsController:
         self.right_column.layout.addWidget(self.markers_visible, 5, 0)
 
         # Performance table
-        self.right_column.layout.addWidget(self.performance_table, 6, 0, 1, 5)
+        self.right_column.layout.addWidget(self.performance_table, 6, 0, 1, 4)
 
         # Trigger date change once all dates are set
         self.on_change_dates()
@@ -541,6 +539,12 @@ class GraphsController:
         self.display_disabled_accounts = self.checkbox_disabled_accounts.isChecked()
         self.reload_data()
         self.checkbox_disabled_accounts.clearFocus()
+
+    def on_click_hidden_shares(self):
+        """User clicks on 'display hidden accounts' checkbox => reload tree"""
+        self.display_hidden_shares = self.checkbox_hidden_shares.isChecked()
+        self.reload_data()
+        self.checkbox_hidden_shares.clearFocus()
 
     def on_change_dates(self):
         """User changes one of the dates => calculate & render graph with new dates"""
