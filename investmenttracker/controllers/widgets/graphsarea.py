@@ -463,6 +463,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
                     share, share.base_currency, *range_missing
                 )
                 self.shares_raw_values[share_id] |= {v.date: v for v in values}
+            logger.debug(
+                f"GraphsArea.calculate_shares - {len(self.shares_raw_values[share_id])} values for {share.name}"
+            )
 
     def calculate_accounts(self, accounts):
         """Calculates the raw values for a list of accounts
@@ -668,7 +671,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         values : dict of format {x:y}
             All the graph values
         """
-        logger.info(f"GraphsArea.add_markers {values}")
+        logger.info(f"GraphsArea.add_markers: {len(values)} items")
         if not self.display_markers:
             return
 
@@ -866,6 +869,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         else:
             ranges_missing.append((start, self.end_date))
 
+        logger.debug(f"GraphsArea.find_missing_date_ranges - Found {ranges_missing}")
         return ranges_missing
 
     def get_share_value_as_of(self, share_id, start_date, currency):
@@ -913,7 +917,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             In which currency the share prices should be
         """
         logger.info(
-            f"GraphsArea.get_share_value_in_range {share_id} - {start_date} to {end_date} with currency {currency}"
+            f"GraphsArea.get_share_value_in_range {share_id} - {start_date} to {end_date} with currency {currency.name}"
         )
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
