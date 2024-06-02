@@ -22,16 +22,16 @@ class TestAccount:
         assert isinstance(
             app_db.account_get_by_id(1), Account
         ), "There should be 1 account with ID 1"
-        assert len(app_db.accounts_get()) == 3, "3 accounts are visible & enabled"
+        assert len(app_db.accounts_get()) == 4, "4 accounts are visible & enabled"
         assert (
-            len(app_db.accounts_get(with_hidden=True)) == 4
-        ), "4 hidden or visible accounts"
+            len(app_db.accounts_get(with_hidden=True)) == 5
+        ), "5 hidden or visible accounts"
         assert (
-            len(app_db.accounts_get(with_disabled=True)) == 4
-        ), "4 non-hidden accounts"
+            len(app_db.accounts_get(with_disabled=True)) == 5
+        ), "5 non-hidden accounts"
         assert (
-            len(app_db.accounts_get(with_disabled=True, with_hidden=True)) == 5
-        ), "5 accounts in total"
+            len(app_db.accounts_get(with_disabled=True, with_hidden=True)) == 6
+        ), "6 accounts in total"
 
         # Check account attributes
         account = app_db.account_get_by_id(1)

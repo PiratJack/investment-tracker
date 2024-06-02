@@ -136,7 +136,7 @@ class TestUiSharePrices:
         assert isinstance(app_ui("table"), QtWidgets.QTableView), "Table type is OK"
         index = app_ui("table").model.index(1, 1)
         assert app_ui("table").model.columnCount(index) == 7, "Column count OK"
-        assert app_ui("table").model.rowCount(index) == 5, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 6, "Row count OK"
 
         # Check table layout for a share price
         assert app_ui("table_0_0") == "Accenture", "Price share OK"
@@ -159,13 +159,13 @@ class TestUiSharePrices:
         ), "WhatsThis is empty"
 
         # Check table layout for adding a share price
-        assert app_ui("table_4_0") == "Add a share price", "Price share OK"
-        assert app_ui("table_4_1").isNull(), "Price ID OK"
-        assert app_ui("table_4_2").isNull(), "Price date OK"
-        assert app_ui("table_4_3").isNull(), "Price value OK"
-        assert app_ui("table_4_4").isNull(), "Price currency OK"
-        assert app_ui("table_4_5").isNull(), "Price source OK"
-        assert app_ui("table_4_6").isNull(), "Price icon OK"
+        assert app_ui("table_5_0") == "Add a share price", "Price share OK"
+        assert app_ui("table_5_1").isNull(), "Price ID OK"
+        assert app_ui("table_5_2").isNull(), "Price date OK"
+        assert app_ui("table_5_3").isNull(), "Price value OK"
+        assert app_ui("table_5_4").isNull(), "Price currency OK"
+        assert app_ui("table_5_5").isNull(), "Price source OK"
+        assert app_ui("table_5_6").isNull(), "Price icon OK"
 
         # Check table layout for editing a share price
         assert app_ui("tableedit_0_0") == 2, "Price share ID OK"
@@ -178,13 +178,13 @@ class TestUiSharePrices:
 
         # Check table layout for adding a share price (Edit version)
         # Each time it adds a new row, so it has to increment
-        assert app_ui("tableedit_4_0") == 0, "Price share OK"
-        assert app_ui("tableedit_5_1") is None, "Price ID OK"
-        assert app_ui("tableedit_6_2").date() == datetime.date.today(), "Price date OK"
-        assert app_ui("tableedit_7_3") == 0, "Price value OK"
-        assert app_ui("tableedit_8_4") == 0, "Price currency OK"
-        assert app_ui("tableedit_9_5") == "", "Price source OK"
-        assert app_ui("tableedit_10_6") is None, "Price icon OK"
+        assert app_ui("tableedit_5_0") == 0, "Price share OK"
+        assert app_ui("tableedit_6_1") is None, "Price ID OK"
+        assert app_ui("tableedit_7_2").date() == datetime.date.today(), "Price date OK"
+        assert app_ui("tableedit_8_3") == 0, "Price value OK"
+        assert app_ui("tableedit_9_4") == 0, "Price currency OK"
+        assert app_ui("tableedit_10_5") == "", "Price source OK"
+        assert app_ui("tableedit_11_6") is None, "Price icon OK"
 
     def test_shareprices_select_share_via_dropdown(self, app_ui, qtbot):
         # Select a share
@@ -221,7 +221,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_datetime(self, app_ui, qtbot):
         # Select a date
@@ -229,7 +229,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_str(self, app_ui, qtbot):
         # Select a date
@@ -237,7 +237,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_int(self, app_ui, qtbot):
         # Select a date
@@ -245,7 +245,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_variant(self, app_ui, qtbot):
         # Select a date
@@ -253,7 +253,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_minus_one(self, app_ui, qtbot):
         # Select a date
@@ -261,7 +261,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 8, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_click_table(self, app_ui, qtbot):
         # Select a share
@@ -364,7 +364,7 @@ class TestUiSharePrices:
 
         # Check database is unchanged
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 5, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 6, "Row count OK"
         assert shareprice is not None, "Share price remains unchanged"
 
     def test_shareprices_delete_confirm(self, app_ui, qtbot, app_db, monkeypatch):
@@ -388,7 +388,7 @@ class TestUiSharePrices:
 
         # Check database is unchanged
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 4, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 5, "Row count OK"
         with pytest.raises(sqlalchemy.orm.exc.NoResultFound):
             app_db.share_price_get_by_id(3)
 

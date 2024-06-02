@@ -152,7 +152,7 @@ class TestUiAccounts:
             app_ui("account_tree"), QtWidgets.QTreeWidget
         ), "The tree is a tree"
         assert (
-            app_ui("account_tree").topLevelItemCount() == 4
+            app_ui("account_tree").topLevelItemCount() == 5
         ), "Count of elements is OK"
 
         assert (
@@ -213,7 +213,7 @@ class TestUiAccounts:
         qtbot.mouseClick(app_ui("display_hidden"), Qt.LeftButton, Qt.NoModifier, offset)
         # Check hidden account is displayed
         assert (
-            app_ui("account_tree").topLevelItemCount() == 5
+            app_ui("account_tree").topLevelItemCount() == 6
         ), "Count of elements is OK"
 
         assert app_ui("hidden_account_0") == "Hidden account", "Account name OK"
@@ -234,7 +234,7 @@ class TestUiAccounts:
         )
         # Check hidden account is displayed
         assert (
-            app_ui("account_tree").topLevelItemCount() == 5
+            app_ui("account_tree").topLevelItemCount() == 6
         ), "Count of elements is OK"
 
         assert app_ui("disabled_account_0") == "Disabled account", "Account name OK"
@@ -256,7 +256,7 @@ class TestUiAccounts:
         qtbot.mouseClick(app_ui("display_hidden"), Qt.LeftButton, Qt.NoModifier, offset)
         # Check hidden account is displayed
         assert (
-            app_ui("account_tree").topLevelItemCount() == 6
+            app_ui("account_tree").topLevelItemCount() == 7
         ), "Count of elements is OK"
 
         assert app_ui("hidden_account_0") == "Hidden account", "Account name OK"
@@ -310,7 +310,7 @@ class TestUiAccounts:
             qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
 
             # Check no account is created
-            assert len(app_db.accounts_get()) == 3, "3 accounts are visible & enabled"
+            assert len(app_db.accounts_get()) == 4, "4 accounts are visible & enabled"
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)

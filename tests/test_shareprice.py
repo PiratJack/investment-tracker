@@ -16,7 +16,7 @@ class TestSharePrice:
         # Get from direct query (based on date)
         share_prices = app_db.share_price_query()
         share_prices = share_prices.filter(SharePrice.date >= datetime.date(2022, 3, 1))
-        assert len(share_prices.all()) == 5, "5 prices after March 1st, 2022"
+        assert len(share_prices.all()) == 12, "12 prices after March 1st, 2022"
 
         # Get from direct query (based on share)
         share_prices = app_db.share_prices_get(share_id=3)
