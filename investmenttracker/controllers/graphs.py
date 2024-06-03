@@ -167,7 +167,7 @@ class PerformanceTable(QtWidgets.QTableWidget):
                     else:
                         data = format_number(max_price.price)
                     if base_price:
-                        evolution = (max_price.price - base_price) / base_price
+                        evolution = (max_price.price - base_price) / base_price * 100
                         data += "\n" + locale.format_string("%.2f %%", evolution)
                     else:
                         base_price = max_price.price
