@@ -318,7 +318,6 @@ class SharePricesTableModel(QtCore.QAbstractTableModel):
             Enabled & selectable for ID and button columns
             Enabled, selectable & editable for other fields
         """
-        logger.info(f"SharePricesTableModel.flags at {index.row()}, {index.column()}")
         if index.column() in (1, 6):
             return Qt.ItemIsSelectable | Qt.ItemIsEnabled
         return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
