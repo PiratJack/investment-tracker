@@ -130,7 +130,7 @@ class TestUiGraphs:
             elif element.startswith("share_ungrouped_"):
                 column = int(element.split("_")[-1])
                 return get_ui("share_ungrouped").data(column, Qt.DisplayRole)
-            elif element == "share_Euro":
+            elif element == "share_EUR":
                 return get_ui("share_ungrouped").child(0)
             elif element == "share_HSBC":
                 return get_ui("share_ungrouped").child(1)
@@ -178,6 +178,9 @@ class TestUiGraphs:
             # Right > Bottom: Performance table
             elif element == "performance_table":
                 return get_ui("right_column").layout.itemAtPosition(6, 0).widget()
+            elif element.startswith("performance_table"):
+                row, col = element.split("_")[2:]
+                return get_ui("performance_table").item(int(row), int(col)).text()
 
             raise ValueError(f"Field {element} could not be found")
 
@@ -355,8 +358,8 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [10500, 10200, 10300, 10800, 11000, 10700]
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [10500, 10200, 10300, 9300, 9800, 10000, 9700]
         assert (dataItems[0].curve.yData == values).all(), "Values are correct"
 
     def test_graphs_account_error(self, app_ui, qtbot):
@@ -388,8 +391,20 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "BNP (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [55, 52, 53, 58, 60, 57]
+        assert len(dataItems[0].curve.yData) == 5, "5 different points in graph"
+        values = [52, 53, 58, 60, 57]
+        assert (dataItems[0].curve.yData == values).all(), "Values are correct"
+
+    def test_graphs_share_without_currency(self, app_ui, qtbot):
+        # Select BNP share
+        self.click_tree_item("share", app_ui("share_USD"), qtbot, app_ui)
+
+        # Check display in the graph
+        dataItems = app_ui("graph").plotItem.dataItems
+        assert len(dataItems) == 1, "Graph curve count OK"
+        assert dataItems[0].name() == "Dollar", "Curve name OK"
+        assert len(dataItems[0].curve.yData) == 1, "1 points i graph"
+        values = [10]
         assert (dataItems[0].curve.yData == values).all(), "Values are correct"
 
     def test_graphs_period_change(self, app_ui, qtbot):
@@ -406,8 +421,8 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 2, "2 different points in graph"
-        values = [10300, 10800]
+        values = [10300, 9300, 9800]
+        assert len(dataItems[0].curve.yData) == len(values), "3 points in graph"
         for i in range(len(values)):
             assert (
                 round(dataItems[0].curve.yData[i], 3) == values[i]
@@ -439,8 +454,8 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [1, 0.971, 0.981, 1.029, 1.048, 1.019]
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [1, 0.971, 0.981, 0.886, 0.933, 0.952, 0.924]
         for i in range(len(values)):
             assert (
                 round(dataItems[0].curve.yData[i], 3) == values[i]
@@ -464,15 +479,36 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [0.972, 0.944, 0.954, 1.0, 1.019, 0.991]
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [1.071, 1.041, 1.051, 0.949, 1, 1.020, 0.990]
+        for i in range(len(values)):
+            assert (
+                round(dataItems[0].curve.yData[i], 3) == values[i]
+            ), "Values are correct"
+
+    def test_graphs_baseline_net(self, app_ui, qtbot):
+        # Select an account & enable baseline mode
+        self.click_tree_item("account", app_ui("test_accounteur"), qtbot, app_ui)
+        offset = QtCore.QPoint(2, app_ui("baseline_enabled").height() // 2)
+        qtbot.mouseClick(
+            app_ui("baseline_enabled"), Qt.LeftButton, Qt.NoModifier, offset
+        )
+        offset = QtCore.QPoint(2, app_ui("baseline_net").height() // 2)
+        qtbot.mouseClick(app_ui("baseline_net"), Qt.LeftButton, Qt.NoModifier, offset)
+
+        # Check display in the graph
+        dataItems = app_ui("graph").plotItem.dataItems
+        assert len(dataItems) == 1, "Graph curve count OK"
+        assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [1, 0.971, 0.981, 0.981, 1.029, 1.048, 1.019]
         for i in range(len(values)):
             assert (
                 round(dataItems[0].curve.yData[i], 3) == values[i]
             ), "Values are correct"
 
     def test_graphs_account_split(self, app_ui, qtbot):
-        # Select an account & enable baseline mode
+        # Select an account & enable split mode
         self.click_tree_item("account", app_ui("test_accounteur"), qtbot, app_ui)
         offset = QtCore.QPoint(2, app_ui("split_enabled").height() // 2)
         qtbot.mouseClick(app_ui("split_enabled"), Qt.LeftButton, Qt.NoModifier, offset)
@@ -483,7 +519,7 @@ class TestUiGraphs:
         assert dataItems[0].name() == "Euro", "Curve name OK"
         assert dataItems[1].name() == "BNP (Euro)", "Curve name OK"
         assert dataItems[2].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
 
         # Check values for Euro
         values = [
@@ -494,11 +530,34 @@ class TestUiGraphs:
                 round(dataItems[0].curve.yData[i], 3) == values[i]
             ), "Values are correct"
         # Check values for BNP
-        values = [0.524, 0.510, 0.515, 0.537, 0.545, 0.533]
+        values = [0.524, 0.510, 0.515, 0.570, 0.592, 0.600]
         for i in range(len(values)):
             assert (
                 round(dataItems[1].curve.yData[i], 3) == values[i]
             ), "Values are correct"
+
+    def test_graphs_account_split_error(self, app_ui, qtbot):
+        # Select an account & enable split mode
+        self.click_tree_item("account", app_ui("main_account"), qtbot, app_ui)
+        self.click_tree_item("account", app_ui("test_accounteur"), qtbot, app_ui)
+        offset = QtCore.QPoint(2, app_ui("split_enabled").height() // 2)
+        qtbot.mouseClick(app_ui("split_enabled"), Qt.LeftButton, Qt.NoModifier, offset)
+
+        # Check display in the graph
+        dataItems = app_ui("graph").plotItem.dataItems
+        assert len(dataItems) == 2, "Graph curve count OK"
+        assert (
+            app_ui("errors")
+            .text()
+            .find(
+                "Could not display account Main account due to missing value for Accenture"
+            )
+            != -1
+        ), "Error is displayed"
+        assert (
+            app_ui("errors").text().find("Only 1 account can be displayed in this mode")
+            != -1
+        ), "Error is displayed"
 
     def test_graphs_account_enable_disable_split(self, app_ui, qtbot):
         # Select an account & click twice on baseline
@@ -511,8 +570,8 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [10500, 10200, 10300, 10800, 11000, 10700]
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [10500, 10200, 10300, 9300, 9800, 10000, 9700]
         assert (dataItems[0].curve.yData == values).all(), "Values are correct"
 
     def test_graphs_markers_display(self, app_ui, qtbot):
@@ -529,9 +588,45 @@ class TestUiGraphs:
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 1, "Graph curve count OK"
         assert dataItems[0].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
-        values = [10500, 10200, 10300, 10800, 11000, 10700]
+        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        values = [10500, 10200, 10300, 9300, 9800, 10000, 9700]
         assert (dataItems[0].curve.yData == values).all(), "Values are correct"
+
+    def test_graphs_performance_table_share(self, app_ui, qtbot):
+        # Display hidden shares
+        # This offset is just a guess to end up on the checkbox
+        offset = QtCore.QPoint(2, app_ui("display_hidden_shares").height() // 2)
+        qtbot.mouseClick(
+            app_ui("display_hidden_shares"), Qt.LeftButton, Qt.NoModifier, offset
+        )
+
+        # Select BNP share
+        self.click_tree_item("share", app_ui("share_BNP"), qtbot, app_ui)
+
+        # Check display in the table
+        assert (
+            app_ui("performance_table").verticalHeaderItem(0).text() == "BNP"
+        ), "Name OK"
+        assert app_ui("performance_table_0_1") == "55,00 EUR", "Values OK"
+        assert app_ui("performance_table_0_2") == "52,00 EUR\n-5,45 %", "Values OK"
+        assert app_ui("performance_table_0_3") == "53,00 EUR\n-3,64 %", "Values OK"
+        assert app_ui("performance_table_0_4") == "58,00 EUR\n5,45 %", "Values OK"
+        assert app_ui("performance_table_0_5") == "60,00 EUR\n9,09 %", "Values OK"
+
+    def test_graphs_performance_table_account_before_its_creation(self, app_ui, qtbot):
+        # Select an account
+        self.click_tree_item("account", app_ui("main_account"), qtbot, app_ui)
+        app_ui("period_start").setDate(datetime.date(2009, 1, 1))
+
+        # Check display in the graph
+        assert (
+            app_ui("performance_table").verticalHeaderItem(0).text() == "Main account"
+        ), "Name OK"
+        assert app_ui("performance_table_0_1") == "Unknown", "Values OK"
+        assert app_ui("performance_table_0_2") == "Unknown", "Values OK"
+        assert app_ui("performance_table_0_3") == "Unknown", "Values OK"
+        assert app_ui("performance_table_0_4") == "Unknown", "Values OK"
+        assert app_ui("performance_table_0_5") == "Unknown", "Values OK"
 
 
 if __name__ == "__main__":
