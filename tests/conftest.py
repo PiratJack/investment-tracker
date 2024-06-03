@@ -260,14 +260,24 @@ def app_db(app_empty_db):
                 quantity=10000,
                 unit_price=1,
             ),
-            Transaction(  # Account 6: buy 100 BNP at 50 on Dec 1st, 2023
+            Transaction(  # Account 6: buy 100 BNP at 50 on Nov 1st, 2023
                 account_id=6,
-                date=datetime.date(2023, 12, 1),
+                date=datetime.date(2023, 11, 1),
                 label="Buy BNP",
                 type="asset_buy",
                 share_id=7,
                 quantity=100,
                 unit_price=50,
+            ),
+            Transaction(  # Account 6: remove 1000 EUR 4 months ago
+                account_id=6,
+                date=(datetime.date.today() + datetime.timedelta(days=-4 * 30)).replace(
+                    day=5
+                ),
+                label="Withdraw cash",
+                type="cash_exit",
+                quantity=1000,
+                unit_price=1,
             ),
             SharePrice(  # ACN at 100 EUR on January 5th, 2020
                 share_id=2,
@@ -320,42 +330,54 @@ def app_db(app_empty_db):
             ),
             SharePrice(  # BNP at 50 EUR 7 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-7 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-7 * 30)).replace(
+                    day=1
+                ),
                 price=50,
                 currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 55 EUR 6 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-6 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-6 * 30)).replace(
+                    day=1
+                ),
                 price=55,
                 currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 52 EUR 5 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-5 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-5 * 30)).replace(
+                    day=1
+                ),
                 price=52,
                 currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 53 EUR 4 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-4 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-4 * 30)).replace(
+                    day=1
+                ),
                 price=53,
                 currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 58 EUR 3 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-3 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-3 * 30)).replace(
+                    day=1
+                ),
                 price=58,
                 currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 60 EUR 2 months ago
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-2 * 30),
+                date=(datetime.date.today() + datetime.timedelta(days=-2 * 30)).replace(
+                    day=1
+                ),
                 price=60,
                 currency_id=5,
                 source="Lambda",

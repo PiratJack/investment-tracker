@@ -434,7 +434,7 @@ class TestUiTransactions:
 
             # Check results
             with pytest.raises(sqlalchemy.exc.NoResultFound):
-                app_db.transaction_get_by_id(17)
+                app_db.transaction_get_by_id(18)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -455,7 +455,7 @@ class TestUiTransactions:
 
             # Check results
             with pytest.raises(sqlalchemy.exc.NoResultFound):
-                app_db.transaction_get_by_id(17)
+                app_db.transaction_get_by_id(18)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -492,7 +492,7 @@ class TestUiTransactions:
             index = app_ui("table").model.index(1, 1)
             assert app_ui("table").model.rowCount(index) == 7, "Row count OK"
             assert app_ui("table_5_0") == "Main account", "Account name OK"
-            assert app_ui("table_5_1") == 17, "Transaction ID OK"
+            assert app_ui("table_5_1") == 18, "Transaction ID OK"
             assert app_ui("table_5_2") == QtCore.QDate(
                 2023, 6, 15
             ), "Transaction date OK"
@@ -509,7 +509,7 @@ class TestUiTransactions:
             assert app_ui("table_5_9") == "-3\u202f100,00 EUR", "Transaction # cash OK"
             assert app_ui("table_5_10") == "10,00 EUR", "Transaction Balance (cash) OK"
             # Check save is done in DB
-            app_db.transaction_get_by_id(17)
+            app_db.transaction_get_by_id(18)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
@@ -706,7 +706,7 @@ class TestUiTransactions:
                 app_ui("table_5_10") == "3\u202f260,00 EUR"
             ), "Transaction Balance (cash) OK"
             # Check save is done in DB
-            transaction = app_db.transaction_get_by_id(17)
+            transaction = app_db.transaction_get_by_id(18)
             assert transaction.label == "Get well funded", "Transaction label updated"
 
         # Trigger the display of the dialog (click on label)
@@ -727,7 +727,7 @@ class TestUiTransactions:
             # Check results
             assert app_ui("table").model.rowCount(index) == 6, "Row count OK"
             with pytest.raises(sqlalchemy.exc.NoResultFound):
-                app_db.transaction_get_by_id(17)
+                app_db.transaction_get_by_id(18)
 
         # Trigger the display of the dialog (click on label)
         QtCore.QTimer.singleShot(0, handle_dialog)
