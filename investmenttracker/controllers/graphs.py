@@ -662,7 +662,5 @@ class GraphsController:
                         "Could not display account {account} due to missing value for {share}"
                     ).format(account=error.account.name, share=error.share.name)
                 )
-            else:
-                raise error
         messages = set(messages)
         self.error_messages.setText("\n".join(messages))
