@@ -174,21 +174,16 @@ class ShareController(EditController):
                 v
                 for v in models.share.ShareDataOrigin
                 if self.item.sync_origin in (v, v.name)
-            ]
-            if not sync_origin:
-                self.item.sync_origin = None
-            else:
-                self.item.sync_origin = sync_origin[0]
+            ][0]
+            self.item.sync_origin = sync_origin
 
-                existing_code = [
-                    code
-                    for code in self.item.codes
-                    if code.origin == self.item.sync_origin
-                ]
-                if not existing_code:
-                    raise ValidationException(
-                        _("Missing code for sync"),
-                        self.item,
-                        "code_" + self.item.sync_origin.name,
-                        None,
-                    )
+            existing_code = [
+                code for code in self.item.codes if code.origin == self.item.sync_origin
+            ]
+            if not existing_code:
+                raise ValidationException(
+                    _("Missing code for sync"),
+                    self.item,
+                    "code_" + self.item.sync_origin.name,
+                    None,
+                )
