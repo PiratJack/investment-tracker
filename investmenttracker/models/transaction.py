@@ -309,8 +309,6 @@ class Transaction(Base):
         """Ensure the unit price field is filled"""
         if not self.type:
             return value
-        if not isinstance(self.type, TransactionTypes):
-            return value
         type_value = self.type.value
         if type_value["has_asset"] and type_value["impact_currency"]:
             self.validate_missing_field(key, value, _("Missing transaction unit price"))
