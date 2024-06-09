@@ -288,7 +288,7 @@ class DashboardController:
         self.display_widget.layout.addWidget(self.error_label, 2, 2, 1, 2)
 
         # Share price statistics
-        self.display_widget.layout.addWidget(self.share_price_stats, 4, 0, 1, 4)
+        self.display_widget.layout.addWidget(self.share_price_stats, 3, 0, 1, 4)
 
         self.parent_window.setCentralWidget(self.display_widget)
 
