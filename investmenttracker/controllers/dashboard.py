@@ -408,11 +408,6 @@ class DashboardController:
                 _("There was an error reading this file. Please choose another file.")
             )
             return
-        except UnicodeDecodeError:
-            self.error_label.setText(
-                _("There was an error reading this file. Please choose another file.")
-            )
-            return
         except FileNotFoundError:
             self.error_label.setText(_("The selected file does not exist"))
             return
