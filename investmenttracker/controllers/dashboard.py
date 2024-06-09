@@ -347,18 +347,14 @@ class DashboardController:
         if not file_path:
             self.on_choose_export_file()
         # If user still doesn't want to choose, display error
+        file_path = self.export_file_path.text()
         if not file_path:
             self.error_label.setText(_("Please select a file before exporting"))
             return
         self.error_label.setText("")
 
         export_dialog = ShareExportDialog(self)
-        try:
-            export_dialog.set_file(file_path)
-        except FileNotFoundError:
-            self.error_label.setText(_("The selected file does not exist"))
-            return
-
+        export_dialog.set_file(file_path)
         export_dialog.show_window()
 
         self.reload_data()
