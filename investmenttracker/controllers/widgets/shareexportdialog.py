@@ -177,14 +177,14 @@ class ShareExportDialog:
         # Should we export headers?
         self.export_headers_widget.setTristate(False)
         self.export_headers_widget.clicked.connect(self.on_export_headers)
-        self.layout.addWidget(self.export_headers_widget, 2, 0, 1, 2)
+        self.layout.addWidget(self.export_headers_widget, 1, 0, 1, 2)
 
         # Errors
         self.error_label.setProperty("class", "validation_warning")
-        self.layout.addWidget(self.error_label, 3, 0, 1, 2)
+        self.layout.addWidget(self.error_label, 2, 0, 1, 2)
 
         # Table with preview & choice of values
-        self.layout.addWidget(self.data_table, 4, 0, 1, 2)
+        self.layout.addWidget(self.data_table, 3, 0, 1, 2)
         self.data_table.setEditTriggers(self.data_table.NoEditTriggers)
 
         # Validation buttons
@@ -193,7 +193,7 @@ class ShareExportDialog:
         button_box.accepted.connect(self.on_confirm_export)
         button_box.rejected.connect(self.window.close)
         button_box.button(QtWidgets.QDialogButtonBox.Ok).setText(_("Export"))
-        self.layout.addWidget(button_box, 5, 1)
+        self.layout.addWidget(button_box, 4, 1)
 
         self.display_table()
 
@@ -268,7 +268,7 @@ class ShareExportDialog:
         field_id : str
             The field to display (may be a related object field)
         """
-        logger.info(f"ShareExportDialog.get_share_field {share} - Field {field_id}")
+        logger.debug(f"ShareExportDialog.get_share_field {share} - Field {field_id}")
         if field_id in ["name", "id", "main_code", "code_sync_origin"]:
             return getattr(share, field_id)
         if field_id == "sync_origin":
