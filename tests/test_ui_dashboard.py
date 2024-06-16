@@ -59,10 +59,17 @@ class TestUiDashboard:
             elif element == "price_table":
                 return app_dashboard.layout.itemAtPosition(3, 0).widget()
             elif element.startswith("price_"):
-                row, col = element.split("_")[1:]
-                if col == "0":
-                    return get_ui("price_table").verticalHeaderItem(int(row)).text()
-                return get_ui("price_table").item(int(row), int(col)).text()
+                row, col = map(int, element.split("_")[1:])
+                if (
+                    row > get_ui("price_table").rowCount()
+                    or col >= get_ui("price_table").columnCount()
+                ):
+                    return None
+                if row == 0:
+                    return get_ui("price_table").horizontalHeaderItem(int(col)).text()
+                if col == 0:
+                    return get_ui("price_table").verticalHeaderItem(int(row) - 1).text()
+                return get_ui("price_table").item(row - 1, col).text()
 
             raise ValueError(f"Field {element} could not be found")
 
@@ -174,8 +181,48 @@ class TestUiDashboard:
         ), "Price table OK"
         assert app_ui("price_table").rowCount() == 1, "Price table row count OK"
         assert app_ui("price_table").columnCount() == 8, "Price table column count OK"
-        assert app_ui("price_0_0") == "Workday", "Price table value OK"
-        assert app_ui("price_0_1") == "0", "Price table value OK"
+        assert app_ui("price_1_0") == "Workday", "Price table value OK"
+        assert app_ui("price_1_1") == "0", "Price table value OK"
+
+    def test_dashboard_price_table_dates1(self, app_ui, app_mainwindow, monkeypatch):
+        # Force today to be January 1st, 2024
+        class mydatee(datetime.date):
+            @classmethod
+            def today(cls):
+                return datetime.date(2024, 1, 1)
+
+        # #monkeypatch.setattr(datetime.date, "today", lambda: datetime.date(2024,1,1))
+        monkeypatch.setattr(datetime, "date", mydatee)
+        # Force reload of the screen
+        app_mainwindow.display_tab("Dashboard")
+
+        assert app_ui("price_table").rowCount() == 1, "Price table row count OK"
+        assert app_ui("price_table").columnCount() == 8, "Price table column count OK"
+        assert app_ui("price_1_0") == "Workday", "Price table value OK"
+        assert app_ui("price_1_1") == "0", "Price table value OK"
+        assert app_ui("price_0_1") == "01/07/2023", "Price table header OK"
+        assert app_ui("price_0_5") == "01/11/2023", "Price table header OK"
+        assert app_ui("price_0_7") == "01/01/2024", "Price table header OK"
+
+    def test_dashboard_price_table_dates2(self, app_ui, app_mainwindow, monkeypatch):
+        # Force today to be January 1st, 2024
+        class mydatee(datetime.date):
+            @classmethod
+            def today(cls):
+                return datetime.date(2024, 8, 1)
+
+        # #monkeypatch.setattr(datetime.date, "today", lambda: datetime.date(2024,1,1))
+        monkeypatch.setattr(datetime, "date", mydatee)
+        # Force reload of the screen
+        app_mainwindow.display_tab("Dashboard")
+
+        assert app_ui("price_table").rowCount() == 1, "Price table row count OK"
+        assert app_ui("price_table").columnCount() == 8, "Price table column count OK"
+        assert app_ui("price_1_0") == "Workday", "Price table value OK"
+        assert app_ui("price_1_1") == "0", "Price table value OK"
+        assert app_ui("price_0_1") == "01/02/2024", "Price table header OK"
+        assert app_ui("price_0_5") == "01/06/2024", "Price table header OK"
+        assert app_ui("price_0_7") == "01/08/2024", "Price table header OK"
 
     def test_export_file_choose(
         self, app_ui, app_db, qtbot, monkeypatch, patch_export, exportdialog_ui
