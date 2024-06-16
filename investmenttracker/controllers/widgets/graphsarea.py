@@ -153,7 +153,8 @@ class GraphsArea(pyqtgraph.PlotWidget):
     #     },
     #     'cash': cash_value
     # }
-    # One date element per transaction date
+    # One date element per transaction or price date
+    # Goal: store values on correct dates
     accounts_holdings = {}
 
     shares_raw_values = {}
@@ -342,60 +343,45 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.calculate_accounts(self.selected_accounts)
         account_id = self.selected_accounts[0]
         account = self.all_accounts[account_id]
-        start_date = self.start_date
-        if start_date not in self.accounts_holdings[account_id]:
-            start_date = max(
-                d for d in self.accounts_holdings[account_id] if d < start_date
-            )
-        # Find held shares during the timespan of the graph (rather than the whole account lifecycle)
-        held_shares = set(
-            d
-            for date in self.accounts_holdings[account_id]
-            if date > start_date and date <= self.end_date
-            for d in self.accounts_holdings[account_id][date]["shares"]
-        )
-        self.calculate_shares(held_shares)
-
-        # Now convert to percentages
-        holdings = self.accounts_holdings[account_id]
-        self.shares_graph_values = {}
-        holdings = {
-            d: holdings[d] for d in holdings if self.start_date <= d <= self.end_date
-        }
-        self.accounts_graph_values[account_id] = {d: 1 for d in holdings}
-
-        if not held_shares:
+        if account_id not in self.accounts_holdings:
+            # Error is already displayed by self.calculate_accounts
             return
-        share_id = 0
-        for share_id in held_shares:
-            try:
-                self.shares_graph_values[share_id] = {
-                    date: (
-                        holdings[date]["shares"][share_id]
-                        * self.get_share_value_as_of(
-                            share_id, date, account.base_currency
-                        ).price
-                        / self.accounts_raw_values[account_id][date]
-                        if share_id in holdings[date]["shares"]
-                        else 0
-                    )
+        holdings = self.accounts_holdings[account_id]
+
+        # Convert values to percentages
+        key_dates = [d for d in holdings if self.start_date <= d <= self.end_date]
+        self.shares_graph_values = {}
+        self.accounts_graph_values[account_id] = {d: 1 for d in key_dates}
+        all_shares = set()
+        for date in holdings:
+            all_shares.update(holdings[date]["shares"])
+
+        if not all_shares:
+            self.add_error(UserWarning(f"Account {account.name} has no holding"))
+            return
+
+        for share_id in sorted(all_shares):
+            if share_id not in self.shares_graph_values:
+                self.shares_graph_values[share_id] = {}
+            self.shares_graph_values[share_id] = {
+                date: (
+                    holdings[date]["shares"].get(share_id, 0)
+                    * holdings[date]["share_value"][share_id]
+                    / self.accounts_raw_values[account_id][date]
                     + max(
                         [0]
                         + [
-                            self.shares_graph_values[s][date]
+                            self.shares_graph_values[s].get(date, 0)
                             for s in self.shares_graph_values
                         ]
                     )
-                    for date in holdings
-                }
-            except (KeyError, NoPriceException) as initial_exception:
-                exception = NoPriceException(
-                    _("No value found"), self.all_shares[share_id]
                 )
-                exception.account = account
-                raise exception from initial_exception
+                for date in key_dates
+            }
 
-        self.selected_shares = list(held_shares) + [account.base_currency.id]
+        self.selected_shares = list(self.shares_graph_values.keys()) + [
+            account.base_currency.id
+        ]
         self.calculate_shares([account.base_currency.id])
 
         # This should yield 1 for each date (because it contains the sum of everything)
@@ -407,12 +393,10 @@ class GraphsArea(pyqtgraph.PlotWidget):
             )
             + (self.shares_graph_values[share_id][date] if share_id else 0)
             # share_id contains the last share from the loop, thus everything except cash
-            # This is because the% of a given share is actually the percentage of that share in the total + all the "previous" shares' %
+            # This is because the % of a given share is actually the percentage of that share in the total + all the "previous" shares' %
             # Otherwise, it's not a stacked area chart, but each share would have its percentage
-            for date in holdings
+            for date in key_dates
         }
-
-        # The actual conversion is done by convert_raw_to_graph (called by plot_graph)
 
         self.plot_graph()
 
@@ -447,22 +431,13 @@ class GraphsArea(pyqtgraph.PlotWidget):
             The list of shares to calculate
         """
         logger.info(f"GraphsArea.calculate_shares {shares}")
-        if not self.start_date or not self.end_date or not shares:
+        if not shares:
             return
 
         for share_id in shares:
             share = self.all_shares[share_id]
-            ranges_missing = self.find_missing_date_ranges(
-                self.shares_raw_values, share_id
-            )
             if share_id not in self.shares_raw_values:
-                self.shares_raw_values[share_id] = {}
-
-            for range_missing in ranges_missing:
-                values = self.database.share_prices_get(
-                    share, share.base_currency, *range_missing
-                )
-                self.shares_raw_values[share_id] |= {v.date: v for v in values}
+                self.shares_raw_values[share_id] = {p.date: p for p in share.prices}
             logger.debug(
                 f"GraphsArea.calculate_shares - {len(self.shares_raw_values[share_id])} values for {share.name}"
             )
@@ -488,110 +463,128 @@ class GraphsArea(pyqtgraph.PlotWidget):
             The list of shares to calculate
         """
         logger.info(f"GraphsArea.calculate_accounts {accounts}")
-        if not self.start_date or not self.end_date or not accounts:
+        if not accounts:
             return
         # Evaluate the value from the start date until the end date
         for account_id in accounts:
             try:
                 account = self.all_accounts[account_id]
                 if not account.holdings:
+                    self.add_error(
+                        UserWarning(f"Account {account.name} has no holding")
+                    )
                     continue
-                if account_id not in self.accounts_holdings:
-                    self.accounts_holdings[account_id] = account.holdings.copy()
-                holdings = self.accounts_holdings[account_id]
-
                 if account_id not in self.accounts_raw_values:
+                    self.accounts_holdings[account_id] = {}
                     self.accounts_raw_values[account_id] = {}
+                else:
+                    continue
 
-                # Find missing ranges - improves performance
-                ranges_missing = self.find_missing_date_ranges(
-                    self.accounts_raw_values, account_id, account.start_date
+                # Get share prices when they're held in the account
+                # Also, find all key dates when the account value changes
+                all_shares = set(
+                    t.share
+                    for t in account.transactions
+                    if t.type.value["impact_asset"]
                 )
+                key_dates = set(account.holdings.keys())
+                share_prices = {}
+                for share in all_shares:
+                    # Get dates in which share is held (= and in which prices should be known)
+                    date_acquired = min(
+                        t.date for t in account.transactions if t.share == share
+                    )
+                    date_sold = max(
+                        t.date for t in account.transactions if t.share == share
+                    )
+                    # If share is still held today, date_sold should be None
+                    if share.id in account.shares and account.shares[share.id] != 0:
+                        date_sold = None
 
-                for range_missing in ranges_missing:
-                    new_raw_values = {}
-
-                    # Get holdings at start of range
-                    holdings_at_start = holdings[
-                        max([d for d in holdings.keys() if d <= range_missing[0]])
-                    ]
-                    holdings[range_missing[0]] = {
-                        "cash": holdings_at_start["cash"],
-                        "shares": holdings_at_start["shares"].copy(),
+                    # Get prices when share is held
+                    prices = {
+                        p.date: p.price
+                        for p in share.prices
+                        if p.date >= date_acquired
+                        and (date_sold is None or p.date <= date_sold)
+                        and p.currency == account.base_currency
                     }
-
-                    transaction_dates = list(holdings.keys())
-                    for transaction_date in transaction_dates:
-                        # Outside of requested range
-                        if (
-                            transaction_date < range_missing[0]
-                            or transaction_date > range_missing[1]
-                        ):
-                            continue
-
-                        # Get next transaction, because holdings are stable until then
-                        # range_missing[1] is here to guarantee there is a value
-                        # It also limit the range of transactions
-                        next_transaction_date = min(
-                            [x for x in holdings.keys() if x > transaction_date]
-                            + [range_missing[1]]
-                        )
-
-                        current_holdings = holdings[transaction_date]
-
-                        new_raw_values[transaction_date] = current_holdings["cash"]
-                        for share_id in current_holdings["shares"]:
-                            # Get values from the DB
-                            share_values = self.get_share_value_in_range(
-                                share_id,
-                                transaction_date,
-                                next_transaction_date,
-                                account.base_currency,
+                    if not share.prices:
+                        if date_sold is not None:
+                            raise NoPriceException(
+                                _(
+                                    "No price when share is held: from {date_acquired}"
+                                ).format(date_acquired=date_acquired),
+                                share,
+                            )
+                        else:
+                            raise NoPriceException(
+                                _(
+                                    "No price when share is held: {date_acquired} to {date_sold}"
+                                ).format(
+                                    date_acquired=date_acquired, date_sold=date_sold
+                                ),
+                                share,
                             )
 
-                            # Add all dates of this share to the list
-                            previous_share_value = 0
-                            for share_value_date in sorted(share_values.keys()):
-                                holdings[share_value_date] = current_holdings
-                                # If date doesn't exist, take previous one
-                                # Also remove this share's value (to avoid double-count)
-                                if not share_value_date in new_raw_values:
-                                    previous_value_date = max(
-                                        d
-                                        for d in new_raw_values
-                                        if d < share_value_date
-                                    )
-                                    new_raw_values[share_value_date] = (
-                                        new_raw_values[previous_value_date]
-                                        - previous_share_value
-                                    )
+                    # If share not valued upon acquisition, find the most recent price
+                    if date_acquired not in prices:
+                        dates_before = [
+                            p.date for p in share.prices if p.date <= date_acquired
+                        ]
+                        if not dates_before:
+                            raise NoPriceException(
+                                _(
+                                    "No price upon share acquisition on {date_acquired}"
+                                ).format(date_acquired=date_acquired),
+                                share,
+                            )
+                        most_recent_date = max(dates_before)
+                        prices[date_acquired] = [
+                            p.price for p in share.prices if p.date == most_recent_date
+                        ][0]
+                    share_prices[share.id] = prices
+                    key_dates.update(prices.keys())
 
-                                # Add the share value as of share_value_date
-                                previous_share_value = (
-                                    current_holdings["shares"][share_id]
-                                    * share_values[share_value_date].price
-                                )
-                                new_raw_values[share_value_date] += previous_share_value
+                # For each key date, evaluate the values
+                holdings_now = account.holdings[account.start_date]
+                holdings_now["share_value"] = {}
+                for date in sorted(key_dates):
+                    # Copy previous value, to avoid overwriting it
+                    holdings_now = holdings_now.copy()
+                    for i in holdings_now:
+                        if not isinstance(holdings_now[i], float):
+                            holdings_now[i] = holdings_now[i].copy()
+                    # If there's a transaction on that date, update cash & shares held
+                    if date in account.holdings:
+                        holdings_now["cash"] = account.holdings[date]["cash"]
+                        holdings_now["shares"] = account.holdings[date]["shares"].copy()
 
-                            # Add dates from other shares (they're not in holdings)
-                            missing_dates = [
-                                d
-                                for d in new_raw_values
-                                if d not in share_values
-                                # and d not in holdings
-                                and transaction_date < d < next_transaction_date
-                            ]
-                            for missing_date in missing_dates:
-                                holdings[missing_date] = holdings[transaction_date]
-                                share_value = self.get_share_value_as_of(
-                                    share_id, missing_date, account.base_currency
-                                )
-                                new_raw_values[missing_date] += (
-                                    current_holdings["shares"][share_id]
-                                    * share_value.price
-                                )
+                    # Determine value of the account : cash + shares
+                    self.accounts_raw_values[account_id][date] = holdings_now["cash"]
+                    for share_id in holdings_now["shares"]:
+                        # Update value if there is a new share price. Otherwise, the previous value is used thanks to the logic above
+                        if date in share_prices[share_id]:
+                            holdings_now["share_value"][share_id] = share_prices[
+                                share_id
+                            ][date]
+                        self.accounts_raw_values[account_id][date] += (
+                            holdings_now["shares"][share_id]
+                            * holdings_now["share_value"][share_id]
+                        )
+                    self.accounts_holdings[account_id][date] = holdings_now
 
-                    self.accounts_raw_values[account_id] |= new_raw_values
+                # Start date of graph: use most recent value
+                if self.start_date not in self.accounts_raw_values[account_id]:
+                    found = [
+                        date
+                        for date in self.accounts_raw_values[account_id]
+                        if date < self.start_date
+                    ]
+                    if found:
+                        self.accounts_raw_values[account_id][self.start_date] = (
+                            self.accounts_raw_values[account_id][max(found)]
+                        )
             except NoPriceException as exception:
                 exception.account = self.all_accounts[account_id]
                 self.add_error(exception)
@@ -726,6 +719,9 @@ class GraphsArea(pyqtgraph.PlotWidget):
                     self.accounts_graph_values,
                 )
 
+        if element_id not in raw:
+            return
+
         baseline_value = 1
         if self.graph_type == "baseline" or self.graph_type == "baseline_net":
             # If there is a date before the baseline, take it. Otherwise, take the first available.
@@ -735,9 +731,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
             elif raw[element_id]:
                 real_baseline_date = min(raw[element_id].keys())
             else:
-                raise NoPriceException(
-                    f"No value to graph for {element_type} {element_id}"
-                )
+                raise ValueError(f"No value to graph for {element_type} {element_id}")
             baseline_value = raw[element_id][real_baseline_date]
             baseline_value = (
                 baseline_value
@@ -833,45 +827,6 @@ class GraphsArea(pyqtgraph.PlotWidget):
             ymax = self.graph_types[self.graph_type]["max"]
         self.setYRange(ymin, ymax, padding=0)
 
-    def find_missing_date_ranges(self, raw_values, element_id, first_date=None):
-        """Given a share or account, finds which dates are missing from calculation
-
-        The goal is (ultimately) to reduce the number of dates calculated
-
-        Parameters
-        ----------
-        raw_values : dict of format {element_id: {datetime.date: value}}
-            The values already known / calculated
-        element_id : int
-            The ID of element to check
-        first_date : datetime.date
-            The 'start of the world' so nothing can be before
-        """
-        logger.debug(
-            f"GraphsArea.find_missing_date_ranges {element_id} starting on {first_date}"
-        )
-        ranges_missing = []
-        if not first_date:
-            first_date = datetime.date(1, 1, 1)
-        elif first_date > self.end_date:
-            return []
-
-        start = max(self.start_date, first_date)
-        if raw_values and element_id in raw_values and raw_values[element_id]:
-            existing_dates = list(raw_values[element_id].keys())
-            if min(existing_dates) > start:
-                ranges_missing.append((start, min(existing_dates + [self.end_date])))
-
-            if max(existing_dates) < self.end_date:
-                ranges_missing.append(
-                    (max(existing_dates + [self.start_date]), self.end_date)
-                )
-        else:
-            ranges_missing.append((start, self.end_date))
-
-        logger.debug(f"GraphsArea.find_missing_date_ranges - Found {ranges_missing}")
-        return ranges_missing
-
     def get_share_value_as_of(self, share_id, start_date, currency):
         """Returns the price of a share on a given date and in a given currency
 
@@ -890,7 +845,7 @@ class GraphsArea(pyqtgraph.PlotWidget):
         self.calculate_shares([share_id])
         # If no value known at all, we can't proceed
         if share_id not in self.shares_raw_values:
-            raise NoPriceException("No value found", self.all_shares[share_id])
+            raise NoPriceException("No value found at all", self.all_shares[share_id])
         share_values = [
             d
             for d, price in self.shares_raw_values[share_id].items()
@@ -898,47 +853,11 @@ class GraphsArea(pyqtgraph.PlotWidget):
         ]
         # If no value known before the start, we can't proceed
         if not share_values:
-            raise NoPriceException("No value found", self.all_shares[share_id])
+            raise NoPriceException(
+                "No value found on date", self.all_shares[share_id], None, start_date
+            )
 
         return self.shares_raw_values[share_id][max(share_values)]
-
-    def get_share_value_in_range(self, share_id, start_date, end_date, currency):
-        """Returns the prices of a share on a given date range and in a given currency
-
-        Parameters
-        ----------
-        share_id : int
-            The ID of the share to find
-        start_date : datetime.date
-            The start date of the range being searched
-        end_date : datetime.date
-            The end date of the range being searched
-        currency : models.share.Share
-            In which currency the share prices should be
-        """
-        logger.info(
-            f"GraphsArea.get_share_value_in_range {share_id} - {start_date} to {end_date} with currency {currency.name}"
-        )
-        self.calculate_shares([share_id])
-        # If no value known at all, we can't proceed
-        if share_id not in self.shares_raw_values:
-            raise NoPriceException("No value found", self.all_shares[share_id])
-
-        first_date = [
-            d
-            for d, price in self.shares_raw_values[share_id].items()
-            if d <= start_date and price.currency == currency
-        ]
-        if not first_date:
-            raise NoPriceException("No value found", self.all_shares[share_id])
-        share_values = {start_date: self.shares_raw_values[share_id][max(first_date)]}
-        share_values |= {
-            d: self.shares_raw_values[share_id][d]
-            for d in self.shares_raw_values[share_id]
-            if start_date < d < end_date
-        }
-
-        return share_values
 
     def add_error(self, exception):
         """Adds an error for display (calls parent controller's method)

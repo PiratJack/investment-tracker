@@ -373,7 +373,7 @@ class TestUiGraphs:
         assert len(dataItems[0].curve.yData) == 0, "No point in graph"
         assert (
             app_ui("errors").text()
-            == "Could not display account Main account due to missing value for Accenture"
+            == "Could not display account Main account due to share Workday : No price upon share acquisition on 2020-01-25"
         ), "Error is displayed"
 
     def test_graphs_share(self, app_ui, qtbot):
@@ -519,7 +519,7 @@ class TestUiGraphs:
         assert dataItems[0].name() == "Euro", "Curve name OK"
         assert dataItems[1].name() == "BNP (Euro)", "Curve name OK"
         assert dataItems[2].name() == "Test account in EUR (Euro)", "Curve name OK"
-        assert len(dataItems[0].curve.yData) == 7, "7 different points in graph"
+        assert len(dataItems[0].curve.yData) == 6, "6 different points in graph"
 
         # Check values for Euro
         values = [
@@ -530,7 +530,7 @@ class TestUiGraphs:
                 round(dataItems[0].curve.yData[i], 3) == values[i]
             ), "Values are correct"
         # Check values for BNP
-        values = [0.524, 0.510, 0.515, 0.570, 0.592, 0.600]
+        values = [0.510, 0.515, 0.570, 0.592, 0.600, 0.588]
         for i in range(len(values)):
             assert (
                 round(dataItems[1].curve.yData[i], 3) == values[i]
@@ -546,14 +546,6 @@ class TestUiGraphs:
         # Check display in the graph
         dataItems = app_ui("graph").plotItem.dataItems
         assert len(dataItems) == 2, "Graph curve count OK"
-        assert (
-            app_ui("errors")
-            .text()
-            .find(
-                "Could not display account Main account due to missing value for Accenture"
-            )
-            != -1
-        ), "Error is displayed"
         assert (
             app_ui("errors").text().find("Only 1 account can be displayed in this mode")
             != -1
