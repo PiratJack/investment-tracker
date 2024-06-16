@@ -221,7 +221,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_datetime(self, app_ui, qtbot):
         # Select a date
@@ -229,7 +229,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_str(self, app_ui, qtbot):
         # Select a date
@@ -237,7 +237,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 14, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_int(self, app_ui, qtbot):
         # Select a date
@@ -245,7 +245,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 16, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_variant(self, app_ui, qtbot):
         # Select a date
@@ -253,7 +253,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 16, "Row count OK"
 
     def test_shareprices_select_date_via_set_filters_minus_one(self, app_ui, qtbot):
         # Select a date
@@ -261,7 +261,7 @@ class TestUiSharePrices:
 
         # Check table layout
         index = app_ui("table").model.index(1, 1)
-        assert app_ui("table").model.rowCount(index) == 15, "Row count OK"
+        assert app_ui("table").model.rowCount(index) == 16, "Row count OK"
 
     def test_shareprices_click_table(self, app_ui, qtbot):
         # Select a share

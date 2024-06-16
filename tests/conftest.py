@@ -269,7 +269,7 @@ def app_db(app_empty_db):
                 quantity=100,
                 unit_price=50,
             ),
-            Transaction(  # Account 6: remove 1000 EUR 4 months ago
+            Transaction(  # Account 6: remove 1000 EUR 4 months ago on 5th of month
                 account_id=6,
                 date=(datetime.date.today() + datetime.timedelta(days=-4 * 30)).replace(
                     day=5
@@ -326,6 +326,13 @@ def app_db(app_empty_db):
                 date=datetime.date.today() + datetime.timedelta(days=-5),
                 price=10,
                 currency_id=1,
+                source="Lambda",
+            ),
+            SharePrice(  # BNP at 50 EUR on Nov 1st, 2023 (when it was bought)
+                share_id=7,
+                date=datetime.date(2023, 11, 1),
+                price=50,
+                currency_id=5,
                 source="Lambda",
             ),
             SharePrice(  # BNP at 50 EUR 7 months ago
