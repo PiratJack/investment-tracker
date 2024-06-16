@@ -122,7 +122,7 @@ msgid "Copy"
 msgstr ""
 
 #, python-brace-format
-msgid "Could not display account {account} due to missing value for {share}"
+msgid "Could not display account {account} due to share {share} : {error}"
 msgstr ""
 
 msgid "Could not find currency in database"
@@ -405,7 +405,16 @@ msgstr ""
 msgid "No price available for share {name} ({main_code})"
 msgstr ""
 
-msgid "No value found"
+#, python-brace-format
+msgid "No price upon share acquisition on {date_acquired}"
+msgstr ""
+
+#, python-brace-format
+msgid "No price when share is held: from {date_acquired}"
+msgstr ""
+
+#, python-brace-format
+msgid "No price when share is held: {date_acquired} to {date_sold}"
 msgstr ""
 
 msgid "Period"

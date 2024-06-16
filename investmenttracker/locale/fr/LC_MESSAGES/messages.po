@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2024-05-12 15:42+0200\n"
+"PO-Revision-Date: 2024-06-16 19:40+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 msgid "Account"
 msgstr "Compte"
@@ -124,8 +124,8 @@ msgid "Copy"
 msgstr "Copier"
 
 #, python-brace-format
-msgid "Could not display account {account} due to missing value for {share}"
-msgstr "Impossible d'afficher la valeur du compte {account}: valeur manquante pour {share}"
+msgid "Could not display account {account} due to share {share} : {error}"
+msgstr "Impossible d'afficher la valeur du compte {account} pour le titre {share} : {error}"
 
 msgid "Could not find currency in database"
 msgstr "Monnaie impossible à trouver dans la base de données"
@@ -407,8 +407,17 @@ msgstr "Référence nette (exclus les entrées/sorties d'espèces et d'actions)"
 msgid "No price available for share {name} ({main_code})"
 msgstr "Prix inconnu pour titre {name} ({main_code})"
 
-msgid "No value found"
-msgstr "Aucune valeur trouvée"
+#, python-brace-format
+msgid "No price upon share acquisition on {date_acquired}"
+msgstr ""
+
+#, python-brace-format
+msgid "No price when share is held: from {date_acquired}"
+msgstr ""
+
+#, python-brace-format
+msgid "No price when share is held: {date_acquired} to {date_sold}"
+msgstr ""
 
 msgid "Period"
 msgstr "Période"
@@ -586,6 +595,9 @@ msgstr "type"
 #, fuzzy
 #~ msgid "Missing share limit value"
 #~ msgstr "Valeur manquante: code du titre"
+
+#~ msgid "No value found"
+#~ msgstr "Aucune valeur trouvée"
 
 #~ msgid "Select a value"
 #~ msgstr "Choisir une valeur"

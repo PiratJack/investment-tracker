@@ -659,8 +659,12 @@ class GraphsController:
             elif isinstance(error, NoPriceException):
                 messages.append(
                     _(
-                        "Could not display account {account} due to missing value for {share}"
-                    ).format(account=error.account.name, share=error.share.name)
+                        "Could not display account {account} due to share {share} : {error}"
+                    ).format(
+                        account=error.account.name,
+                        share=error.share.name,
+                        error=error.args[0],
+                    )
                 )
         messages = set(messages)
         self.error_messages.setText("\n".join(messages))
