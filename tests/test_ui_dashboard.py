@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(os.path.join(BASE_DIR, "investmenttracker"))
 
+from models.config import Config
+
 
 class TestUiDashboard:
     @pytest.fixture
@@ -111,6 +113,69 @@ class TestUiDashboard:
         return get_ui
 
     @pytest.fixture
+    def importdialog_ui(self, qtbot, qapp):
+        def get_ui(element):
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None, timeout=800)
+            dialog = qapp.activeWindow()
+
+            if element == "dialog":
+                return dialog
+            elif element == "separator_title":
+                return dialog.layout().itemAtPosition(0, 0).widget()
+            elif element == "separator_field":
+                return dialog.layout().itemAtPosition(0, 1).widget()
+            elif element == "decimaldot_title":
+                return dialog.layout().itemAtPosition(1, 0).widget()
+            elif element == "decimaldot_field":
+                return dialog.layout().itemAtPosition(1, 1).widget()
+            elif element == "has_header":
+                return dialog.layout().itemAtPosition(2, 0).widget()
+            elif element == "errors":
+                return dialog.layout().itemAtPosition(3, 0).widget()
+            elif element == "table":
+                return dialog.layout().itemAtPosition(4, 0).widget()
+            elif element.startswith("table_"):
+                row, col = element.split("_")[1:]
+                if row == "0":
+                    return get_ui("table").cellWidget(int(row), int(col))
+                return get_ui("table").item(int(row), int(col))
+
+            elif element == "buttonbox":
+                return dialog.layout().itemAtPosition(5, 1).widget()
+            elif element == "button_cancel":
+                return get_ui("buttonbox").button(QtWidgets.QDialogButtonBox.Cancel)
+            elif element == "button_ok":
+                return get_ui("buttonbox").button(QtWidgets.QDialogButtonBox.Ok)
+
+            raise ValueError(f"Field {element} could not be found")
+
+        return get_ui
+
+    @pytest.fixture
+    def importresults_ui(self, qtbot, qapp):
+        def get_ui(element):
+            qtbot.waitUntil(lambda: qapp.activeWindow() is not None, timeout=500)
+            qtbot.waitUntil(lambda: qapp.activeWindow().windowTitle() == "Load results")
+            dialog = qapp.activeWindow()
+
+            if element == "dialog":
+                return dialog
+            elif element == "table":
+                return dialog.layout().itemAt(0).widget()
+            elif element.startswith("table_"):
+                row, col = element.split("_")[1:]
+                return get_ui("table").item(int(row), int(col))
+
+            elif element == "buttonbox":
+                return dialog.layout().itemAt(1).widget()
+            elif element == "button_ok":
+                return get_ui("buttonbox").button(QtWidgets.QDialogButtonBox.Ok)
+
+            raise ValueError(f"Field {element} could not be found")
+
+        return get_ui
+
+    @pytest.fixture
     def patch_export(self, app_ui, qtbot, monkeypatch):
         def define_file(temp_file):
             monkeypatch.setattr(
@@ -120,6 +185,18 @@ class TestUiDashboard:
             )
             qtbot.mouseClick(app_ui("export_choose"), Qt.LeftButton, Qt.NoModifier)
             temp_file.close()  # Allow the app to use the file in read-write mode
+
+        return define_file
+
+    @pytest.fixture
+    def patch_import(self, app_ui, qtbot, monkeypatch):
+        def define_file(temp_file):
+            monkeypatch.setattr(
+                QtWidgets.QFileDialog,
+                "getOpenFileName",
+                lambda *args, **kwargs: (temp_file.fileName(), ""),
+            )
+            qtbot.mouseClick(app_ui("import_choose"), Qt.LeftButton, Qt.NoModifier)
 
         return define_file
 
@@ -224,7 +301,7 @@ class TestUiDashboard:
         assert app_ui("price_0_5") == "01/06/2024", "Price table header OK"
         assert app_ui("price_0_7") == "01/08/2024", "Price table header OK"
 
-    def test_export_file_choose(
+    def test_export_choose_file(
         self, app_ui, app_db, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Trigger export on temporary file
@@ -241,7 +318,7 @@ class TestUiDashboard:
                 == temp_file.fileName()
             ), "Export path updated OK in DB"
 
-    def test_export_file_choose_twice(
+    def test_export_choose_file_twice(
         self, app_ui, app_db, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Trigger export on temporary file
@@ -265,7 +342,7 @@ class TestUiDashboard:
                 app_db.config_get_by_name("export.filename").value == "/tmp/temp.txt"
             ), "Export path updated OK"
 
-    def test_export_file_cancel(self, app_ui, qtbot, patch_export, exportdialog_ui):
+    def test_export_cancel(self, app_ui, qtbot, patch_export, exportdialog_ui):
         # Check dialog contents + cancel
         def handle_dialog():
             # Get the different fields
@@ -318,7 +395,7 @@ class TestUiDashboard:
             )
             assert file_contents == [], "No data exported"
 
-    def test_export_file_confirm(
+    def test_export_confirm(
         self, app_ui, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Choose values and confirm export
@@ -377,7 +454,7 @@ class TestUiDashboard:
             )
             assert file_contents == ["3:Workday:AMEX"], "Data exported OK"
 
-    def test_export_file_refuse_overwrite(
+    def test_export_refuse_overwrite(
         self, app_ui, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Choose values and confirm export
@@ -430,7 +507,7 @@ class TestUiDashboard:
             )
             assert file_contents == [], "Data exported OK"
 
-    def test_export_file_no_file_selected(
+    def test_export_no_file_selected(
         self, app_ui, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Cancel everything, this is not the purpose of the test
@@ -459,7 +536,7 @@ class TestUiDashboard:
             QtCore.QTimer.singleShot(0, handle_dialog)
             qtbot.mouseClick(app_ui("export_exec"), Qt.LeftButton, Qt.NoModifier)
 
-    def test_export_file_no_file_selected_error(
+    def test_export_no_file_selected_error(
         self, app_ui, qtbot, monkeypatch, patch_export, exportdialog_ui
     ):
         # Trigger export on temporary file
@@ -480,6 +557,444 @@ class TestUiDashboard:
             assert (
                 app_ui("errors").text() == "Please select a file before exporting"
             ), "Error display OK"
+
+    def test_import_too_old(self, app_ui, app_db, app_mainwindow):
+        # Set an old import date
+        old_date = datetime.date.today() + datetime.timedelta(days=-45)
+        app_db.config_set("import.last", old_date.strftime("%Y-%m-%d"))
+        app_mainwindow.display_tab("Dashboard")
+
+        # Check "Last import date" is updated
+        assert app_ui("import_last_date").text() == old_date.strftime(
+            "%d/%m/%Y"
+        ), "Last import date OK"
+        assert (
+            app_ui("import_last_date").property("class") == "warning"
+        ), "Last import date displayed OK"
+
+    def test_import_inexistant_file(self, app_ui, qtbot, app_db, app_mainwindow):
+        # Enter inexistant file in DB
+        app_db.session.add_all([Config(name="import.filename", value="/test/path")])
+        app_db.session.commit()
+        app_db.config_get_by_name("import.filename")
+        # Force reload of screen
+        app_mainwindow.display_tab("Dashboard")
+
+        # Check display of file path
+        assert app_ui("import_path").text() == "/test/path", "Import path is inexistant"
+
+        # Trigger import & check error
+        qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+        assert app_ui("errors").text() == "The selected file does not exist", "Error OK"
+
+    def test_import_no_file_selected(
+        self, app_ui, qtbot, app_db, monkeypatch, importdialog_ui
+    ):
+        # Trigger import without selecting a file first
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            assert app_ui("import_path").text() == "", "Import path is empty at start"
+            monkeypatch.setattr(
+                QtWidgets.QFileDialog,
+                "getOpenFileName",
+                lambda *args, **kwargs: (temp_file.fileName(), ""),
+            )
+
+            # Display import dialog
+            # This will trigger the selection of a file
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+            assert app_ui("errors").text() == "The selected file is empty", "Error OK"
+
+    def test_import_no_file_selected_refuse_choosing(self, app_ui, qtbot, monkeypatch):
+        # Refuse selecting a file
+        monkeypatch.setattr(
+            QtWidgets.QFileDialog,
+            "getOpenFileName",
+            lambda *args, **kwargs: (None, ""),
+        )
+
+        # Trigger import without selecting a file first
+        qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+        assert (
+            app_ui("errors").text() == "Please select a file before importing"
+        ), "Error display OK"
+
+    def test_import_unicode_error(self, app_ui, qtbot, app_db, monkeypatch):
+        # Trigger import on wrongly encoded file
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            assert app_ui("import_path").text() == "", "Import path is empty at start"
+            monkeypatch.setattr(
+                QtWidgets.QFileDialog,
+                "getOpenFileName",
+                lambda *args, **kwargs: (temp_file.fileName(), ""),
+            )
+
+            temp_file.write(b"\x81")
+            temp_file.close()
+
+            # Trigger import
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+            assert (
+                app_ui("errors").text()
+                == "There was an error reading this file. Please choose another file."
+            ), "Error display OK"
+
+    def test_import_empty_file(self, app_ui, qtbot, patch_import):
+        # Trigger import on temporary file
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            patch_import(temp_file)
+
+            # Display import dialog
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+            assert app_ui("errors").text() == "The selected file is empty", "Error OK"
+
+    def test_import_choose_file(self, app_ui, app_db, patch_import):
+        # Create import file
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            # Trigger file selection
+            patch_import(temp_file)
+
+            # Check fields & DB are updated
+            assert (
+                app_ui("import_path").text() == temp_file.fileName()
+            ), "Import path updated OK in UI"
+            assert (
+                app_db.config_get_by_name("import.filename").value
+                == temp_file.fileName()
+            ), "Import path updated OK in DB"
+
+    def test_import_choose_file_twice(
+        self, app_ui, app_db, patch_import, qtbot, monkeypatch
+    ):
+        # Create import file
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            patch_import(temp_file)
+
+            # Trigger file selection a second time, with different value
+            monkeypatch.setattr(
+                QtWidgets.QFileDialog,
+                "getOpenFileName",
+                lambda *args, **kwargs: ("/tmp/temp.txt", ""),
+            )
+            qtbot.mouseClick(app_ui("import_choose"), Qt.LeftButton, Qt.NoModifier)
+
+            # Check fields & DB are updated
+            assert (
+                app_ui("import_path").text() == "/tmp/temp.txt"
+            ), "Import path updated OK in UI"
+            assert (
+                app_db.config_get_by_name("import.filename").value == "/tmp/temp.txt"
+            ), "Import path updated OK in DB"
+
+    def test_import_cancel(self, app_ui, app_db, patch_import, qtbot, importdialog_ui):
+        def handle_dialog():
+            # Get the different fields
+            separator_title = importdialog_ui("separator_title")
+            separator_field = importdialog_ui("separator_field")
+            decimaldot_title = importdialog_ui("decimaldot_title")
+            decimaldot_field = importdialog_ui("decimaldot_field")
+            has_header = importdialog_ui("has_header")
+            errors = importdialog_ui("errors")
+            table = importdialog_ui("table")
+            table_0_0 = importdialog_ui("table_0_0")
+            table_0_1 = importdialog_ui("table_0_1")
+            table_1_0 = importdialog_ui("table_1_0")
+            table_1_1 = importdialog_ui("table_1_1")
+            table_1_2 = importdialog_ui("table_1_2")
+            table_1_3 = importdialog_ui("table_1_3")
+            table_1_4 = importdialog_ui("table_1_4")
+            button_ok = importdialog_ui("button_ok")
+            button_cancel = importdialog_ui("button_cancel")
+
+            assert isinstance(separator_title, QtWidgets.QLabel), "Separator title OK"
+            assert separator_title.text() == "Field delimiter", "Separator title OK"
+            assert isinstance(
+                separator_field, QtWidgets.QComboBox
+            ), "Field separator OK"
+            assert separator_field.currentText() == ";", "Field separator value OK"
+            assert isinstance(
+                decimaldot_title, QtWidgets.QLabel
+            ), "Decimal dot title OK"
+            assert decimaldot_title.text() == "Decimal point", "Decimal dot title OK"
+            assert isinstance(
+                decimaldot_field, QtWidgets.QComboBox
+            ), "Decimal dot field OK"
+            assert decimaldot_field.currentText() == ".", "Decimal dot value field OK"
+            assert isinstance(has_header, QtWidgets.QCheckBox), "Import header OK"
+            assert has_header.text() == "The file has headers", "Import header OK"
+            assert isinstance(errors, QtWidgets.QLabel), "Errors OK"
+            assert (
+                errors.text() == "Missing fields: Share, Date, Price, Currency, Source"
+            ), "Errors OK"
+
+            assert isinstance(table, QtWidgets.QTableWidget), "Table OK"
+            assert isinstance(table_0_0, QtWidgets.QComboBox), "Table header OK"
+            assert isinstance(table_0_1, QtWidgets.QComboBox), "Table header OK"
+            assert table_0_0.currentText() == "", "Table header OK"
+            assert table_0_1.currentText() == "", "Table header OK"
+            assert table_1_0.text() == "WDAY", "Table row OK"
+            assert table_1_1.text() == datetime.date.today().strftime(
+                "%Y-%m-%d"
+            ), "Table row OK"
+            assert table_1_2.text() == "11", "Table row OK"
+            assert table_1_3.text() == "USD", "Table row OK"
+            assert table_1_4.text() == "Irrelevant", "Table row OK"
+
+            assert isinstance(button_cancel, QtWidgets.QPushButton), "Cancel button OK"
+            assert isinstance(button_ok, QtWidgets.QPushButton), "OK button OK"
+
+            # Close dialog
+            qtbot.mouseClick(button_cancel, Qt.LeftButton, Qt.NoModifier)
+
+            # Check table has not changed
+            assert app_ui("price_1_0") == "Workday", "No new value in price table"
+            assert app_ui("price_1_6") == "0", "No new value in price table"
+            assert app_ui("price_1_7") == "1", "No new value in price table"
+            assert len(app_db.share_get_by_id(3).prices) == 1, "No new value in DB"
+
+        # Create import file
+        file_contents = [
+            "WDAY",
+            datetime.date.today().strftime("%Y-%m-%d"),
+            "11",
+            "USD",
+            "Irrelevant",
+        ]
+        file_contents = bytearray(";".join(file_contents), "UTF-8")
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            patch_import(temp_file)
+            temp_file.write(file_contents)
+            temp_file.close()  # Needed for some reason, otherwise python sees empty file
+
+            # Trigger the display of the dialog
+            QtCore.QTimer.singleShot(0, handle_dialog)
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+
+    def test_import_confirm(
+        self, app_ui, app_db, patch_import, qtbot, importdialog_ui, importresults_ui
+    ):
+        def handle_import_dialog():
+            # Get the different fields
+            errors = importdialog_ui("errors")
+            table_0_0 = importdialog_ui("table_0_0")
+            table_0_1 = importdialog_ui("table_0_1")
+            table_0_2 = importdialog_ui("table_0_2")
+            table_0_3 = importdialog_ui("table_0_3")
+            table_0_4 = importdialog_ui("table_0_4")
+            button_ok = importdialog_ui("button_ok")
+
+            # Set import fields & check error display along the way
+            table_0_0.setCurrentIndex(table_0_0.findText("Share"))
+            assert (
+                errors.text() == "Missing fields: Date, Price, Currency, Source"
+            ), "Errors OK"
+            table_0_1.setCurrentIndex(
+                table_0_1.findText("Date (YYYY-MM-DD)", Qt.MatchExactly)
+            )
+            assert (
+                errors.text() == "Missing fields: Price, Currency, Source"
+            ), "Errors OK"
+            table_0_2.setCurrentIndex(table_0_2.findText("Price", Qt.MatchExactly))
+            assert errors.text() == "Missing fields: Currency, Source", "Errors OK"
+            table_0_3.setCurrentIndex(table_0_2.findText("Currency", Qt.MatchExactly))
+            assert errors.text() == "Missing fields: Source", "Errors OK"
+            table_0_4.setCurrentIndex(table_0_2.findText("Source", Qt.MatchExactly))
+            assert errors.text() == "", "Errors OK"
+
+            # Confirm import
+            QtCore.QTimer.singleShot(0, handle_import_results)
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+        def handle_import_results():
+            # Get the different fields
+            table_0_0 = importresults_ui("table_0_0")
+            table_0_1 = importresults_ui("table_0_1")
+            table_0_2 = importresults_ui("table_0_2")
+            table_0_3 = importresults_ui("table_0_3")
+            table_1_0 = importresults_ui("table_1_0")
+            table_1_1 = importresults_ui("table_1_1")
+            table_1_2 = importresults_ui("table_1_2")
+            table_1_3 = importresults_ui("table_1_3")
+            button_ok = importresults_ui("button_ok")
+
+            assert table_0_0.text() == "Workday", "Import result OK"
+            assert table_0_1.text() == "1", "Import result OK"
+            assert table_0_2.text() == "0", "Import result OK"
+            assert table_0_3.text() == "WDAY", "Import result OK"
+            assert table_1_0.text() == "Total", "Import result OK"
+            assert table_1_1.text() == "1", "Import result OK"
+            assert table_1_2.text() == "0", "Import result OK"
+            assert table_1_3 is None, "Import result OK"
+
+            # Close dialog
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+            # Check table has been updated
+            assert app_ui("price_1_0") == "Workday", "New price in price table"
+            assert app_ui("price_1_6") == "0", "New price in price table"
+            assert app_ui("price_1_7") == "2", "New price in price table"
+            assert len(app_db.share_get_by_id(3).prices) == 2, "New price in DB"
+
+            # Check "Last import date" is updated
+            assert app_ui("import_last_date").text() == datetime.date.today().strftime(
+                "%d/%m/%Y"
+            ), "Last import date OK"
+
+        # Create import file
+        file_contents = [
+            "WDAY",
+            datetime.date.today().strftime("%Y-%m-%d"),
+            "11",
+            "USD",
+            "Irrelevant",
+        ]
+        file_contents = bytearray(";".join(file_contents), "UTF-8")
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            patch_import(temp_file)
+            temp_file.write(file_contents)
+            temp_file.close()  # Needed for some reason, otherwise python sees empty file
+
+            # Trigger the display of the dialog
+            QtCore.QTimer.singleShot(0, handle_import_dialog)
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+
+    def test_import_twice(
+        self,
+        app_ui,
+        app_db,
+        qapp,
+        patch_import,
+        qtbot,
+        importdialog_ui,
+        importresults_ui,
+    ):
+        def handle_first_import_dialog():
+            # Get the different fields
+            errors = importdialog_ui("errors")
+            table_0_0 = importdialog_ui("table_0_0")
+            table_0_1 = importdialog_ui("table_0_1")
+            table_0_2 = importdialog_ui("table_0_2")
+            table_0_3 = importdialog_ui("table_0_3")
+            table_0_4 = importdialog_ui("table_0_4")
+            button_ok = importdialog_ui("button_ok")
+
+            # Set import fields & check error display along the way
+            table_0_0.setCurrentIndex(table_0_0.findText("Share"))
+            table_0_1.setCurrentIndex(
+                table_0_1.findText("Date (YYYY-MM-DD)", Qt.MatchExactly)
+            )
+            table_0_2.setCurrentIndex(table_0_2.findText("Price", Qt.MatchExactly))
+            table_0_3.setCurrentIndex(table_0_2.findText("Currency", Qt.MatchExactly))
+            table_0_4.setCurrentIndex(table_0_2.findText("Source", Qt.MatchExactly))
+            assert errors.text() == "", "Errors OK"
+
+            # Confirm import
+            QtCore.QTimer.singleShot(0, handle_first_import_results)
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+            # Check configuration is saved
+            assert (
+                app_db.config_get_by_name("import.mapping").value
+                == "share;%Y-%m-%d;price;currency;source"
+            ), "Mapping is saved"
+
+        def handle_second_import_dialog():
+            # Get the different fields
+            errors = importdialog_ui("errors")
+            table_0_0 = importdialog_ui("table_0_0")
+            table_0_1 = importdialog_ui("table_0_1")
+            table_0_2 = importdialog_ui("table_0_2")
+            table_0_3 = importdialog_ui("table_0_3")
+            table_0_4 = importdialog_ui("table_0_4")
+            button_ok = importdialog_ui("button_ok")
+
+            # All import fields should be OK based on configuration saving
+            assert table_0_0.currentText() == "Share", "Import config save OK"
+            assert (
+                table_0_1.currentText() == "Date (YYYY-MM-DD)"
+            ), "Import config save OK"
+            assert table_0_2.currentText() == "Price", "Import config save OK"
+            assert table_0_3.currentText() == "Currency", "Import config save OK"
+            assert table_0_4.currentText() == "Source", "Import config save OK"
+            assert errors.text() == "", "Errors OK"
+
+            # Confirm import
+            QtCore.QTimer.singleShot(0, handle_second_import_results)
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+        def handle_first_import_results():
+            # Check the different fields
+            assert importresults_ui("table_0_0").text() == "Workday", "Import result OK"
+            assert importresults_ui("table_0_1").text() == "1", "Import result OK"
+            assert importresults_ui("table_0_2").text() == "0", "Import result OK"
+            assert importresults_ui("table_0_3").text() == "WDAY", "Import result OK"
+            assert importresults_ui("table_1_0").text() == "Total", "Import result OK"
+            assert importresults_ui("table_1_1").text() == "1", "Import result OK"
+            assert importresults_ui("table_1_2").text() == "0", "Import result OK"
+            assert importresults_ui("table_1_3") is None, "Import result OK"
+
+            # Close dialog
+            button_ok = importresults_ui("button_ok")
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+            # Check table has been updated
+            assert app_ui("price_1_0") == "Workday", "New price in price table"
+            assert app_ui("price_1_6") == "0", "New price in price table"
+            assert app_ui("price_1_7") == "2", "New price in price table"
+            assert len(app_db.share_get_by_id(3).prices) == 2, "New price in DB"
+
+            # Trigger the second display of the dialog
+            QtCore.QTimer.singleShot(0, handle_second_import_dialog)
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+
+        def handle_second_import_results():
+            # Check the different fields
+            assert importresults_ui("table_0_0").text() == "Workday", "Import result OK"
+            assert importresults_ui("table_0_1").text() == "0", "Import result OK"
+            assert importresults_ui("table_0_2").text() == "1", "Import result OK"
+            assert importresults_ui("table_0_3").text() == "WDAY", "Import result OK"
+            assert importresults_ui("table_1_0").text() == "Total", "Import result OK"
+            assert importresults_ui("table_1_1").text() == "0", "Import result OK"
+            assert importresults_ui("table_1_2").text() == "1", "Import result OK"
+            assert importresults_ui("table_1_3") is None, "Import result OK"
+
+            # Close dialog
+            button_ok = importresults_ui("button_ok")
+            qtbot.mouseClick(button_ok, Qt.LeftButton, Qt.NoModifier)
+
+            # Check table has been updated
+            assert app_ui("price_1_0") == "Workday", "No new price in price table"
+            assert app_ui("price_1_6") == "0", "No new price in price table"
+            assert app_ui("price_1_7") == "2", "No new price in price table"
+            assert len(app_db.share_get_by_id(3).prices) == 2, "No new price in DB"
+
+        # Create import file
+        file_contents = [
+            "WDAY",
+            datetime.date.today().strftime("%Y-%m-%d"),
+            "11",
+            "USD",
+            "Irrelevant",
+        ]
+        file_contents = bytearray(";".join(file_contents), "UTF-8")
+        temp_file = QtCore.QTemporaryFile()
+        if temp_file.open():
+            patch_import(temp_file)
+            temp_file.write(file_contents)
+            temp_file.close()  # Needed for some reason, otherwise python sees empty file
+
+            # Trigger the display of the dialog
+            QtCore.QTimer.singleShot(0, handle_first_import_dialog)
+            qtbot.mouseClick(app_ui("import_exec"), Qt.LeftButton, Qt.NoModifier)
+
+            # This prevents the DB from being deleted too early
+            qtbot.wait(500)
 
 
 if __name__ == "__main__":
