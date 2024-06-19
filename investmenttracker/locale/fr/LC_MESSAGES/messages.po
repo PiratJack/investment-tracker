@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-27 11:21+0200\n"
-"PO-Revision-Date: 2024-06-16 19:40+0200\n"
+"PO-Revision-Date: 2024-06-19 14:30+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -409,15 +409,15 @@ msgstr "Prix inconnu pour titre {name} ({main_code})"
 
 #, python-brace-format
 msgid "No price upon share acquisition on {date_acquired}"
-msgstr ""
+msgstr "Prix inconnu à l'achat du titre le {date_acquired}"
 
 #, python-brace-format
 msgid "No price when share is held: from {date_acquired}"
-msgstr ""
+msgstr "Prix inconnu pendant la possession: depuis le {date_acquired}"
 
 #, python-brace-format
 msgid "No price when share is held: {date_acquired} to {date_sold}"
-msgstr ""
+msgstr "Prix inconnu pendant la possession: du {date_acquired} au {date_sold}"
 
 msgid "Period"
 msgstr "Période"
@@ -512,6 +512,9 @@ msgstr "Le prix n'est pas un nombre décimal"
 msgid "The selected file does not exist"
 msgstr "Le fichier n'existe pas"
 
+msgid "The selected file is empty"
+msgstr "Le fichier choisi est vide"
+
 msgid "The source field is mandatory"
 msgstr "Le champ source est obligatoire"
 
@@ -601,3 +604,6 @@ msgstr "type"
 
 #~ msgid "Select a value"
 #~ msgstr "Choisir une valeur"
+
+#~ msgid "The file is empty"
+#~ msgstr "Le fichier est vide"

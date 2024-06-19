@@ -497,6 +497,9 @@ msgstr ""
 msgid "The selected file does not exist"
 msgstr ""
 
+msgid "The selected file is empty"
+msgstr ""
+
 msgid "The source field is mandatory"
 msgstr ""
 

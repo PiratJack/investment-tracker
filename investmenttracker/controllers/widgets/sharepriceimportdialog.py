@@ -419,6 +419,8 @@ class SharePriceImportDialog:
         logger.debug(f"SharePriceImportDialog.set_file {file_path}")
         self.file_path = file_path
         self.file_contents = open(file_path, "r+", encoding="UTF-8").read().splitlines()
+        if not self.file_contents:
+            raise ValueError(_("The selected file is empty"))
 
     def process_data(self):
         """Processes the file

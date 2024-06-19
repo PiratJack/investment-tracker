@@ -391,13 +391,18 @@ class DashboardController:
         Displays error if user still doesn't want to choose a file
         """
         logger.debug("DashboardController.on_import_share_prices")
+        # Reload config for import
+        self.config = self.database.configs_get_all()
+
         file_path = self.import_file_path.text()
         if not file_path:
             self.on_choose_import_file()
         # If user still doesn't want to choose, display error
+        file_path = self.import_file_path.text()
         if not file_path:
             self.error_label.setText(_("Please select a file before importing"))
             return
+
         self.error_label.setText("")
 
         import_dialog = SharePriceImportDialog(self)
@@ -411,5 +416,10 @@ class DashboardController:
         except FileNotFoundError:
             self.error_label.setText(_("The selected file does not exist"))
             return
+        except ValueError as e:
+            self.error_label.setText(e.args[0])
+            return
         import_dialog.window.finished.connect(self.reload_data)
         import_dialog.show_window()
+
+        self.reload_data()
