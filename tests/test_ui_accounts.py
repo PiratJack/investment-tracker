@@ -1,6 +1,5 @@
 import os
 import sys
-import datetime
 import pytest
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
@@ -186,9 +185,8 @@ class TestUiAccounts:
         assert app_ui("account_historyACN_2") == "NYSE:ACN", "ACN code OK"
         assert app_ui("account_historyACN_3") == "5,00000", "ACN quantity OK"
         assert app_ui("account_historyACN_4") == "50,00 EUR", "ACN value OK"
-        five_days_ago = datetime.date.today() + datetime.timedelta(days=-5)
-        five_days_ago_label = five_days_ago.strftime("%d/%m/%Y")
-        assert app_ui("account_historyACN_5") == five_days_ago_label, "ACN at date OK"
+        some_time_ago = pytest.SOME_DAYS_AGO.strftime("%d/%m/%Y")
+        assert app_ui("account_historyACN_5") == some_time_ago, "ACN at date OK"
         assert app_ui("account_historyACN_6") == "", "ACN total invested OK"
         assert app_ui("account_historyACN").childCount() == 0, "ACN has 0 child"
 

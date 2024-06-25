@@ -32,6 +32,12 @@ def pytest_configure():
         os.path.dirname(os.path.dirname(__file__)), "investmenttracker", "plugins"
     )
 
+    # Date for a recent share price
+    # It must be in the current month and less than 15 days ago
+    five_days_ago = datetime.date.today() + datetime.timedelta(days=-5)
+    first_this_month = datetime.date.today().replace(day=1)
+    pytest.SOME_DAYS_AGO = max(five_days_ago, first_this_month)
+
 
 @pytest.fixture
 def app_pluginmanager():
@@ -47,7 +53,7 @@ def app_empty_db(app_pluginmanager):
 
 
 @pytest.fixture
-def app_db(app_empty_db):
+def app_db(app_empty_db, monkeypatch):
     app_empty_db.session.add_all(
         [
             ShareGroup(id=1, name="AMEX"),
@@ -293,9 +299,9 @@ def app_db(app_empty_db):
                 currency_id=5,
                 source="Lambda",
             ),
-            SharePrice(  # ACN at 10 EUR 5 days ago
+            SharePrice(  # ACN at 10 EUR at a recent date
                 share_id=2,
-                date=datetime.date.today() + datetime.timedelta(days=-5),
+                date=pytest.SOME_DAYS_AGO,
                 price=10,
                 currency_id=5,
                 source="Lambda",
@@ -307,23 +313,23 @@ def app_db(app_empty_db):
                 currency_id=6,
                 source="Lambda",
             ),
-            SharePrice(  # WDAY at 10 USD 5 days ago
+            SharePrice(  # WDAY at 10 USD at a recent date
                 share_id=3,
-                date=datetime.date.today() + datetime.timedelta(days=-5),
+                date=pytest.SOME_DAYS_AGO,
                 price=10,
                 currency_id=6,
                 source="Lambda",
             ),
-            SharePrice(  # USD at 10 EUR 5 days ago
+            SharePrice(  # USD at 10 EUR at a recent date
                 share_id=6,
-                date=datetime.date.today() + datetime.timedelta(days=-5),
+                date=pytest.SOME_DAYS_AGO,
                 price=10,
                 currency_id=5,
                 source="Lambda",
             ),
-            SharePrice(  # HSBC at 10 AXA 5 days ago (which makes no sense)
+            SharePrice(  # HSBC at 10 AXA at a recent date (which makes no sense)
                 share_id=4,
-                date=datetime.date.today() + datetime.timedelta(days=-5),
+                date=pytest.SOME_DAYS_AGO,
                 price=10,
                 currency_id=1,
                 source="Lambda",
@@ -389,9 +395,9 @@ def app_db(app_empty_db):
                 currency_id=5,
                 source="Lambda",
             ),
-            SharePrice(  # BNP at 57 EUR 5 days ago
+            SharePrice(  # BNP at 57 EUR at a recent date
                 share_id=7,
-                date=datetime.date.today() + datetime.timedelta(days=-5),
+                date=pytest.SOME_DAYS_AGO,
                 price=57,
                 currency_id=5,
                 source="Lambda",

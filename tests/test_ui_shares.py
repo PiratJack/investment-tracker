@@ -1,6 +1,5 @@
 import os
 import sys
-import datetime
 import pytest
 import sqlalchemy.exc
 from PyQt5 import QtWidgets, QtCore
@@ -167,10 +166,9 @@ class TestUiShares:
         assert (
             app_ui("share_USD").data(4, Qt.DisplayRole) == "10,00 EUR"
         ), "USD price OK"
-        five_days_ago = datetime.date.today() + datetime.timedelta(days=-5)
-        five_days_ago_label = five_days_ago.strftime("%d/%m/%Y")
+        some_time_ago = pytest.SOME_DAYS_AGO.strftime("%d/%m/%Y")
         assert (
-            app_ui("share_USD").data(5, Qt.DisplayRole) == five_days_ago_label
+            app_ui("share_USD").data(5, Qt.DisplayRole) == some_time_ago
         ), "USD price date OK"
         assert app_ui("share_USD").data(6, Qt.DisplayRole) == "", "USD codes OK"
         assert app_ui("share_USD").data(7, Qt.DisplayRole) == "", "USD sync OK"
@@ -221,10 +219,9 @@ class TestUiShares:
         assert (
             app_ui("share_HSBC").data(4, Qt.DisplayRole) == "10,00 FR8472"
         ), "HSBC price OK"
-        five_days_ago = datetime.date.today() + datetime.timedelta(days=-5)
-        five_days_ago_label = five_days_ago.strftime("%d/%m/%Y")
+        some_time_ago = pytest.SOME_DAYS_AGO.strftime("%d/%m/%Y")
         assert (
-            app_ui("share_HSBC").data(5, Qt.DisplayRole) == five_days_ago_label
+            app_ui("share_HSBC").data(5, Qt.DisplayRole) == some_time_ago
         ), "HSBC price date OK"
         assert app_ui("share_HSBC").data(6, Qt.DisplayRole) == "", "HSBC codes OK"
         assert app_ui("share_HSBC").data(7, Qt.DisplayRole) == "", "HSBC sync OK"
