@@ -319,9 +319,7 @@ class EditController:
         is_warning : bool
             Whether the error is a warning or not (displays differently)
         """
-        logger.info(
-            f"EditController.add_error_field {message} for {error_field} - Warning? {is_warning}"
-        )
+        logger.info(f"EditController.add_error_field {message} - Warning? {is_warning}")
         error_widget = QtWidgets.QLabel(message)
         if is_warning:
             error_widget.setProperty("class", "validation_warning")
