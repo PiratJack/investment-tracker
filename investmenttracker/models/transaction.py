@@ -319,9 +319,10 @@ class Transaction(Base):
         """Ensure the share_id field is filled if transaction has assets"""
         if self.type:
             type_value = self.type.value
-            if type_value["impact_asset"] and value in (-1, 0):
+            print("validate_share_id", type_value, type_value["impact_asset"], value)
+            if type_value["impact_asset"] and value in (-1, 0, None):
                 raise ValidationException("Missing transaction share", self, key, value)
-            if type_value["has_asset"] and value in (-1, 0):
+            if type_value["has_asset"] and value in (-1, 0, None):
                 raise ValidationException("Missing transaction share", self, key, value)
         return value
 
