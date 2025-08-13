@@ -211,7 +211,7 @@ class Account(Base):
                     >= datetime.date.today() + datetime.timedelta(days=-31)
                 ]
                 if prices:
-                    price = sorted(prices, key=lambda a: a.date, reverse=True)[-1].price
+                    price = sorted(prices, key=lambda a: a.date, reverse=True)[0].price
                 else:
                     currency_prices = [
                         price
