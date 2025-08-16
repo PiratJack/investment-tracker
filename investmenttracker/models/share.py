@@ -32,6 +32,9 @@ class ShareDataOrigin(enum.Enum):
     quantalys = {
         "name": "Quantalys",
     }
+    yahoo = {
+        "name": "Yahoo",
+    }
 
 
 class Share(Base):
