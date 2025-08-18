@@ -61,6 +61,8 @@ def format_number(number, currency=None):
         Either '-' for numbers <= 10**-7, or formatted number
         Includes the currency string if provided
     """
+    if not isinstance(number, float) and not isinstance(number, int):
+        return number
     if not number or abs(number) <= 10**-7:
         return "-"
     if currency:
